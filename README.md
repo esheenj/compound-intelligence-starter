@@ -189,3 +189,14 @@ python -m src.compound_intelligence.learning_loop --fixture
 A validated extraction example becomes reusable context for a separate task. The new result is independently checked, and the run is saved for deterministic recovery. The fixture is **simulated**, not a measured improvement in a real AI. With a locally running Ollama model, replace `--fixture` with `--model YOUR_LOCAL_MODEL`.
 
 [Full walkthrough, safety boundaries and limitations](docs/V1.0.md).
+
+## v1.1 — Measure whether verified examples actually help
+
+Compare the same held-out task **without** memory (baseline) and **with** previously verified examples (assisted):
+
+```bash
+python -m src.compound_intelligence.ab_evaluation --fixture
+python -m src.compound_intelligence.ab_evaluation --fixture
+```
+
+The offline fixture deliberately responds only when it sees an example, demonstrating A/B plumbing—not a real AI breakthrough. With local Ollama running, use `--model YOUR_LOCAL_MODEL --run-id real-001` instead. Both arms are independently checked, and their paired results are saved for recovery. See [v1.1 evaluation guide](docs/V1.1.md).
