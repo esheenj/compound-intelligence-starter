@@ -24,6 +24,14 @@ Try the fictional keyboard-focus and dashboard issues: see which one merits atte
 
 [See the Engineering Issue Challenger walkthrough](docs/ENGINEERING_ISSUE_CHALLENGER.md). This public example intentionally excludes private strategies, proprietary system internals and financial/trading logic.
 
+Open an **offline, accessible HTML report** of those same proposed tests, including competing explanations and what would disprove each one:
+
+```sh
+python -m src.compound_intelligence.issue_report --input examples/engineering_issues.json --output issue-challenger-report.html
+```
+
+Open the resulting file locally. It contains no JavaScript or remote resources, and never claims an issue was fixed or an agent executed a build. [Report details and limitations](docs/ENGINEERING_ISSUE_CHALLENGER.md).
+
 ### Try the idea in minutes
 
 This repo includes a **free, runnable Python starter** for testing ideas, rejecting mistakes, preserving evidence, comparing approaches and reusing verified examples. The offline demonstrations need no paid AI account, cloud setup or API key.
