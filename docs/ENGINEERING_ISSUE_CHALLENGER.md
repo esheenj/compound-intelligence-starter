@@ -112,3 +112,7 @@ claims, prove that any experiments ran, grant engineering permissions, publish
 a PR or certify browser/screen-reader accessibility. File creation is
 exclusive: existing output files are not silently overwritten. Use fictional,
 public or independently cleared inputs only.
+
+### Real browser smoke coverage
+
+The separate [Chrome/ChromeDriver QA guide](BROWSER_QA.md) describes an actual headless-browser check of keyboard skip-link navigation, responsive widths and light/dark computed styles. It runs in GitHub Actions alongside Python tests and reports the browser version. This is not a screen-reader certification.
