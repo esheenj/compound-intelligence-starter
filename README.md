@@ -123,6 +123,18 @@ python -m src.compound_intelligence.benchmark --fixture --output local-data/repo
 
 For locally running Ollama models replace `--fixture` with `--models MODEL_A MODEL_B`. Fixture results are **simulated**, and tiny exact-match datasets cannot establish general intelligence or model reliability. [Guide and interpretation](docs/V0.5.md).
 
+## v0.6 — Run bounded experiments and recover after restarts
+
+Queue a safe offline experiment, run one controlled batch, and inspect the durable receipt:
+
+```bash
+python -m src.compound_intelligence.scheduler enqueue --id first-demo
+python -m src.compound_intelligence.scheduler tick
+python -m src.compound_intelligence.scheduler status
+```
+
+The scheduler currently permits **only** the simulated fixture benchmark. It does not automatically run as a daemon or execute arbitrary code; a separate scheduler can invoke one bounded tick when explicitly configured. [v0.6 usage and safety boundaries](docs/V0.6.md).
+
 ## Next improvements
 
 Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
