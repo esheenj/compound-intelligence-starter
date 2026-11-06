@@ -54,3 +54,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.learning_loop --fixture
           python -m src.compound_intelligence.learning_loop --fixture
+      - name: v1.1 paired held-out baseline and assisted evaluation
+        run: |
+          python -m src.compound_intelligence.ab_evaluation --fixture
+          python -m src.compound_intelligence.ab_evaluation --fixture
