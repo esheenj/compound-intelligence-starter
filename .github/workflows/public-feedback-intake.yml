@@ -1,0 +1,35 @@
+name: Read-only public feedback intake
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/public-feedback-intake.yml"
+      - "src/compound_intelligence/community_intake.py"
+      - "examples/public_feedback_fixture.json"
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    if: github.repository == 'esheenj/compound-intelligence-starter'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify collector against synthetic input
+        run: |
+          python3 -m unittest tests.test_community_intake -v
+          python3 -m src.compound_intelligence.community_intake --fixture examples/public_feedback_fixture.json --output local-data/fixture-feedback.json
+      - name: Inventory selected public GitHub issue references (read-only)
+        run: python3 -m src.compound_intelligence.community_intake --live --output local-data/public-feedback.json
+      - name: Upload bounded evidence pointers only
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-feedback-index
+          path: local-data/public-feedback.json
+          retention-days: 2
+          if-no-files-found: error
