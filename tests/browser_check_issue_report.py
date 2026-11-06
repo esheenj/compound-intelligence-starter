@@ -231,8 +231,8 @@ def run() -> dict:
                             color:getComputedStyle(document.body).color};
                 """, [scheme])
                 assert_true(themes[scheme]["media"] is True
-                            and themes[scheme]["background"]
-                            and themes[scheme]["color"],
+                            and bool(themes[scheme]["background"])
+                            and bool(themes[scheme]["color"]),
                             "THEME_" + scheme + "_" + json.dumps(themes[scheme], sort_keys=True))
             assert_true(themes["dark"]["background"] != themes["light"]["background"],
                         "THEME_BACKGROUND_RESPONSIVE")
