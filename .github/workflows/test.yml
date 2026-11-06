@@ -28,3 +28,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.tournament --fixture
           python -m src.compound_intelligence.tournament --fixture
+      - name: v0.4 practical challenge fixture and replay
+        run: |
+          python -m src.compound_intelligence.problem_runner --fixture
+          python -m src.compound_intelligence.problem_runner --fixture
