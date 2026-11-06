@@ -32,3 +32,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.problem_runner --fixture
           python -m src.compound_intelligence.problem_runner --fixture
+      - name: v0.5 measurable benchmark and replay
+        run: |
+          python -m src.compound_intelligence.benchmark --fixture --output local-data/benchmark.json
+          python -m src.compound_intelligence.benchmark --fixture --output local-data/benchmark.json
