@@ -69,7 +69,7 @@ class TournamentTests(unittest.TestCase):
     @patch("src.compound_intelligence.tournament.urlopen")
     def test_invalid_ollama_result_not_accepted(self, opener):
         response = MagicMock()
-        response.__enter__.return_value.read.return_value = b'{"response":"{\"expected\":true}"}'
+        response.__enter__.return_value.read.return_value = json.dumps({"response": json.dumps({"expected": True})}).encode()
         opener.return_value = response
         self.assertEqual(ollama_proposal("test", {"kind": "sum", "values": [1]})["error"],
                          "INVALID_PROPOSAL")
