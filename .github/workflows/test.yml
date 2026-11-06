@@ -67,3 +67,21 @@ jobs:
           python -m src.compound_intelligence.issue_report --input examples/engineering_issues.json --output local-data/issue-report.html
           python -m src.compound_intelligence.issue_report --input local-data/issue-brief.json --output local-data/issue-report-from-brief.html
           python -c "from pathlib import Path; a=Path('local-data/issue-report.html').read_bytes(); b=Path('local-data/issue-report-from-brief.html').read_bytes(); assert a == b and b'No experiments, code builds, pull requests' in a and b'<script' not in a"
+
+  browser-smoke:
+    name: Real Chrome keyboard and responsive report QA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Record actual Chrome and ChromeDriver versions
+        run: |
+          google-chrome --version
+          "$CHROMEWEBDRIVER/chromedriver" --version
+      - name: Test rendered report with real headless Chrome
+        run: python tests/browser_check_issue_report.py
