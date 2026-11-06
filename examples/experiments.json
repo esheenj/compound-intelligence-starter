@@ -1,0 +1,4 @@
+[
+  {"id": "demo-a", "kind": "sum", "values": [4, 7], "expected": 11},
+  {"id": "demo-b", "kind": "sum", "values": [4, 7], "expected": 12}
+]
