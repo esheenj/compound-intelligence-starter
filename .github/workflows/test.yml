@@ -42,3 +42,7 @@ jobs:
           python -m src.compound_intelligence.scheduler tick
           python -m src.compound_intelligence.scheduler tick
           python -m src.compound_intelligence.scheduler status
+      - name: v0.7 offline evidence dashboard smoke test
+        run: |
+          python -m src.compound_intelligence.dashboard --queue-db local-data/v06/queue.sqlite3 --output local-data/dashboard.html
+          python -c "from pathlib import Path; assert 'Compound Intelligence' in Path('local-data/dashboard.html').read_text()"
