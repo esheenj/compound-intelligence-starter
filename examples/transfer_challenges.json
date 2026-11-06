@@ -1,0 +1,9 @@
+[
+  {
+    "id": "harbor-returns",
+    "type": "extract",
+    "text": "Harbor Outfitters: contact service@harbor.example for help. Items can be returned within 45 days.",
+    "fields": ["support_email", "returns_days"],
+    "expected": {"support_email": "service@harbor.example", "returns_days": 45}
+  }
+]

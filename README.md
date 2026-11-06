@@ -176,3 +176,16 @@ python -m src.compound_intelligence.progress receipt --report local-data/benchma
 ```
 
 The public runner has no persistent cross-run memory. Download reports from separate GitHub runs and use the [comparison guide](docs/CONTINUOUS_EXPERIMENTS.md) to inspect score changes on the same dataset. The scheduled fixture is not a running local LLM.
+
+## v1.0 — Reuse verified knowledge on a new problem
+
+Test the integrated example-memory loop, without subscriptions or a hosted service:
+
+```bash
+python -m src.compound_intelligence.learning_loop --fixture
+python -m src.compound_intelligence.learning_loop --fixture
+```
+
+A validated extraction example becomes reusable context for a separate task. The new result is independently checked, and the run is saved for deterministic recovery. The fixture is **simulated**, not a measured improvement in a real AI. With a locally running Ollama model, replace `--fixture` with `--model YOUR_LOCAL_MODEL`.
+
+[Full walkthrough, safety boundaries and limitations](docs/V1.0.md).
