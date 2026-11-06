@@ -142,7 +142,7 @@ def run(seed: list[dict], targets: list[dict], workspace: Path, model: str,
             return {**existing, "reused_receipt": True}
         seeded = 0
         for item in seed:
-            proposal = offline_fixture("fixture", {"**public_task(item),
+            proposal = offline_fixture("fixture", {**public_task(item),
                 "verified_examples": [{"format": item["type"]}]}) if proposer is offline_fixture else proposer(model, public_task(item))
             if isinstance(proposal, dict) and store.remember(item, proposal):
                 seeded += 1
