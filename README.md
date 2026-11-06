@@ -99,6 +99,19 @@ python -m src.compound_intelligence.tournament --models YOUR_MODEL_A YOUR_MODEL_
 
 Results are checked by a separate deterministic validator; model claims cannot self-approve. This release benchmarks **integer addition only**, and does not claim general autonomous reasoning. [Setup, examples and limitations](docs/V0.3.md).
 
+## v0.4 — Practical, independently checked challenges
+
+**Go beyond arithmetic:** compare model proposals for extracting useful facts and proposing a narrowly scoped code fix, with reference answers withheld from model prompts.
+
+```bash
+python -m src.compound_intelligence.problem_runner --fixture
+python -m src.compound_intelligence.problem_runner --fixture
+```
+
+The offline demonstration uses two simulated proposers. With Ollama running locally, use `--models MODEL_A MODEL_B` for real model-generated proposals. A verifier checks exact data extraction and static code patches without running model-generated source. Results are saved, replayable and scoped to the exact task/model/version.
+
+Read [the v0.4 guide](docs/V0.4.md) for real-model setup, custom challenge files, and limitations.
+
 ## Next improvements
 
 Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
