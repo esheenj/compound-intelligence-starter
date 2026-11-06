@@ -24,3 +24,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.runner --input examples/experiments.json
           python -m src.compound_intelligence.runner --input examples/experiments.json
+      - name: v0.3 fixture multi-model comparison and replay
+        run: |
+          python -m src.compound_intelligence.tournament --fixture
+          python -m src.compound_intelligence.tournament --fixture

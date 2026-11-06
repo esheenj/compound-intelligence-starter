@@ -80,6 +80,25 @@ python -m src.compound_intelligence.runner --ollama-model YOUR_LOCAL_MODEL
 
 This is a bounded arithmetic experiment runner, not a free-roaming agent. See [v0.2 setup and limits](docs/V0.2.md).
 
+## v0.3 — Compare model proposals
+
+**See how competing ideas become measured evidence, not just more AI output.**
+
+Start with a free offline demonstration of two simulated proposals:
+
+```bash
+python -m src.compound_intelligence.tournament --fixture
+python -m src.compound_intelligence.tournament --fixture
+```
+
+The first run records one accepted and one rejected answer. The second reuses that evidence. For **real local model proposals**, install Ollama, download two models and run:
+
+```bash
+python -m src.compound_intelligence.tournament --models YOUR_MODEL_A YOUR_MODEL_B --values 8 13
+```
+
+Results are checked by a separate deterministic validator; model claims cannot self-approve. This release benchmarks **integer addition only**, and does not claim general autonomous reasoning. [Setup, examples and limitations](docs/V0.3.md).
+
 ## Next improvements
 
 Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
