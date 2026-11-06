@@ -1,12 +1,22 @@
 # Compound Intelligence Starter
 
+**What if AI could build on yesterday's progress instead of starting over every time?**
+
+Today, we often ask an AI a question, get an answer, and start again. **Compound Intelligence** is a different idea: connect AI models, tools, automation, and shared memory so each experiment helps make the next one better.
+
+Imagine a small team of AI helpers: one explores an idea, another spots problems, tools check what actually works, and the useful lessons are saved for next time.
+
+**Why it matters:** less repeated work, fewer unchecked guesses, faster experiments, and knowledge that grows with every verified result.
+
+**Discover → Challenge → Test → Learn → Improve → Repeat.**
+
 **Don't just use intelligence. Compound it.**
 
-A small, runnable, dependency-free demonstration of a persistent evidence-driven improvement loop:
+### Try the idea in minutes
 
-**Discover → Reason → Challenge → Build → Validate → Learn → Improve → Repeat**
+This repo includes a **free, runnable Python example** showing the core loop: test ideas, reject mistakes, save evidence, and pick up where you left off. No paid AI account, cloud setup, or API key needed.
 
-This public educational starter shows how independent roles and durable evidence can turn repeated experiments into accumulated, checkable knowledge. It intentionally does **not** include private infrastructure, credentials, production agent controls, or financial trading logic.
+**A starting point, not a finished autonomous AI platform:** the example uses simple, deterministic tests. Connecting real AI models and automatic development tools is the next step.
 
 ## Quick start
 
