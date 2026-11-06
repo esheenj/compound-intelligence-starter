@@ -32,6 +32,8 @@ python -m src.compound_intelligence.issue_report --input examples/engineering_is
 
 Open the resulting file locally. It contains no JavaScript or remote resources, and never claims an issue was fixed or an agent executed a build. [Report details and limitations](docs/ENGINEERING_ISSUE_CHALLENGER.md).
 
+The static report also has a [real Chrome accessibility smoke check](docs/BROWSER_QA.md) for keyboard navigation, narrow screens and light/dark themes. Automated browser checks do not establish complete screen-reader or WCAG conformance.
+
 ### Try the idea in minutes
 
 This repo includes a **free, runnable Python starter** for testing ideas, rejecting mistakes, preserving evidence, comparing approaches and reusing verified examples. The offline demonstrations need no paid AI account, cloud setup or API key.
