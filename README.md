@@ -12,6 +12,18 @@ Imagine a small team of AI helpers: one explores an idea, another spots problems
 
 **Don't just use intelligence. Compound it.**
 
+### New: turn a GitHub-style issue into a test-first plan
+
+**Two small intelligence patterns you can run today:** challenge competing explanations before coding, then generate a stable engineering brief that an authorised worker could pick up later.
+
+```sh
+python -m src.compound_intelligence.issue_challenger --input examples/engineering_issues.json
+```
+
+Try the fictional keyboard-focus and dashboard issues: see which one merits attention, compare two explanations, pick the cheapest test that could prove an assumption wrong, and get a reproducible brief ID. **No accounts, API key, model or shell execution required.** The ranking is an explainable hint based on user-entered scores, not a factual priority or completed build.
+
+[See the Engineering Issue Challenger walkthrough](docs/ENGINEERING_ISSUE_CHALLENGER.md). This public example intentionally excludes private strategies, proprietary system internals and financial/trading logic.
+
 ### Try the idea in minutes
 
 This repo includes a **free, runnable Python starter** for testing ideas, rejecting mistakes, preserving evidence, comparing approaches and reusing verified examples. The offline demonstrations need no paid AI account, cloud setup or API key.
