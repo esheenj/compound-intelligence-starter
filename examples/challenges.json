@@ -1,0 +1,16 @@
+[
+  {
+    "id": "store-policy-extraction",
+    "type": "extract",
+    "text": "Riverside Store: email help@example.test for support. Returns are accepted within 30 days.",
+    "fields": ["support_email", "returns_days"],
+    "expected": {"support_email": "help@example.test", "returns_days": 30}
+  },
+  {
+    "id": "total-function-repair",
+    "type": "patch",
+    "source": "def total(items):\n    return len(items)\n",
+    "instruction": "Change the function to return the sum of the numbers, rather than the number of items.",
+    "expected": "def total(items):\n    return sum(items)\n"
+  }
+]
