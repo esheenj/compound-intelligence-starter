@@ -165,3 +165,14 @@ python -m unittest tests.test_community_intake -v
 ```
 
 The independent scheduled GitHub Actions workflow gathers references from four explicitly listed public repos on standard public runners, with no paid service or repository-write token. It does not run Cortex on Oracle, write code or auto-promote a claim. [Read the feedback guide](docs/PUBLIC_FEEDBACK.md).
+
+## v0.9 — Repeated experiments, measured carefully
+
+The existing daily public-feedback GitHub Actions workflow now also stores a tiny **simulated** capability benchmark and a provenance receipt. It reuses the same schedule rather than adding infrastructure. Reports can be compared across runs, but identical fixtures should report **UNCHANGED**, never invented learning.
+
+```bash
+python -m src.compound_intelligence.benchmark --fixture --output local-data/benchmark.json
+python -m src.compound_intelligence.progress receipt --report local-data/benchmark.json --run-id 123 --output local-data/receipt.json
+```
+
+The public runner has no persistent cross-run memory. Download reports from separate GitHub runs and use the [comparison guide](docs/CONTINUOUS_EXPERIMENTS.md) to inspect score changes on the same dataset. The scheduled fixture is not a running local LLM.
