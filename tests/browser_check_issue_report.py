@@ -232,7 +232,8 @@ def run() -> dict:
                 """, [scheme])
                 assert_true(themes[scheme]["media"] is True
                             and themes[scheme]["background"]
-                            and themes[scheme]["color"], f"THEME_{scheme}")
+                            and themes[scheme]["color"],
+                            "THEME_" + scheme + "_" + json.dumps(themes[scheme], sort_keys=True))
             assert_true(themes["dark"]["background"] != themes["light"]["background"],
                         "THEME_BACKGROUND_RESPONSIVE")
             findings["light_dark_theme"] = "PASS"
