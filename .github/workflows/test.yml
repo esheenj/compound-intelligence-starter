@@ -8,12 +8,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      matrix:
+        python: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
       - name: Unit tests
         run: python -m unittest discover -s tests -v
-      - name: Smoke run
+      - name: Original demo smoke run
         run: python -m src.compound_intelligence.demo --workspace ./local-data --iterations 3
+      - name: v0.2 bounded runner smoke and recovery
+        run: |
+          python -m src.compound_intelligence.runner --input examples/experiments.json
+          python -m src.compound_intelligence.runner --input examples/experiments.json
