@@ -58,3 +58,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.ab_evaluation --fixture
           python -m src.compound_intelligence.ab_evaluation --fixture
+      - name: Engineering issue challenger (synthetic, no network)
+        run: |
+          python -m src.compound_intelligence.issue_challenger --input examples/engineering_issues.json > local-data/issue-brief.json
+          python -c "import json; x=json.load(open('local-data/issue-brief.json')); assert x['schema'] == 'compound-engineering-challenger-v1' and not x['external_execution'] and len(x['ranked_issues']) == 2"
