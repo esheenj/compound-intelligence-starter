@@ -36,3 +36,9 @@ jobs:
         run: |
           python -m src.compound_intelligence.benchmark --fixture --output local-data/benchmark.json
           python -m src.compound_intelligence.benchmark --fixture --output local-data/benchmark.json
+      - name: v0.6 queue receipt and bounded replay
+        run: |
+          python -m src.compound_intelligence.scheduler enqueue --id ci-test
+          python -m src.compound_intelligence.scheduler tick
+          python -m src.compound_intelligence.scheduler tick
+          python -m src.compound_intelligence.scheduler status
