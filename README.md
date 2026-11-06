@@ -14,9 +14,9 @@ Imagine a small team of AI helpers: one explores an idea, another spots problems
 
 ### Try the idea in minutes
 
-This repo includes a **free, runnable Python example** showing the core loop: test ideas, reject mistakes, save evidence, and pick up where you left off. No paid AI account, cloud setup, or API key needed.
+This repo includes a **free, runnable Python starter** for testing ideas, rejecting mistakes, preserving evidence, comparing approaches and reusing verified examples. The offline demonstrations need no paid AI account, cloud setup or API key.
 
-**A starting point, not a finished autonomous AI platform:** the example uses simple, deterministic tests. Connecting real AI models and automatic development tools is the next step.
+**Scope:** The starter supports optional local Ollama model proposals, but the bundled automated examples use simulated fixtures. It is not a commissioned autonomous coding agent or proof of general AI self-improvement. See [MVP v1.1.0 release notes](RELEASE_NOTES.md).
 
 ## Quick start
 
@@ -149,7 +149,7 @@ Open `local-data/dashboard.html` to see which jobs ran, what succeeded or failed
 
 ## Next improvements
 
-Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
+Advanced development belongs in separate, explicitly scoped extensions: richer independent validators, isolated real-model evaluations, permissioned task execution and long-running evidence collection. The included bounded offline queue is already implemented; it is **not** a full autonomous scheduler. See [how to extend validators](docs/EXTENDING.md).
 
 ## Contributing
 

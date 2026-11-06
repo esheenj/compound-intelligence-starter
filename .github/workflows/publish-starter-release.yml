@@ -1,0 +1,42 @@
+name: Publish starter MVP release
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-starter-release.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.repository == 'esheenj/compound-intelligence-starter' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test the exact release source
+        run: |
+          python -m unittest discover -s tests -v
+          python -m src.compound_intelligence.learning_loop --fixture
+          python -m src.compound_intelligence.ab_evaluation --fixture
+      - name: Publish once with GitHub release token
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.1.0 >/dev/null 2>&1; then
+            echo "v1.1.0 release already exists; no mutation performed"
+            exit 0
+          fi
+          if git ls-remote --exit-code --tags origin refs/tags/v1.1.0 >/dev/null 2>&1; then
+            echo "Release tag exists but release is missing; refusing ambiguous retry"
+            exit 1
+          fi
+          gh release create v1.1.0 --target "$GITHUB_SHA" --title "Compound Intelligence Starter v1.1.0 — MVP" --notes-file RELEASE_NOTES.md --latest
