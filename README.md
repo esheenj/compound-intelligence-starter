@@ -62,6 +62,24 @@ See [Architecture](docs/ARCHITECTURE.md) and [Public release boundaries](docs/SE
 
 No proprietary model or cloud service is required to run this starter. Tool names above describe independent products; this project is not affiliated with their providers.
 
+## v0.2 — Try the experiment runner
+
+```bash
+python -m src.compound_intelligence.runner --input examples/experiments.json
+python -m src.compound_intelligence.runner --input examples/experiments.json
+python -m unittest discover -s tests -v
+```
+
+The first execution records verified **and** rejected claims in local SQLite. The second reuses that evidence without duplicating experiments.
+
+Optionally connect a local Ollama model for an independent **advisory critique**:
+
+```bash
+python -m src.compound_intelligence.runner --ollama-model YOUR_LOCAL_MODEL
+```
+
+This is a bounded arithmetic experiment runner, not a free-roaming agent. See [v0.2 setup and limits](docs/V0.2.md).
+
 ## Next improvements
 
 Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
