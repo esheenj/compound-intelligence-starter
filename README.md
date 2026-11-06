@@ -112,6 +112,17 @@ The offline demonstration uses two simulated proposers. With Ollama running loca
 
 Read [the v0.4 guide](docs/V0.4.md) for real-model setup, custom challenge files, and limitations.
 
+## v0.5 — Measure what works
+
+Move from individual examples to **clear capability comparisons**. The benchmark shows which simulated or local model proposals passed independent checks, which were rejected, and which produced no usable answer. Metrics are broken down by extraction versus static patching and tied to a dataset fingerprint.
+
+```bash
+python -m src.compound_intelligence.benchmark --fixture --output local-data/report.json
+python -m src.compound_intelligence.benchmark --fixture --output local-data/report.json
+```
+
+For locally running Ollama models replace `--fixture` with `--models MODEL_A MODEL_B`. Fixture results are **simulated**, and tiny exact-match datasets cannot establish general intelligence or model reliability. [Guide and interpretation](docs/V0.5.md).
+
 ## Next improvements
 
 Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
