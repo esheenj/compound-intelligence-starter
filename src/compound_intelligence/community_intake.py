@@ -19,6 +19,9 @@ PUBLIC_REPOS = (
     "esheenj/design-system-foundations-oss",
     "esheenj/mobile-first-flow-kit-oss",
     "esheenj/data-table-interactions-oss",
+    "esheenj/flow-state-machine-oss",
+    "esheenj/form-experience-kit-oss",
+    "esheenj/visual-regression-starter-oss",
 )
 DATE = re.compile(r"^20[0-9]{2}-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]Z$")
 MAX_BODY = 100_000
@@ -88,7 +91,7 @@ def report(payloads: dict) -> dict:
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="Capture bounded public GitHub issue references")
     mode = p.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--live", action="store_true", help="Read only four listed public GitHub repos")
+    mode.add_argument("--live", action="store_true", help="Read only seven listed public GitHub repos")
     mode.add_argument("--fixture", help="Local synthetic JSON {repo: [issue, ...]}")
     p.add_argument("--output", required=True, help="Local report JSON path")
     args = p.parse_args(argv)

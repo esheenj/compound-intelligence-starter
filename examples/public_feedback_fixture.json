@@ -6,5 +6,29 @@
       "body": "A synthetic issue can be reproduced without user or client data.",
       "updated_at": "2026-11-06T09:00:00Z"
     }
+  ],
+  "esheenj/flow-state-machine-oss": [
+    {
+      "number": 1,
+      "title": "Synthetic stage review",
+      "body": "Fictional workflow demo feedback; no private content.",
+      "updated_at": "2026-11-06T10:00:00Z"
+    }
+  ],
+  "esheenj/form-experience-kit-oss": [
+    {
+      "number": 1,
+      "title": "Synthetic accessibility review",
+      "body": "Review invented form labels and focus flow.",
+      "updated_at": "2026-11-06T10:01:00Z"
+    }
+  ],
+  "esheenj/visual-regression-starter-oss": [
+    {
+      "number": 1,
+      "title": "Synthetic image comparison case",
+      "body": "Check a fabricated pixel change and expected verdict.",
+      "updated_at": "2026-11-06T10:02:00Z"
+    }
   ]
 }
