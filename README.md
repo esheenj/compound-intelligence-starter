@@ -154,3 +154,14 @@ Add sandboxed model adapters, pluggable domain validators, explicit task authori
 ## Contributing
 
 Issues and narrowly scoped PRs with passing tests are welcome. See [CONTRIBUTING](CONTRIBUTING.md). Licensed under [MIT](LICENSE).
+
+## v0.8 — Gather public feedback without copying private data
+
+Use a tiny read-only public GitHub issue index as the **discovery** step in the learning loop. It records source links, update times and content digests, not user comments or private repository content. Observations must still be challenged and tested before becoming knowledge or code changes.
+
+```sh
+python -m src.compound_intelligence.community_intake --fixture examples/public_feedback_fixture.json --output local-data/feedback.json
+python -m unittest tests.test_community_intake -v
+```
+
+The independent scheduled GitHub Actions workflow gathers references from four explicitly listed public repos on standard public runners, with no paid service or repository-write token. It does not run Cortex on Oracle, write code or auto-promote a claim. [Read the feedback guide](docs/PUBLIC_FEEDBACK.md).
