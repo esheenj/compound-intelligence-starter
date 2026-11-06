@@ -135,6 +135,18 @@ python -m src.compound_intelligence.scheduler status
 
 The scheduler currently permits **only** the simulated fixture benchmark. It does not automatically run as a daemon or execute arbitrary code; a separate scheduler can invoke one bounded tick when explicitly configured. [v0.6 usage and safety boundaries](docs/V0.6.md).
 
+## v0.7 — See experiments and results in a visual dashboard
+
+Generate an offline HTML evidence report from the existing local scheduler:
+
+```bash
+python -m src.compound_intelligence.scheduler enqueue --id dashboard-demo
+python -m src.compound_intelligence.scheduler tick
+python -m src.compound_intelligence.dashboard --queue-db local-data/v06/queue.sqlite3 --output local-data/dashboard.html
+```
+
+Open `local-data/dashboard.html` to see which jobs ran, what succeeded or failed, and which proposals passed validation. The report does not call external services or execute commands. Fixture results are visibly marked as simulated. [v0.7 guide](docs/V0.7.md).
+
 ## Next improvements
 
 Add sandboxed model adapters, pluggable domain validators, explicit task authorization, bounded budgets, a job queue, reproducible experiment datasets, and human-reviewed promotion of higher-risk capabilities.
