@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "issues": [
+    {
+      "id": "keyboard-focus",
+      "title": "Keyboard focus is hard to see in a fictional form",
+      "impact": 5,
+      "effort": 2,
+      "risk": 1,
+      "hypotheses": [
+        {
+          "id": "contrast",
+          "claim": "The focus outline blends into the background",
+          "test": "Inspect the synthetic focus state and compare outline contrast against the adjacent surface",
+          "counterexample": "The outline contrast is already sufficient in the synthetic fixture",
+          "cost": 1
+        },
+        {
+          "id": "clipping",
+          "claim": "The focus outline is clipped by a container",
+          "test": "Render the fictional form with and without overflow clipping",
+          "counterexample": "The outline remains hidden even when clipping is disabled",
+          "cost": 2
+        }
+      ]
+    },
+    {
+      "id": "empty-state",
+      "title": "Fictional dashboard has a confusing empty state",
+      "impact": 3,
+      "effort": 1,
+      "risk": 1,
+      "hypotheses": [
+        {
+          "id": "labels",
+          "claim": "The empty-state message does not say how to reset filters",
+          "test": "Check a synthetic zero-result state for a visible reset action",
+          "counterexample": "A visible and keyboard-accessible reset action already exists",
+          "cost": 1
+        },
+        {
+          "id": "filters",
+          "claim": "A stale filter persists after clearing the search",
+          "test": "Simulate a clear-search action and inspect the active filter state",
+          "counterexample": "All filters are cleared in the synthetic state transition",
+          "cost": 2
+        }
+      ]
+    }
+  ]
+}
