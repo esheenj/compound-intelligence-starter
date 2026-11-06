@@ -78,3 +78,37 @@ employer/client artifacts, private models, trading algorithms, market
 execution parameters, secrets or sensitive customer information into
 examples or public issues. This project is MIT-licensed and has no
 additional runtime dependencies.
+
+## New: browse an accessible offline report
+
+Turn the same fictional issue proposals into a self-contained static HTML page:
+
+```sh
+python -m src.compound_intelligence.issue_report --input examples/engineering_issues.json --output issue-challenger-report.html
+```
+
+Open `issue-challenger-report.html` in a local browser. The file contains a
+clear unverified notice, issue titles, prioritisation hints, stable brief IDs,
+the cheapest suggested test, explicit falsifying observations and *all*
+competing explanations.
+
+You can also render **already produced challenger JSON** (without changing the input):
+
+```sh
+python -m src.compound_intelligence.issue_challenger --input examples/engineering_issues.json > issue-brief.json
+python -m src.compound_intelligence.issue_report --input issue-brief.json --output issue-brief-report.html
+```
+
+The renderer checks strict schemas and non-execution markers; it rejects
+unrecognised fields, inconsistent test selection, invalid identifiers and
+a claim that results are already verified or that build authority exists.
+Contributor text is escaped as inert HTML text, not treated as tags. The
+standalone report uses semantic headings, a keyboard skip link, responsive
+CSS and a restrictive content-security policy. No JavaScript, remote assets,
+third-party package, key, account or online service is involved.
+
+**Limitations:** The report is static and does *not* verify the truth of issue
+claims, prove that any experiments ran, grant engineering permissions, publish
+a PR or certify browser/screen-reader accessibility. File creation is
+exclusive: existing output files are not silently overwritten. Use fictional,
+public or independently cleared inputs only.
