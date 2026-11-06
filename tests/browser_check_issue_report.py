@@ -54,7 +54,7 @@ class Driver:
             headers={"Content-Type": "application/json"},
         )
         try:
-            with self.opener.open(request, timeout=8) as response:
+            with self.opener.open(request, timeout=25) as response:
                 result = json.load(response)
         except urllib.error.HTTPError as exc:
             # Avoid echoing potentially untrusted HTML/paths from driver errors.
@@ -155,9 +155,11 @@ def run() -> dict:
             port = sock.getsockname()[1]
         driver = Driver(driver_executable(), port)
         findings = {}
+        print(json.dumps({"qa_phase": "WEBDRIVER_STARTING"}), flush=True)
         try:
             version = driver.start()
             driver.command("POST", "url", {"url": output.resolve().as_uri()})
+            print(json.dumps({"qa_phase": "DOCUMENT_LOADED"}), flush=True)
             semantic = driver.js("""
                 const cards=[...document.querySelectorAll('article.card')];
                 return {
@@ -206,6 +208,7 @@ def run() -> dict:
             assert_true(driver.js("return location.hash") == "#main",
                         "KEYBOARD_SKIP_LINK_TARGET")
             findings["keyboard_skip_link"] = "PASS"
+            print(json.dumps({"qa_phase": "KEYBOARD_COMPLETE"}), flush=True)
 
             for width, height in ((375, 812), (1440, 900)):
                 driver.viewport(width, height)
@@ -237,6 +240,7 @@ def run() -> dict:
             assert_true(themes["dark"]["background"] != themes["light"]["background"],
                         "THEME_BACKGROUND_RESPONSIVE")
             findings["light_dark_theme"] = "PASS"
+            print(json.dumps({"qa_phase": "BROWSER_SMOKE_COMPLETE"}), flush=True)
             return {
                 "schema": "compound-browser-qa-v1",
                 "runner_browser": "Google Chrome",
