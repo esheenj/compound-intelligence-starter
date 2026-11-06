@@ -50,3 +50,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.progress receipt --report local-data/benchmark.json --run-id 123 --output local-data/cycle-receipt.json
           python -m src.compound_intelligence.progress compare --before local-data/benchmark.json --after local-data/benchmark.json --output local-data/progress.json
+      - name: v1.0 verified memory retrieval and receipt replay
+        run: |
+          python -m src.compound_intelligence.learning_loop --fixture
+          python -m src.compound_intelligence.learning_loop --fixture
