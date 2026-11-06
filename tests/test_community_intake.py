@@ -15,6 +15,25 @@ def issue(number=7, body="A synthetic report"):
 
 
 class FeedbackTests(unittest.TestCase):
+    def test_seven_public_repositories_and_redacted_full_inventory(self):
+        expected = {
+            "esheenj/compound-intelligence-starter",
+            "esheenj/design-system-foundations-oss",
+            "esheenj/mobile-first-flow-kit-oss",
+            "esheenj/data-table-interactions-oss",
+            "esheenj/flow-state-machine-oss",
+            "esheenj/form-experience-kit-oss",
+            "esheenj/visual-regression-starter-oss",
+        }
+        self.assertEqual(set(PUBLIC_REPOS), expected)
+        all_issues = {repo: [issue(number=i+1)] for i, repo in enumerate(PUBLIC_REPOS)}
+        observed = report(all_issues)
+        self.assertEqual(len(observed["records"]), 7)
+        self.assertEqual(sum(x["count"] for x in observed["records"]), 7)
+        self.assertTrue(all(r["interpretation"] == "NONE" and
+                            not r["safe_to_execute"] for r in observed["records"]))
+        self.assertNotIn("Synthetic edge case", json.dumps(observed))
+
     def test_report_hides_body_and_preserves_source_digest(self):
         out = report({PUBLIC_REPOS[0]: [issue()]})
         self.assertTrue(out["contents_redacted"])
