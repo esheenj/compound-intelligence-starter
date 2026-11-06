@@ -1,6 +1,6 @@
 # Public feedback intake — v0.8 incremental research signal
 
-**What this does:** records issue URLs, update times and opaque content hashes for four selected *already-public* Esheen Labs projects. It does not reproduce issue text, scrape private repositories, change code, merge PRs, call trading systems, train a model or decide which suggestions are true.
+**What this does:** records issue URLs, update times and opaque content hashes for seven selected *already-public* Esheen Labs projects. It does not reproduce issue text, scrape private repositories, change code, merge PRs, call trading systems, train a model or decide which suggestions are true.
 
 The collector is separate from the private Cortex agent and does **not** prove Cortex was commissioned on Oracle. Public issue content is untrusted; a maintainer or a scoped Cortex research worker must inspect original sources, competing hypotheses, licenses and actual test results before using a report.
 
@@ -10,7 +10,7 @@ python3 -m src.compound_intelligence.community_intake --fixture examples/public_
 python3 -m unittest tests.test_community_intake -v
 ```
 
-## Fetch only the four listed public repositories
+## Fetch only the seven listed public repositories
 ```sh
 python3 -m src.compound_intelligence.community_intake --live --output local-data/public-feedback.json
 ```
@@ -26,3 +26,7 @@ The job does not make public issues into private validated knowledge. A separate
 If you have a reproducible problem or improvement idea, please open a public issue with only synthetic data and public links. Do not paste private source, customer data, credentials or employer screenshots.
 
 Related: [MVP milestone issue #7](https://github.com/esheenj/compound-intelligence-starter/issues/7).
+
+## Public cohort expansion — November 2026
+
+The collector now also reads `flow-state-machine-oss`, `form-experience-kit-oss` and `visual-regression-starter-oss` alongside the original four repositories. These are independent, synthetic public examples with tests and documentation. The feedback inventory remains read-only and unvalidated; it does not run a coding worker or certify an MVP. Update both this allowlist and the private Cortex verified-public cohort when any further release is added.
