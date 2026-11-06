@@ -46,3 +46,7 @@ jobs:
         run: |
           python -m src.compound_intelligence.dashboard --queue-db local-data/v06/queue.sqlite3 --output local-data/dashboard.html
           python -c "from pathlib import Path; assert 'Compound Intelligence' in Path('local-data/dashboard.html').read_text()"
+      - name: v0.9 evidence receipt and compatible replay comparison
+        run: |
+          python -m src.compound_intelligence.progress receipt --report local-data/benchmark.json --run-id 123 --output local-data/cycle-receipt.json
+          python -m src.compound_intelligence.progress compare --before local-data/benchmark.json --after local-data/benchmark.json --output local-data/progress.json
