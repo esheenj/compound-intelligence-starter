@@ -68,10 +68,14 @@ class KnowledgeStore:
         rows = self.db.execute("SELECT id,task,proposal,digest FROM exemplars ORDER BY id").fetchall()
         found = []
         target = public_task(task)
-        target_digest = _digest(target)
+        # The identifier is not part of the semantic task identity: a renamed
+        # duplicate must not leak its verified output into the target prompt.
+        target_signature = {key: value for key, value in target.items() if key != "id"}
         for item_id, raw_task, raw_proposal, digest in rows:
             example = json.loads(raw_task)
-            if item_id == task["id"] or _digest(example) == target_digest or example["type"] != task["type"]:
+            example_signature = {key: value for key, value in example.items() if key != "id"}
+            if (item_id == task["id"] or example_signature == target_signature
+                    or example["type"] != task["type"]):
                 continue
             if task["type"] == "extract" and set(example["fields"]) != set(task["fields"]):
                 continue
