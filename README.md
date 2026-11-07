@@ -11,6 +11,8 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
+**Explore the wider [Esheen Labs public MVP collection](docs/PUBLIC_OSS_MVP_COLLECTION.md)** — seven independent, runnable tools spanning AI experiments, interface flows, form UX, design tokens, tables and synthetic visual comparisons.
+
 ## See it in two minutes
 
 ```bash
