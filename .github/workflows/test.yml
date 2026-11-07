@@ -85,3 +85,5 @@ jobs:
           "$CHROMEWEBDRIVER/chromedriver" --version
       - name: Test rendered report with real headless Chrome
         run: python tests/browser_check_issue_report.py
+      - name: Test offline hypothesis explorer with real headless Chrome
+        run: python tests/browser_check_issue_explorer.py
