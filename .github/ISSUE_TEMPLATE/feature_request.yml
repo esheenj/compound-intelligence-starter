@@ -1,0 +1,25 @@
+name: Focused enhancement
+description: A small, measurable improvement to the public starter
+title: "enhancement: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What can a developer not do today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed bounded change
+      description: Avoid new privileged execution or private-system dependencies.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Independent acceptance test
+      description: What observable result would count as success? Include a failure or counterexample.
+    validations:
+      required: true
