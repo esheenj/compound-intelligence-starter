@@ -1,224 +1,107 @@
 # Compound Intelligence Starter
 
-**What if AI could build on yesterday's progress instead of starting over every time?**
+**Challenge assumptions. Verify outcomes. Reuse what works.**
 
-Today, we often ask an AI a question, get an answer, and start again. **Compound Intelligence** is a different idea: connect AI models, tools, automation, and shared memory so each experiment helps make the next one better.
+Turn an engineering problem into competing, falsifiable hypotheses and a reproducible test-first brief. Explore a small, offline reference implementation of evidence-backed AI experiments, durable memory and model comparisons.
 
-Imagine a small team of AI helpers: one explores an idea, another spots problems, tools check what actually works, and the useful lessons are saved for next time.
+[![Tests](https://github.com/esheenj/compound-intelligence-starter/actions/workflows/test.yml/badge.svg)](https://github.com/esheenj/compound-intelligence-starter/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/esheenj/compound-intelligence-starter)](https://github.com/esheenj/compound-intelligence-starter/releases/tag/v1.1.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)
 
-**Why it matters:** less repeated work, fewer unchecked guesses, faster experiments, and knowledge that grows with every verified result.
+**Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
-**Discover → Challenge → Test → Learn → Improve → Repeat.**
+## See it in two minutes
 
-**Don't just use intelligence. Compound it.**
-
-### New: turn a GitHub-style issue into a test-first plan
-
-**Two small intelligence patterns you can run today:** challenge competing explanations before coding, then generate a stable engineering brief that an authorised worker could pick up later.
-
-```sh
+```bash
+git clone https://github.com/esheenj/compound-intelligence-starter.git
+cd compound-intelligence-starter
 python -m src.compound_intelligence.issue_challenger --input examples/engineering_issues.json
 ```
 
-Try the fictional keyboard-focus and dashboard issues: see which one merits attention, compare two explanations, pick the cheapest test that could prove an assumption wrong, and get a reproducible brief ID. **No accounts, API key, model or shell execution required.** The ranking is an explainable hint based on user-entered scores, not a factual priority or completed build.
+The bundled **fictional UX issues** have competing explanations and proposed counterexamples. The command returns structured JSON showing:
 
-[See the Engineering Issue Challenger walkthrough](docs/ENGINEERING_ISSUE_CHALLENGER.md). This public example intentionally excludes private strategies, proprietary system internals and financial/trading logic.
+| Output | Why it matters |
+| --- | --- |
+| `ranked_issues` | Explainable priority *hints* from supplied scores |
+| `competing_hypotheses` | Alternatives to test instead of prematurely choosing a fix |
+| `chosen_next_test` | Smallest estimated falsifiable experiment |
+| `brief_id` | Stable identity for a reproducible engineering handover |
+| `build_execution_allowed: false` | Proposals never silently become actions |
 
-Open an **offline, accessible HTML report** of those same proposed tests, including competing explanations and what would disprove each one:
-
-```sh
-python -m src.compound_intelligence.issue_report --input examples/engineering_issues.json --output issue-challenger-report.html
-```
-
-Open the resulting file locally. It contains no JavaScript or remote resources, and never claims an issue was fixed or an agent executed a build. [Report details and limitations](docs/ENGINEERING_ISSUE_CHALLENGER.md).
-
-The static report also has a [real Chrome accessibility smoke check](docs/BROWSER_QA.md) for keyboard navigation, narrow screens and light/dark themes. Automated browser checks do not establish complete screen-reader or WCAG conformance.
-
-### Try the idea in minutes
-
-This repo includes a **free, runnable Python starter** for testing ideas, rejecting mistakes, preserving evidence, comparing approaches and reusing verified examples. The offline demonstrations need no paid AI account, cloud setup or API key.
-
-**Scope:** The starter supports optional local Ollama model proposals, but the bundled automated examples use simulated fixtures. It is not a commissioned autonomous coding agent or proof of general AI self-improvement. See [MVP v1.1.0 release notes](RELEASE_NOTES.md).
-
-## Quick start
-
-Requires Python 3.10+; no cloud account, API key, model subscription, or third-party Python package is required.
+**Want to see the output as a page?** Generate an accessible, standalone HTML report:
 
 ```bash
-python -m src.compound_intelligence.demo --workspace ./local-data --iterations 3
-python -m unittest discover -s tests -v
+python -m src.compound_intelligence.issue_report \
+  --input examples/engineering_issues.json \
+  --output issue-challenger-report.html
 ```
 
-View the durable, append-only evidence at `local-data/evidence.jsonl`. Run the demo again with the same workspace: completed experiments are recognized, and new work continues without rewriting prior evidence.
+Open `issue-challenger-report.html` locally. No JavaScript, login or network service is needed. The report marks proposed tests as **not yet executed**.
 
-## What this demonstrates
+[Walkthrough](docs/ENGINEERING_ISSUE_CHALLENGER.md) · [Browser accessibility smoke coverage](docs/BROWSER_QA.md)
 
-- **Discovery:** proposes small candidate changes to a generic task.
-- **Reasoning:** records an explicit hypothesis and expected result.
-- **Challenge:** independently checks for counterexamples and rejects an unsupported candidate.
-- **Validation:** only a passing deterministic check can promote a finding.
-- **Learning:** saves a timestamped record of every evaluation, including failures.
-- **Continuation:** reruns are idempotent by candidate ID and use the existing knowledge ledger.
-
-This is a deterministic reference implementation, **not** a continuously running general intelligence, an autonomous coding agent, or a guaranteed learning system. Model integrations are optional future adapters; a model's claims must never substitute for verification.
-
-## Design
+## Explore the compound intelligence loop
 
 ```text
-Task → Candidate generation → Challenger → Deterministic validator
-                                      ↓
-                              Append-only evidence
-                                      ↓
-                          Verified knowledge / next iteration
+Problem → Competing hypotheses → Independent checks
+                                         ↓
+                                  Durable evidence
+                                         ↓
+                           Retrieve verified examples
+                                         ↓
+                           Compare baseline vs assisted
 ```
 
-See [Architecture](docs/ARCHITECTURE.md) and [Public release boundaries](docs/SECURITY.md).
+Three runnable entry points:
 
-## Optional tools you can connect later
+| Try | Command | What you get |
+| --- | --- | --- |
+| Evidence and replay | `python -m src.compound_intelligence.demo --workspace ./local-data --iterations 3` | A rejection and verification example with locally saved results |
+| Knowledge reuse | `python -m src.compound_intelligence.learning_loop --fixture` | A verified example retrieved for a different fictional task |
+| Paired evaluation | `python -m src.compound_intelligence.ab_evaluation --fixture` | A baseline-versus-assisted comparison and durable receipt |
 
-- [Oracle Cloud Free Tier](https://www.oracle.com/cloud/free/) — optional persistent hosting (availability and eligibility vary).
-- [Ollama](https://ollama.com) — local model serving.
-- [Claude Code](https://code.claude.com/docs/en/overview) — software development assistance.
-- [ChatGPT / Codex](https://chatgpt.com/codex) — interactive research and coding.
-- [GitHub Actions](https://docs.github.com/en/actions) — reproducible automated checks.
+The offline `--fixture` demonstrations are **scripted simulations**. They show the *mechanics*, **not measured improvements in a real language model**. Optional local [Ollama](https://ollama.com) adapters can produce real model proposals on your machine; the repository does not download or start a model.
 
-No proprietary model or cloud service is required to run this starter. Tool names above describe independent products; this project is not affiliated with their providers.
+## What's included
 
-## v0.2 — Try the experiment runner
+- **Independent checking:** bounded typed extraction, static patch reference matching and explicit rejection paths; generated code is never executed.
+- **Persistent knowledge:** local SQLite evidence, verified-only exemplars, replayable receipts and recoverable bounded fixture jobs.
+- **Measured comparison:** multi-model experiment scaffolding, benchmark scores and paired memory-assisted evaluation with clear limitations.
+- **Visible evidence:** read-only, self-contained HTML reports and an offline experiment dashboard.
+- **Safe OSS workflow:** automated tests, actual headless-Chrome report smoke coverage, and read-only public feedback indexing.
+
+<details>
+<summary>Capabilities, limitations and more CLI examples</summary>
+
+Read [the full version-by-version guide](docs/VERSION_GUIDE.md), [architecture](docs/ARCHITECTURE.md), [v1.0 knowledge retrieval](docs/V1.0.md) and [v1.1 evaluation](docs/V1.1.md).
+
+To run the tests:
 
 ```bash
-python -m src.compound_intelligence.runner --input examples/experiments.json
-python -m src.compound_intelligence.runner --input examples/experiments.json
 python -m unittest discover -s tests -v
 ```
 
-The first execution records verified **and** rejected claims in local SQLite. The second reuses that evidence without duplicating experiments.
-
-Optionally connect a local Ollama model for an independent **advisory critique**:
-
-```bash
-python -m src.compound_intelligence.runner --ollama-model YOUR_LOCAL_MODEL
-```
-
-This is a bounded arithmetic experiment runner, not a free-roaming agent. See [v0.2 setup and limits](docs/V0.2.md).
-
-## v0.3 — Compare model proposals
-
-**See how competing ideas become measured evidence, not just more AI output.**
-
-Start with a free offline demonstration of two simulated proposals:
-
-```bash
-python -m src.compound_intelligence.tournament --fixture
-python -m src.compound_intelligence.tournament --fixture
-```
-
-The first run records one accepted and one rejected answer. The second reuses that evidence. For **real local model proposals**, install Ollama, download two models and run:
-
-```bash
-python -m src.compound_intelligence.tournament --models YOUR_MODEL_A YOUR_MODEL_B --values 8 13
-```
-
-Results are checked by a separate deterministic validator; model claims cannot self-approve. This release benchmarks **integer addition only**, and does not claim general autonomous reasoning. [Setup, examples and limitations](docs/V0.3.md).
-
-## v0.4 — Practical, independently checked challenges
-
-**Go beyond arithmetic:** compare model proposals for extracting useful facts and proposing a narrowly scoped code fix, with reference answers withheld from model prompts.
-
-```bash
-python -m src.compound_intelligence.problem_runner --fixture
-python -m src.compound_intelligence.problem_runner --fixture
-```
-
-The offline demonstration uses two simulated proposers. With Ollama running locally, use `--models MODEL_A MODEL_B` for real model-generated proposals. A verifier checks exact data extraction and static code patches without running model-generated source. Results are saved, replayable and scoped to the exact task/model/version.
-
-Read [the v0.4 guide](docs/V0.4.md) for real-model setup, custom challenge files, and limitations.
-
-## v0.5 — Measure what works
-
-Move from individual examples to **clear capability comparisons**. The benchmark shows which simulated or local model proposals passed independent checks, which were rejected, and which produced no usable answer. Metrics are broken down by extraction versus static patching and tied to a dataset fingerprint.
-
-```bash
-python -m src.compound_intelligence.benchmark --fixture --output local-data/report.json
-python -m src.compound_intelligence.benchmark --fixture --output local-data/report.json
-```
-
-For locally running Ollama models replace `--fixture` with `--models MODEL_A MODEL_B`. Fixture results are **simulated**, and tiny exact-match datasets cannot establish general intelligence or model reliability. [Guide and interpretation](docs/V0.5.md).
-
-## v0.6 — Run bounded experiments and recover after restarts
-
-Queue a safe offline experiment, run one controlled batch, and inspect the durable receipt:
+To generate the separate offline dashboard:
 
 ```bash
 python -m src.compound_intelligence.scheduler enqueue --id first-demo
 python -m src.compound_intelligence.scheduler tick
-python -m src.compound_intelligence.scheduler status
-```
-
-The scheduler currently permits **only** the simulated fixture benchmark. It does not automatically run as a daemon or execute arbitrary code; a separate scheduler can invoke one bounded tick when explicitly configured. [v0.6 usage and safety boundaries](docs/V0.6.md).
-
-## v0.7 — See experiments and results in a visual dashboard
-
-Generate an offline HTML evidence report from the existing local scheduler:
-
-```bash
-python -m src.compound_intelligence.scheduler enqueue --id dashboard-demo
-python -m src.compound_intelligence.scheduler tick
 python -m src.compound_intelligence.dashboard --queue-db local-data/v06/queue.sqlite3 --output local-data/dashboard.html
 ```
 
-Open `local-data/dashboard.html` to see which jobs ran, what succeeded or failed, and which proposals passed validation. The report does not call external services or execute commands. Fixture results are visibly marked as simulated. [v0.7 guide](docs/V0.7.md).
+</details>
 
-## Next improvements
+## Built for experimentation, not unchecked autonomy
 
-Advanced development belongs in separate, explicitly scoped extensions: richer independent validators, isolated real-model evaluations, permissioned task execution and long-running evidence collection. The included bounded offline queue is already implemented; it is **not** a full autonomous scheduler. See [how to extend validators](docs/EXTENDING.md).
+This is an **educational open-source starter**, not an always-on engineering agent. Issue rankings use user-supplied ratings, model outputs are untrusted proposals, and no GitHub issue authorizes code execution, a merge or privileged infrastructure access. The example code does **not** demonstrate general AI intelligence, causal self-improvement or secure execution of submitted source.
 
-## Contributing
+[Security and public boundaries](docs/SECURITY.md) · [Release notes](RELEASE_NOTES.md) · [Tagged MVP release v1.1.0](https://github.com/esheenj/compound-intelligence-starter/releases/tag/v1.1.0)
 
-Issues and narrowly scoped PRs with passing tests are welcome. See [CONTRIBUTING](CONTRIBUTING.md). Licensed under [MIT](LICENSE).
+## Get involved
 
-## v0.8 — Gather public feedback without copying private data
+Try an example, open a small reproducible issue, or propose a bounded improvement. Good contributions include counterexamples, independent validators, synthetic test data, documentation and accessibility improvements.
 
-Use a tiny read-only public GitHub issue index as the **discovery** step in the learning loop. It records source links, update times and content digests, not user comments or private repository content. Observations must still be challenged and tested before becoming knowledge or code changes.
+**[Contributing guide](CONTRIBUTING.md)** · **[Good first contributions](docs/GOOD_FIRST_ISSUES.md)** · **[Safe validator extensions](docs/EXTENDING.md)** · **[Discussions via GitHub issues](https://github.com/esheenj/compound-intelligence-starter/issues)**
 
-```sh
-python -m src.compound_intelligence.community_intake --fixture examples/public_feedback_fixture.json --output local-data/feedback.json
-python -m unittest tests.test_community_intake -v
-```
-
-The independent scheduled GitHub Actions workflow gathers references from four explicitly listed public repos on standard public runners, with no paid service or repository-write token. It does not run Cortex on Oracle, write code or auto-promote a claim. [Read the feedback guide](docs/PUBLIC_FEEDBACK.md).
-
-## v0.9 — Repeated experiments, measured carefully
-
-The existing daily public-feedback GitHub Actions workflow now also stores a tiny **simulated** capability benchmark and a provenance receipt. It reuses the same schedule rather than adding infrastructure. Reports can be compared across runs, but identical fixtures should report **UNCHANGED**, never invented learning.
-
-```bash
-python -m src.compound_intelligence.benchmark --fixture --output local-data/benchmark.json
-python -m src.compound_intelligence.progress receipt --report local-data/benchmark.json --run-id 123 --output local-data/receipt.json
-```
-
-The public runner has no persistent cross-run memory. Download reports from separate GitHub runs and use the [comparison guide](docs/CONTINUOUS_EXPERIMENTS.md) to inspect score changes on the same dataset. The scheduled fixture is not a running local LLM.
-
-## v1.0 — Reuse verified knowledge on a new problem
-
-Test the integrated example-memory loop, without subscriptions or a hosted service:
-
-```bash
-python -m src.compound_intelligence.learning_loop --fixture
-python -m src.compound_intelligence.learning_loop --fixture
-```
-
-A validated extraction example becomes reusable context for a separate task. The new result is independently checked, and the run is saved for deterministic recovery. The fixture is **simulated**, not a measured improvement in a real AI. With a locally running Ollama model, replace `--fixture` with `--model YOUR_LOCAL_MODEL`.
-
-[Full walkthrough, safety boundaries and limitations](docs/V1.0.md).
-
-## v1.1 — Measure whether verified examples actually help
-
-Compare the same held-out task **without** memory (baseline) and **with** previously verified examples (assisted):
-
-```bash
-python -m src.compound_intelligence.ab_evaluation --fixture
-python -m src.compound_intelligence.ab_evaluation --fixture
-```
-
-The offline fixture deliberately responds only when it sees an example, demonstrating A/B plumbing—not a real AI breakthrough. With local Ollama running, use `--model YOUR_LOCAL_MODEL --run-id real-001` instead. Both arms are independently checked, and their paired results are saved for recovery. See [v1.1 evaluation guide](docs/V1.1.md).
+Please don't publish employer or customer data, proprietary strategies, credentials or private infrastructure details. This project is independent of the AI services mentioned above and is licensed under [MIT](LICENSE).

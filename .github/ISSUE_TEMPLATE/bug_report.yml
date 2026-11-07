@@ -1,0 +1,33 @@
+name: Bug report
+description: Reproducible issue with synthetic inputs and independent evidence
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: "Use only fictional or public test data. Never share passwords, customer records or private repository content."
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the exact command and a small synthetic input.
+      placeholder: "python -m ... with synthetic example"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Counterexample or independent test
+      description: What evidence would disprove your proposed fix?
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "OS and Python version"
