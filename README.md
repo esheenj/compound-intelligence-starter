@@ -41,6 +41,18 @@ python -m src.compound_intelligence.issue_report \
 
 Open `issue-challenger-report.html` locally. No JavaScript, login or network service is needed. The report marks proposed tests as **not yet executed**.
 
+**New: explore alternatives interactively, still offline.** Generate a second self-contained report and filter between fictional issues, expand competing hypotheses and inspect what would disprove each one:
+
+```bash
+python -m src.compound_intelligence.issue_explorer \
+  --input examples/engineering_issues.json \
+  --output issue-explorer.html
+```
+
+Open `issue-explorer.html` locally. The **actual Python challenger** selects the cheapest proposed falsifiable test; a small browser script only shows and hides already-rendered information. Its content-security policy pins the exact script hash and blocks network connections. No AI API, telemetry or account is involved, and no experiment is executed. The existing script-free static report above remains available for strict no-JavaScript environments.
+
+[Offline hypothesis explorer guide](docs/OFFLINE_HYPOTHESIS_EXPLORER.md) · [Explorer source](src/compound_intelligence/issue_explorer.py)
+
 [Walkthrough](docs/ENGINEERING_ISSUE_CHALLENGER.md) · [Browser accessibility smoke coverage](docs/BROWSER_QA.md)
 
 ## Explore the compound intelligence loop
