@@ -16,7 +16,7 @@ The original [single-page OSS directory](../site/index.html) includes all seven 
 | [Data Table Interactions](https://github.com/esheenj/data-table-interactions-oss) | `npm test && npm run demo` | Filtering, stable sorting, pagination and semantic table demo |
 | [Flow State Machine](https://github.com/esheenj/flow-state-machine-oss) | `npm test && npm run replay` | Guarded transitions and replayable fictional workflow journals |
 | [Form Experience Kit](https://github.com/esheenj/form-experience-kit-oss) | `npm test && npm run demo` | Multi-step fictional form with versioned local draft restore |
-| [Visual Regression Starter](https://github.com/esheenj/visual-regression-starter-oss) | `npm test && npm run demo` | Fictional P3 comparison with a static script-free visual report and explicit review verdict |
+| [Visual Regression Starter](https://github.com/esheenj/visual-regression-starter-oss) | `npm test && npm run demo` | Fictional P3 comparison with both a script-free report and new interactive tolerance/coordinate playground |
 
 Each command runs **inside the repository named in that row** after cloning it. Use Python 3.10+ for Compound Intelligence, Node 20+ for the JavaScript tools, and a local static-file server for browser demos as documented in each README. Tool-specific optional test dependencies are documented separately. No repository in this collection represents a live exchange, trading broker, payment platform or privileged AI agent.
 
