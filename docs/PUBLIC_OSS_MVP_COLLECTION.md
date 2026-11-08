@@ -2,6 +2,10 @@
 
 **Seven independent, source-first tools. No accounts, private backends or subscription required for their basic examples.** Each repository owns its own tests, license, limitations and release status. Public GitHub access is **not** a claim of a deployed website, published npm package, independent accessibility certification or real-world adoption.
 
+## Developer-friendly public directory
+
+The original [single-page OSS directory](../site/index.html) includes all seven source repos, reproducible command examples and contribution links. It is entirely static, offline-readable, without analytics or remote assets. [Source packaging, real Chrome QA and one-time GitHub Pages setup](PUBLIC_DIRECTORY_DEPLOY.md) are documented separately; **this does not yet certify a hosted website**.
+
 ## Start with a real runnable example
 
 | Tool | Try it locally | Useful output |
