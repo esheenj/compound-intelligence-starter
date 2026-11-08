@@ -1,6 +1,6 @@
 # Esheen Labs — public open-source MVP collection
 
-**Seven independent, source-first tools. No accounts, private backends or subscription required for their basic examples.** Each repository owns its own tests, license, limitations and release status. Public GitHub access is **not** a claim of a deployed website, published npm package, independent accessibility certification or real-world adoption.
+**Seven independent, source-first tools. No accounts, private backends or subscription required for their basic examples.** Every listed repository now provides a tested static Pages artifact and a guarded deployment workflow; GitHub Pages activation and live HTTPS checks are **not yet verified**. Each repository owns its own tests, license, limitations and release status. Public GitHub access is **not** a claim of a deployed website, published npm package, independent accessibility certification or real-world adoption.
 
 ## Developer-friendly public directory
 
@@ -11,12 +11,12 @@ The original [single-page OSS directory](../site/index.html) includes all seven 
 | Tool | Try it locally | Useful output |
 | --- | --- | --- |
 | [Compound Intelligence Starter](https://github.com/esheenj/compound-intelligence-starter) | `python -m src.compound_intelligence.issue_challenger --input examples/engineering_issues.json` | Hypotheses, counterexamples, an unexecuted next-test brief and evidence workflow |
-| [Design System Foundations](https://github.com/esheenj/design-system-foundations-oss) | `node bin/compile.mjs examples/theme.json` | Deterministic tokens compiled to CSS variables |
-| [Mobile-first Flow Kit](https://github.com/esheenj/mobile-first-flow-kit-oss) | `npm test && npm run demo` | Tested responsive journey/state-transition reference |
+| [Design System Foundations](https://github.com/esheenj/design-system-foundations-oss) | `node bin/compile.mjs examples/theme.json` | Validated tokens and an offline interactive CSS/contrast playground |
+| [Mobile-first Flow Kit](https://github.com/esheenj/mobile-first-flow-kit-oss) | `npm test && npm run demo` | Responsive browser journey with guarded recovery and state-model tests |
 | [Data Table Interactions](https://github.com/esheenj/data-table-interactions-oss) | `npm test && npm run demo` | Filtering, stable sorting, pagination and semantic table demo |
 | [Flow State Machine](https://github.com/esheenj/flow-state-machine-oss) | `npm test && npm run replay` | Guarded transitions and replayable fictional workflow journals |
 | [Form Experience Kit](https://github.com/esheenj/form-experience-kit-oss) | `npm test && npm run demo` | Multi-step fictional form with versioned local draft restore |
-| [Visual Regression Starter](https://github.com/esheenj/visual-regression-starter-oss) | `npm test && npm run demo` | Deterministic ASCII P3 pixel comparison and explicit review verdict |
+| [Visual Regression Starter](https://github.com/esheenj/visual-regression-starter-oss) | `npm test && npm run demo` | Fictional P3 comparison with a static script-free visual report and explicit review verdict |
 
 Each command runs **inside the repository named in that row** after cloning it. Use Python 3.10+ for Compound Intelligence, Node 20+ for the JavaScript tools, and a local static-file server for browser demos as documented in each README. Tool-specific optional test dependencies are documented separately. No repository in this collection represents a live exchange, trading broker, payment platform or privileged AI agent.
 
