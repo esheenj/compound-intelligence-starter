@@ -2,9 +2,12 @@
 from __future__ import annotations
 import json
 import socket
+import sys
 import tempfile
 from pathlib import Path
 from browser_check_issue_report import Driver, driver_executable
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.stage_showcase import stage_catalog
 
 
