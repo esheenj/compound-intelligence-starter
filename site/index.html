@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; connect-src 'none'; style-src 'unsafe-inline'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="description" content="Explore seven original offline open-source MVPs: experiments, flows, forms, tables, design tokens and visual comparison.">
+<title>Esheen Labs · Explore and Contribute</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;background:Canvas;color:CanvasText}
+a{color:LinkText;overflow-wrap:anywhere;text-underline-offset:.15em}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible{outline:3px solid Highlight;outline-offset:4px}
+.wrap{max-width:75rem;margin:auto;padding:clamp(1rem,4vw,3.5rem)}
+.skip{position:absolute;left:1rem;top:-7rem;background:Canvas;color:CanvasText;padding:.65rem;z-index:2}
+.skip:focus{top:.6rem}
+header{border-bottom:1px solid GrayText}
+.kicker{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;font-weight:800}
+h1{font-size:clamp(2.2rem,5vw,4.3rem);letter-spacing:-.038em;line-height:1.08;max-width:19ch;margin:1rem 0}
+.lead{font-size:clamp(1.08rem,2vw,1.3rem);max-width:63ch}
+.buttonrow{display:flex;gap:.8rem;flex-wrap:wrap;margin-block:1.7rem}
+.linkchip{border:1px solid GrayText;border-radius:2rem;padding:.65rem 1rem;min-height:44px;display:inline-flex;align-items:center}
+.notice,.card,.steps{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem)}
+.notice{margin:1.3rem 0;border-inline-start:5px solid currentColor}
+h2{font-size:clamp(1.45rem,3vw,2.05rem);line-height:1.2}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem;margin:1.2rem 0 2.5rem}
+.card{display:flex;flex-direction:column;min-width:0}
+.card h3{font-size:1.2rem;line-height:1.25;margin:.4rem 0}
+.card p{margin:.55rem 0}
+.card .links{margin-top:auto;padding-top:.65rem;display:flex;gap:1rem;flex-wrap:wrap}
+.eyebrow{font-size:.75rem;letter-spacing:.06em;font-weight:750;text-transform:uppercase}
+code{font: .89em/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+code.command{display:block;background:color-mix(in srgb,CanvasText 7%,Canvas);padding:.65rem;border-radius:.5rem}
+.steps{max-width:75rem}
+.steps ol{padding-left:1.4rem}
+.steps li{margin:.9rem 0;padding-left:.15rem}
+.footer{border-top:1px solid GrayText;margin-top:2rem;font-size:.9rem}
+.muted{opacity:.84}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to public projects</a>
+<header class="wrap">
+<p class="kicker">Esheen Labs · open-source workshop</p>
+<h1>Explore. Run. Question. Improve.</h1>
+<p class="lead">Seven small, original, source-first developer tools. No accounts, hidden infrastructure or subscriptions needed to try the examples. Pick one runnable slice, check its evidence and contribute a reproducible improvement.</p>
+<div class="buttonrow">
+<a class="linkchip" href="#projects">Browse the projects</a>
+<a class="linkchip" href="#contribute">Make a first contribution</a>
+<a class="linkchip" href="https://github.com/esheenj/compound-intelligence-starter">Source and tests on GitHub</a>
+</div>
+</header>
+<main class="wrap" id="main">
+<aside class="notice" aria-label="Verification and hosting limitations"><strong>Working source, not a product certification.</strong> These repositories contain public code and offline examples. This directory does not assert that their individual demos are currently hosted, commercially adopted, accessible to all assistive technologies or suitable for production. Tests and limitations live in each repository.</aside>
+<section id="projects" aria-labelledby="projects-heading">
+<h2 id="projects-heading">Choose a working MVP</h2>
+<p class="muted">Commands run from inside each cloned repository. Python 3.10+ for Compound Intelligence; Node.js 20+ for the JavaScript examples.</p>
+<div class="cards">
+<article class="card">
+<p class="eyebrow">01 · AI engineering</p>
+<h3>Compound Intelligence Starter</h3>
+<p>Turn fictional engineering issues into competing hypotheses, falsifiers and a review-only next-test brief.</p>
+<code class="command">python -m src.compound_intelligence.issue_challenger --input examples/engineering_issues.json</code>
+<p class="links"><a href="https://github.com/esheenj/compound-intelligence-starter">Source</a><a href="https://github.com/esheenj/compound-intelligence-starter/issues">Contribute</a></p>
+</article>
+<article class="card">
+<p class="eyebrow">02 · Design systems</p>
+<h3>Design System Foundations</h3>
+<p>Validate nested design tokens and generate deterministic CSS custom properties from a fictional theme.</p>
+<code class="command">node bin/compile.mjs examples/theme.json</code>
+<p class="links"><a href="https://github.com/esheenj/design-system-foundations-oss">Source</a><a href="https://github.com/esheenj/design-system-foundations-oss/issues">Contribute</a></p>
+</article>
+<article class="card">
+<p class="eyebrow">03 · Responsive journeys</p>
+<h3>Mobile-first Flow Kit</h3>
+<p>Explore a guarded three-step fictional journey with validation and focus management.</p>
+<code class="command">npm test &amp;&amp; npm run demo</code>
+<p class="links"><a href="https://github.com/esheenj/mobile-first-flow-kit-oss">Source</a><a href="https://github.com/esheenj/mobile-first-flow-kit-oss/issues">Contribute</a></p>
+</article>
+<article class="card">
+<p class="eyebrow">04 · Data interactions</p>
+<h3>Data Table Interactions</h3>
+<p>Filter, sort, paginate and export completely fabricated rows with an offline browser demo.</p>
+<code class="command">npm test &amp;&amp; npm run demo</code>
+<p class="links"><a href="https://github.com/esheenj/data-table-interactions-oss">Source</a><a href="https://github.com/esheenj/data-table-interactions-oss/issues">Contribute</a></p>
+</article>
+<article class="card">
+<p class="eyebrow">05 · Workflow modeling</p>
+<h3>Flow State Machine</h3>
+<p>Model guarded transitions, immutable recordings and replay of original fictional workflow journals.</p>
+<code class="command">npm test &amp;&amp; npm run record</code>
+<p class="links"><a href="https://github.com/esheenj/flow-state-machine-oss">Source</a><a href="https://github.com/esheenj/flow-state-machine-oss/issues">Contribute</a></p>
+</article>
+<article class="card">
+<p class="eyebrow">06 · Forms</p>
+<h3>Form Experience Kit</h3>
+<p>Build an offline three-step picnic checklist and safely save or restore versioned fictional drafts.</p>
+<code class="command">npm test &amp;&amp; npm run demo</code>
+<p class="links"><a href="https://github.com/esheenj/form-experience-kit-oss">Source</a><a href="https://github.com/esheenj/form-experience-kit-oss/issues">Contribute</a></p>
+</article>
+<article class="card">
+<p class="eyebrow">07 · Visual evidence</p>
+<h3>Visual Regression Starter</h3>
+<p>Compare small, synthetic text-based P3 pixel images and generate a deterministic visual report.</p>
+<code class="command">npm test &amp;&amp; npm run demo</code>
+<p class="links"><a href="https://github.com/esheenj/visual-regression-starter-oss">Source</a><a href="https://github.com/esheenj/visual-regression-starter-oss/issues">Contribute</a></p>
+</article>
+</div>
+</section>
+<section id="contribute" class="steps" aria-labelledby="contribute-heading">
+<h2 id="contribute-heading">Your first contribution in four steps</h2>
+<ol>
+<li><strong>Pick one scope.</strong> Open a project's <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/GOOD_FIRST_ISSUES.md">starter-task examples</a> or its Issues tab, and check whether a task is already being worked on.</li>
+<li><strong>Run the actual example.</strong> Clone the public source, execute the listed command and note the exact revision and environment. Use original, invented data only.</li>
+<li><strong>Propose a falsifiable fix.</strong> Include expected versus actual behavior, one negative case and a test proving the change. State what was not tested.</li>
+<li><strong>Submit a focused PR.</strong> Follow that repository's contribution instructions and CI checks. Maintainers review provenance and test results; an issue never authorizes private execution.</li>
+</ol>
+<p class="muted">No private control-plane code, live customer data, proprietary employer designs, trading execution, secrets, or unlicensed assets belong in this public collection. Report sensitive vulnerabilities through the repository's private security path where available.</p>
+</section>
+</main>
+<footer class="wrap footer"><p>Esheen Labs · original fictional MVP collection · source-first, reproducible and R0 additional infrastructure spend. This page makes no live-hosting, accessibility-certification or adoption claims.</p></footer>
+</body></html>
