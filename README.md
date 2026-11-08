@@ -13,6 +13,8 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Explore the wider [Esheen Labs public MVP collection](docs/PUBLIC_OSS_MVP_COLLECTION.md)** — seven independent, runnable tools spanning AI experiments, interface flows, form UX, design tokens, tables and synthetic visual comparisons.
 
+**New developer directory:** The [public OSS project directory source](site/index.html) offers a single browsable index of seven runnable tools and contribution paths. To preview the exact website bundle locally, run `mkdir -p dist && python scripts/stage_showcase.py --output dist/pages`, then serve `dist/pages` with Python's localhost server. [Pages deployment and live acceptance](docs/PUBLIC_DIRECTORY_DEPLOY.md) are separate; no hosted URL is claimed before it passes HTTPS verification.
+
 ## See it in two minutes
 
 ```bash
