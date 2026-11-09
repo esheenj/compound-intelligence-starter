@@ -73,11 +73,43 @@ def run():
                 """)
                 verify(layout["page"] <= layout["viewport"] and layout["cards"] == 7,
                        "NO_PAGE_OVERFLOW_" + str(width))
+            driver.command("POST", "url", {"url": (path / "mvp-wave.html").resolve().as_uri()})
+            wave = driver.js("""
+                document.getElementById("plan").click();
+                return {
+                    title:document.title,
+                    status:document.getElementById("status").textContent,
+                    count:document.querySelectorAll("#results li").length,
+                    first:document.querySelector("#results li strong")?.textContent,
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                    remoteResources:performance.getEntriesByType("resource")
+                        .filter(x=>x.name.startsWith("http")).length
+                };
+            """)
+            verify(wave["count"] == 3 and wave["first"].startswith("fictional-form")
+                   and "No execution authorized" in wave["status"]
+                   and "connect-src 'none'" in wave["csp"]
+                   and wave["remoteResources"] == 0,
+                   "OFFLINE_MVP_WAVE_FUNCTION")
+            rejection = driver.js("""
+                document.getElementById("fixture").value =
+                    '{"malformed":"<img src=x onerror=alert(1)>"}';
+                document.getElementById("plan").click();
+                return {
+                    status:document.getElementById("status").textContent,
+                    count:document.querySelectorAll("#results li").length
+                };
+            """)
+            verify(rejection["count"] == 0 and rejection["status"].startswith("Rejected:"),
+                   "MVP_WAVE_INVALID_INPUT")
+            driver.viewport(320, 720)
+            verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
+                   "MVP_WAVE_MOBILE_NO_OVERFLOW")
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
                 "browser":version,"publicCards":7,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":1,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()

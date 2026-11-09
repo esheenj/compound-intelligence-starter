@@ -13,6 +13,7 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "site" / "index.html"
+MVP_WAVE_SOURCE = ROOT / "site" / "mvp-wave.html"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
     "compound-intelligence-starter",
@@ -82,7 +83,7 @@ def verify_catalog(data: bytes) -> dict:
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link == "mvp-wave.html"):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -117,6 +118,15 @@ def stage_catalog(output: Path) -> dict:
         raise ValueError("DESTINATION_INSIDE_PUBLIC_SOURCE")
     data = SOURCE.read_bytes()
     summary = verify_catalog(data)
+    if MVP_WAVE_SOURCE.is_symlink() or MVP_WAVE_SOURCE.parent.is_symlink() or not MVP_WAVE_SOURCE.is_file():
+        raise ValueError("MVP_WAVE_SOURCE_INVALID")
+    wave = MVP_WAVE_SOURCE.read_bytes()
+    if len(wave) > 65536 or b"\x00" in wave:
+        raise ValueError("MVP_WAVE_BYTES_INVALID")
+    if (b"connect-src 'none'" not in wave or b"default-src 'none'" not in wave or
+            wave.count(b"<script>") != 1 or b"<script src" in wave or
+            b"innerHTML" in wave or b"XMLHttpRequest" in wave or b"fetch(" in wave):
+        raise ValueError("MVP_WAVE_SAFETY_CONTRACT")
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
     if not output.parent.exists() or output.parent.is_symlink():
@@ -124,8 +134,9 @@ def stage_catalog(output: Path) -> dict:
     output.mkdir()
     try:
         (output / "index.html").write_bytes(data)
+        (output / "mvp-wave.html").write_bytes(wave)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "index.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "index.html", "mvp-wave.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -133,7 +144,9 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "index.html"], **summary
+        "files": [".nojekyll", "index.html", "mvp-wave.html"],
+        "additionalHostedToolCount": 1,
+        "mvpWaveSha256": hashlib.sha256(wave).hexdigest(), **summary
     }
 
 

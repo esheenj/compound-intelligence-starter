@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="description" content="Original offline public MVP wave planning playground using only fictional data.">
+<title>MVP Wave Planner · Esheen Labs</title>
+<style>
+:root{font:16px/1.5 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;background:Canvas;color:CanvasText}
+a{color:LinkText}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+main{max-width:60rem;margin:auto;padding:clamp(1rem,4vw,3rem)}
+h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.15}
+p{max-width:70ch}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2.5vw,1.5rem);margin-top:1.2rem}
+textarea{width:100%;min-height:18rem;border:1px solid GrayText;border-radius:.7rem;background:Canvas;color:CanvasText;padding:1rem;font: .85rem/1.5 ui-monospace,monospace}
+button{background:CanvasText;color:Canvas;border:2px solid CanvasText;border-radius:.7rem;min-height:44px;cursor:pointer;font:inherit;font-weight:700;padding:.5rem 1.2rem;margin-top:1rem}
+button:hover{opacity:.85}
+ol{padding-left:1.5rem}
+li{margin:1.2rem 0;border-bottom:1px solid GrayText;padding-bottom:1rem}
+li strong{display:block}
+small,.muted{color:GrayText}
+.output{overflow-wrap:anywhere}
+#status{font-weight:700}
+</style>
+</head>
+<body>
+<main>
+<p><a href="./">← Esheen Labs public workshop</a></p>
+<p class="muted">Open-source interactive reference · Offline · No account or backend</p>
+<h1>Plan the next MVP wave</h1>
+<p>Try fictional product candidates and see which three deserve the next <em>review</em>. The ranking is a transparent heuristic, not a verified release decision. No real GitHub jobs, builds or deployments can be triggered here.</p>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">1. Edit fictional candidate data</h2>
+<label for="fixture">JSON candidates, with self-declared readiness and scores</label>
+<textarea id="fixture" spellcheck="false">{
+ "version": 1,
+ "max_active": 3,
+ "candidates": [
+  {"id":"fictional-form","status":"pages_deployed","value":4,"effort":1,"risk":1,"rights_reviewed":true,"tests_verified":true},
+  {"id":"fictional-ux-audit","status":"implemented","value":5,"effort":1,"risk":1,"rights_reviewed":false,"tests_verified":true},
+  {"id":"fictional-catalogue","status":"scaffold","value":4,"effort":2,"risk":1,"rights_reviewed":false,"tests_verified":false},
+  {"id":"fictional-table","status":"browser_verified","value":5,"effort":1,"risk":0,"rights_reviewed":true,"tests_verified":true}
+ ]
+}</textarea>
+<button type="button" id="plan">Generate review wave</button>
+<p id="status" role="status" aria-live="polite">Select Generate review wave to inspect the fictional candidates.</p>
+</section>
+<section class="panel output" aria-labelledby="output-heading">
+<h2 id="output-heading">2. Proposed review order</h2>
+<ol id="results"></ol>
+</section>
+<section class="panel">
+<h2>What this does not establish</h2>
+<p>These flags are supplied by the person typing the fixture. No rights, source revision, CI run, browser acceptance, market demand or deployment has been verified. A public release still needs independent review of evidence, license and original clean source.</p>
+<p>See <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/MVP_WAVE_PLANNER.md">the source-only Python companion and limitations</a>. This playground is one tool within an existing public repository, not a new repo or autonomous worker.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+  const stages = ["scaffold","implemented","source_published","pages_deployed","browser_verified"];
+  const fields = ["id","status","value","effort","risk","rights_reviewed","tests_verified"];
+  const next = {
+    scaffold:"Build an original offline vertical slice and a negative-input test.",
+    implemented:"Validate rights, clean-source export, and exact-head CI.",
+    source_published:"Validate release evidence and prepare an independent demo.",
+    pages_deployed:"Verify live HTTPS, keyboard, narrow viewport and failures.",
+    browser_verified:"Maintain regressions and assess attributed feedback."
+  };
+  const input = document.getElementById("fixture");
+  const status = document.getElementById("status");
+  const results = document.getElementById("results");
+  function exactKeys(object, keys) {
+    return object !== null && typeof object === "object" && !Array.isArray(object) &&
+      Object.keys(object).length === keys.length &&
+      keys.every(key => Object.prototype.hasOwnProperty.call(object,key));
+  }
+  function integer(value, min, max) {
+    return Number.isInteger(value) && value >= min && value <= max;
+  }
+  function proposal(data) {
+    if (!exactKeys(data, ["version","max_active","candidates"]) ||
+        data.version !== 1 || !integer(data.max_active,1,3) ||
+        !Array.isArray(data.candidates) || data.candidates.length < 1 ||
+        data.candidates.length > 100) throw Error("invalid root");
+    const seen = new Set();
+    const ranked = data.candidates.map(item => {
+      if (!exactKeys(item,fields) || typeof item.id !== "string" ||
+          !/^[a-z][a-z0-9-]{2,47}$/.test(item.id) || seen.has(item.id) ||
+          !stages.includes(item.status) ||
+          !["value","effort","risk"].every(k => integer(item[k],0,5)) ||
+          typeof item.rights_reviewed !== "boolean" || typeof item.tests_verified !== "boolean") {
+        throw Error("invalid candidate");
+      }
+      seen.add(item.id);
+      const missing = [];
+      if (!item.rights_reviewed) missing.push("rights unreviewed");
+      if (!item.tests_verified) missing.push("tests unverified");
+      if (item.status !== "browser_verified") missing.push("independent browser check missing");
+      return {id:item.id,stage:item.status,stageNumber:stages.indexOf(item.status),
+        score:3*item.value - 2*item.effort - item.risk,
+        missing:missing, next:next[item.status]};
+    });
+    ranked.sort((a,b) => b.stageNumber-a.stageNumber || b.score-a.score ||
+      a.id.localeCompare(b.id,"en"));
+    return {ranked:ranked,active:ranked.filter(x=>x.stage!=="browser_verified").slice(0,data.max_active)};
+  }
+  document.getElementById("plan").addEventListener("click", () => {
+    results.replaceChildren();
+    if (input.value.length > 65536) {
+      status.textContent = "Rejected: fixture exceeds the 64 KiB input limit.";
+      return;
+    }
+    let response;
+    try {response = proposal(JSON.parse(input.value));}
+    catch (_) {status.textContent="Rejected: check the documented JSON schema, unique IDs and score limits.";return;}
+    if (response.active.length === 0) {
+      status.textContent="No unverified candidates. Fixture alone is not proof of acceptance.";
+      return;
+    }
+    status.textContent="Proposed " + response.active.length + " review candidates. No execution authorized.";
+    for (const entry of response.active) {
+      const li=document.createElement("li");
+      const heading=document.createElement("strong");
+      heading.textContent=entry.id + " · " + entry.stage + " · hint " + entry.score;
+      const explain=document.createElement("p");
+      explain.textContent="Next review: " + entry.next;
+      const gates=document.createElement("small");
+      gates.textContent=entry.missing.length ? "Unverified: " + entry.missing.join("; ") :
+        "Fixture flags supplied; external evidence still not verified.";
+      li.append(heading,explain,gates);
+      results.append(li);
+    }
+  });
+})();
+</script>
+</body></html>
