@@ -18,6 +18,8 @@ class ShowcaseStageTests(unittest.TestCase):
         report = stage_catalog(self.output)
         self.assertEqual(report["state"], "STAGED_ONLY")
         self.assertEqual(report["repoCount"], 7)
+        self.assertIn(b"SUPPORT_AND_SUSTAINABILITY.md", SOURCE.read_bytes())
+        self.assertIn(b"PUBLIC_INTELLIGENCE_BOUNDARY.md", SOURCE.read_bytes())
         self.assertEqual(report["githubDeployedUrlCount"], 7)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
