@@ -1,4 +1,4 @@
-name: Synthetic cross-language streaming comparison
+name: Synthetic stream comparison x86-64
 on:
   pull_request:
     paths:
@@ -6,24 +6,23 @@ on:
       - 'tests/test_streaming_benchmark.py'
       - 'docs/STREAMING_LANGUAGE_COMPARISON.md'
       - '.github/workflows/streaming-benchmark.yml'
+      - '.github/workflows/streaming-arm64.yml'
   push:
+    branches: [main]
     paths:
       - 'experiments/streaming_benchmark/**'
       - 'tests/test_streaming_benchmark.py'
       - 'docs/STREAMING_LANGUAGE_COMPARISON.md'
       - '.github/workflows/streaming-benchmark.yml'
+      - '.github/workflows/streaming-arm64.yml'
 permissions:
   contents: read
 jobs:
   compare:
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [ubuntu-24.04, ubuntu-24.04-arm]
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
-      RUNNER_LABEL: ${{ matrix.runner }}
+      RUNNER_LABEL: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
