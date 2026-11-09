@@ -39,7 +39,7 @@ Potential follow-ups: deterministic fuzz cases, a reproducible benchmark harness
 After building Rust, run:
 
 ```bash
-cargo build --manifest-path experiments/receipt_validator/rust/Cargo.toml
+cargo build --release --manifest-path experiments/receipt_validator/rust/Cargo.toml
 python -m experiments.receipt_validator.benchmark --rows 100000 --trials 5 --output local-data/receipt-validator-benchmark.json
 ```
 

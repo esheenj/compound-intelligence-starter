@@ -20,7 +20,7 @@ from experiments.receipt_validator.python_validator import validate_line
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FIXTURE = ROOT / "examples" / "receipt_validator_cases.tsv"
-RUST = ROOT / "experiments" / "receipt_validator" / "rust" / "target" / "debug" / "receipt-validator-pilot"
+RUST = ROOT / "experiments" / "receipt_validator" / "rust" / "target" / "release" / "receipt-validator-pilot"
 PYTHON = ROOT / "experiments" / "receipt_validator" / "python_validator.py"
 
 
