@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.stage_showcase import SOURCE, stage_catalog, verify_catalog
+from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, stage_catalog, verify_catalog
 
 
 class ShowcaseStageTests(unittest.TestCase):
@@ -23,11 +23,17 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["githubDeployedUrlCount"], 7)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
-        self.assertEqual(report["files"], [".nojekyll", "index.html"])
+        self.assertEqual(report["files"], [".nojekyll", "index.html", "mvp-wave.html"])
         content = self.output.joinpath("index.html").read_bytes()
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
-        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "index.html"])
+        self.assertEqual(report["additionalHostedToolCount"], 1)
+        wave = self.output.joinpath("mvp-wave.html").read_bytes()
+        self.assertEqual(wave, MVP_WAVE_SOURCE.read_bytes())
+        self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
+        self.assertIn(b"connect-src 'none'", wave)
+        self.assertIn(b"offline interactive planning playground", content)
+        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "index.html", "mvp-wave.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
         self.assertEqual(content.count(b">Deployed demo</a>"), 7)
