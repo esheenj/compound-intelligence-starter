@@ -34,7 +34,7 @@ class MVPWaveTests(unittest.TestCase):
         self.assertTrue(all(not item["release_authorized"] and
                             not item["execution_authorized"] for item in out["candidates"]))
         self.assertIn("INDEPENDENT_BROWSER_VERIFICATION_MISSING",
-                      out["candidates"][0]["unverified_gates"])
+                      next(item for item in out["candidates"] if item["id"] == "fictional-form")["unverified_gates"])
 
     def test_stable_plan_and_input_digest(self):
         data = fixture()
