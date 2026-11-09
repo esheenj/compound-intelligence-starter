@@ -5,12 +5,14 @@ on:
       - 'experiments/receipt_validator/**'
       - 'examples/receipt_validator_cases.tsv'
       - 'tests/test_receipt_validator_experiment.py'
+      - 'tests/test_receipt_benchmark.py'
       - '.github/workflows/cross-language-validator.yml'
   pull_request:
     paths:
       - 'experiments/receipt_validator/**'
       - 'examples/receipt_validator_cases.tsv'
       - 'tests/test_receipt_validator_experiment.py'
+      - 'tests/test_receipt_benchmark.py'
       - '.github/workflows/cross-language-validator.yml'
 permissions:
   contents: read
@@ -29,5 +31,9 @@ jobs:
         run: rustc --version && cargo --version
       - name: Rust unit tests
         run: cargo test --manifest-path experiments/receipt_validator/rust/Cargo.toml
+      - name: Build optimized-parity Rust CLI for the benchmark
+        run: cargo build --release --manifest-path experiments/receipt_validator/rust/Cargo.toml
       - name: Python and cross-language parity tests
         run: python -m unittest tests/test_receipt_validator_experiment.py -v
+      - name: Informational same-runner batch benchmark (no performance gate)
+        run: python -m experiments.receipt_validator.benchmark --rows 100000 --trials 5 --output local-data/receipt-validator-benchmark.json
