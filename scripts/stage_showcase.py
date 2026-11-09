@@ -23,6 +23,7 @@ REPOS = {
     "form-experience-kit-oss",
     "visual-regression-starter-oss",
 }
+DEPLOYED_PAGES = {"https://esheenj.github.io/" + repo + "/" for repo in REPOS}
 
 
 class SourceCatalog(HTMLParser):
@@ -34,11 +35,15 @@ class SourceCatalog(HTMLParser):
         self.links = []
         self.script = False
         self.remote_assets = []
+        self.card_links = []
+        self._card_open = False
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if tag == "article" and "card" in attrs.get("class", "").split():
             self.articles += 1
+            self.card_links.append([])
+            self._card_open = True
         if tag == "h1":
             self.heading += 1
         if tag == "main":
@@ -48,7 +53,14 @@ class SourceCatalog(HTMLParser):
         if tag in ("img", "iframe", "link", "audio", "video", "source", "object"):
             self.remote_assets.append(tag)
         if tag == "a":
-            self.links.append(attrs.get("href", ""))
+            href = attrs.get("href", "")
+            self.links.append(href)
+            if self._card_open:
+                self.card_links[-1].append(href)
+
+    def handle_endtag(self, tag):
+        if tag == "article":
+            self._card_open = False
 
 
 def verify_catalog(data: bytes) -> dict:
@@ -70,11 +82,23 @@ def verify_catalog(data: bytes) -> dict:
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/")):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
-    if "public Github Pages live" in html or "WCAG certified" in html:
+    # Verify exact source, issues and GitHub-deployed URL on each card.
+    # A swapped destination or unrelated host must not be published.
+    expected_cards = {
+        ("https://github.com/esheenj/" + repo,
+         "https://github.com/esheenj/" + repo + "/issues",
+         "https://esheenj.github.io/" + repo + "/")
+        for repo in REPOS
+    }
+    if {tuple(card) for card in parser.card_links} != expected_cards or len(parser.card_links) != 7:
+        raise ValueError("PUBLIC_CARD_LINK_MISMATCH")
+    if "WCAG certified" in html or "commercially adopted" in html:
         raise ValueError("UNSUPPORTED_CATALOG_CLAIM")
-    return {"repoCount": 7, "htmlSha256": hashlib.sha256(data).hexdigest()}
+    return {"repoCount": 7, "githubDeployedUrlCount": 7,
+            "independentBrowserVerified": False,
+            "htmlSha256": hashlib.sha256(data).hexdigest()}
 
 
 def stage_catalog(output: Path) -> dict:
