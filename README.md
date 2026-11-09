@@ -129,3 +129,14 @@ Please don't publish employer or customer data, proprietary strategies, credenti
 ## Python versus Rust: a small evidence-driven experiment
 
 See the [cross-language validator pilot](docs/CROSS_LANGUAGE_VALIDATOR_PILOT.md): original synthetic records, dependency-free Python and Rust implementations, invalid-input fixtures and a CI parity check. It is a **format demonstration**, not signature checking, operational authorization or a performance claim.
+
+## New: offline public MVP wave planner
+
+A small, independently runnable reference tool helps prioritize at most three fictional open-source MVP review candidates, with explainable scoring, invalid-input tests and explicit no-execution/no-publication boundaries. It uses a completely synthetic fixture; it does **not** verify GitHub, rights or deployed applications.
+
+```sh
+python -m src.compound_intelligence.mvp_portfolio --input examples/mvp_portfolio.json
+python -m unittest tests.test_mvp_portfolio -v
+```
+
+See [the MVP Wave Planner guide](docs/MVP_WAVE_PLANNER.md). This is **one additional source-first tool inside this existing repository**, not a new standalone repository or an independently hosted MVP.
