@@ -1,0 +1,55 @@
+name: Synthetic stream comparison ARM64
+on:
+  pull_request:
+    paths:
+      - 'experiments/streaming_benchmark/**'
+      - 'tests/test_streaming_benchmark.py'
+      - 'docs/STREAMING_LANGUAGE_COMPARISON.md'
+      - '.github/workflows/streaming-benchmark.yml'
+      - '.github/workflows/streaming-arm64.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/streaming_benchmark/**'
+      - 'tests/test_streaming_benchmark.py'
+      - 'docs/STREAMING_LANGUAGE_COMPARISON.md'
+      - '.github/workflows/streaming-benchmark.yml'
+      - '.github/workflows/streaming-arm64.yml'
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 12
+    env:
+      RUNNER_LABEL: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
+      - name: Record toolchain identity
+        run: |
+          python --version
+          rustc --version
+          cargo --version
+          go version
+          uname -m
+      - name: Rust unit tests and optimized build
+        run: |
+          cargo test --manifest-path experiments/streaming_benchmark/rust/Cargo.toml
+          cargo build --release --manifest-path experiments/streaming_benchmark/rust/Cargo.toml
+      - name: Go unit tests and optimized build
+        run: |
+          GO111MODULE=off go test ./experiments/streaming_benchmark/go
+          go build -o experiments/streaming_benchmark/go/stream-aggregator experiments/streaming_benchmark/go/main.go
+      - name: Python golden and full-language parity tests
+        run: python -m unittest tests/test_streaming_benchmark.py -v
+      - name: Informational five-trial benchmark, no performance gate
+        run: python -m experiments.streaming_benchmark.compare --rows 100000 --trials 5 --output local-data/streaming-benchmark.json
