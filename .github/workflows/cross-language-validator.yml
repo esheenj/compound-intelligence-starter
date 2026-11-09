@@ -1,0 +1,33 @@
+name: Cross-language validator pilot
+on:
+  push:
+    paths:
+      - 'experiments/receipt_validator/**'
+      - 'examples/receipt_validator_cases.tsv'
+      - 'tests/test_receipt_validator_experiment.py'
+      - '.github/workflows/cross-language-validator.yml'
+  pull_request:
+    paths:
+      - 'experiments/receipt_validator/**'
+      - 'examples/receipt_validator_cases.tsv'
+      - 'tests/test_receipt_validator_experiment.py'
+      - '.github/workflows/cross-language-validator.yml'
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Confirm Rust toolchain
+        run: rustc --version && cargo --version
+      - name: Rust unit tests
+        run: cargo test --manifest-path experiments/receipt_validator/rust/Cargo.toml
+      - name: Python and cross-language parity tests
+        run: python -m unittest tests/test_receipt_validator_experiment.py -v
