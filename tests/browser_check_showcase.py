@@ -36,7 +36,9 @@ def run():
                     main:document.querySelectorAll('main').length,
                     cards:document.querySelectorAll('article.card').length,
                     projectLinks:[...document.querySelectorAll('article.card .links')]
-                      .every(x=>x.querySelectorAll('a').length===2),
+                      .every(x=>x.querySelectorAll('a').length===3),
+                    githubPagesLinks:[...document.querySelectorAll('article.card a')]
+                      .filter(x=>x.textContent==='Deployed demo').length,
                     script:document.querySelectorAll('script').length,
                     externalAssets:performance.getEntriesByType('resource')
                       .filter(x=>!x.name.startsWith(location.origin)).length,
@@ -44,7 +46,7 @@ def run():
                 };
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
-                   and page["projectLinks"] is True and page["language"] == "en",
+                   and page["projectLinks"] is True and page["githubPagesLinks"] == 7 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
             verify(page["script"] == 0 and page["externalAssets"] == 0
                    and "connect-src 'none'" in page["csp"]

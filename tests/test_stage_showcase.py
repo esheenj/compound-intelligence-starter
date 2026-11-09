@@ -18,6 +18,8 @@ class ShowcaseStageTests(unittest.TestCase):
         report = stage_catalog(self.output)
         self.assertEqual(report["state"], "STAGED_ONLY")
         self.assertEqual(report["repoCount"], 7)
+        self.assertEqual(report["githubDeployedUrlCount"], 7)
+        self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
         self.assertEqual(report["files"], [".nojekyll", "index.html"])
         content = self.output.joinpath("index.html").read_bytes()
@@ -26,7 +28,8 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "index.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
-        self.assertNotIn(b"https://esheenj.github.io/", content)
+        self.assertEqual(content.count(b">Deployed demo</a>"), 7)
+        self.assertIn(b"https://esheenj.github.io/visual-regression-starter-oss/", content)
 
     def test_repeated_stage_never_overwrites(self):
         stage_catalog(self.output)
@@ -42,6 +45,10 @@ class ShowcaseStageTests(unittest.TestCase):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
         with self.assertRaisesRegex(ValueError, "CATALOG_EXTERNAL_LINK_NOT_ALLOWED"):
             verify_catalog(source.replace(b'href="#projects"', b'href="https://example.invalid/projects"'))
+        with self.assertRaisesRegex(ValueError, "PUBLIC_CARD_LINK_MISMATCH"):
+            verify_catalog(source.replace(
+                b'https://esheenj.github.io/visual-regression-starter-oss/',
+                b'https://esheenj.github.io/form-experience-kit-oss/', 1))
         with self.assertRaisesRegex(ValueError, "INVALID_CATALOG_STRUCTURE"):
             verify_catalog(source.replace(b"<main", b"<section", 1))
 
