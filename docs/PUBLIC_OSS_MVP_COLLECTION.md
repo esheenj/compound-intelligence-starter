@@ -1,6 +1,18 @@
 # Esheen Labs — public open-source MVP collection
 
-**Seven independent, source-first tools. No accounts, private backends or subscription required for their basic examples.** Every listed repository now provides a tested static Pages artifact and a guarded deployment workflow; GitHub Pages activation and live HTTPS checks are **not yet verified**. Each repository owns its own tests, license, limitations and release status. Public GitHub access is **not** a claim of a deployed website, published npm package, independent accessibility certification or real-world adoption.
+**Seven independent, source-first tools. No accounts, private backends or subscription required for their basic examples.** GitHub Actions successfully deployed all seven projects to their recorded GitHub Pages URLs on **9 November 2026**, using the previously tested exact source commits. **Independent external-browser HTTPS/UI acceptance remains pending**; deployment success is not that separate check. Each repository owns its own tests, license, limitations and release status. Public GitHub access is **not** a claim of a deployed website, published npm package, independent accessibility certification or real-world adoption.
+
+## GitHub Pages deployments — 9 November 2026
+
+All seven source-verified Pages deployment jobs succeeded on their second attempts after Pages was enabled. The following are **actual GitHub Actions deployment URLs**, not guessed addresses; independent external browser reachability could not be checked from the release environment. Use these as published entry points and report any rendering issues in the linked repository.
+
+- [Compound Intelligence Starter — GitHub-deployed demo](https://esheenj.github.io/compound-intelligence-starter/)
+- [Design System Foundations — GitHub-deployed demo](https://esheenj.github.io/design-system-foundations-oss/)
+- [Mobile-first Flow Kit — GitHub-deployed demo](https://esheenj.github.io/mobile-first-flow-kit-oss/)
+- [Data Table Interactions — GitHub-deployed demo](https://esheenj.github.io/data-table-interactions-oss/)
+- [Flow State Machine — GitHub-deployed demo](https://esheenj.github.io/flow-state-machine-oss/)
+- [Form Experience Kit — GitHub-deployed demo](https://esheenj.github.io/form-experience-kit-oss/)
+- [Visual Regression Starter — GitHub-deployed demo](https://esheenj.github.io/visual-regression-starter-oss/)
 
 ## Developer-friendly public directory
 
