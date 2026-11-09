@@ -125,3 +125,7 @@ Try an example, open a small reproducible issue, or propose a bounded improvemen
 **[Contributing guide](CONTRIBUTING.md)** · **[Good first contributions](docs/GOOD_FIRST_ISSUES.md)** · **[Safe validator extensions](docs/EXTENDING.md)** · **[Discussions via GitHub issues](https://github.com/esheenj/compound-intelligence-starter/issues)**
 
 Please don't publish employer or customer data, proprietary strategies, credentials or private infrastructure details. This project is independent of the AI services mentioned above and is licensed under [MIT](LICENSE).
+
+## Python versus Rust: a small evidence-driven experiment
+
+See the [cross-language validator pilot](docs/CROSS_LANGUAGE_VALIDATOR_PILOT.md): original synthetic records, dependency-free Python and Rust implementations, invalid-input fixtures and a CI parity check. It is a **format demonstration**, not signature checking, operational authorization or a performance claim.
