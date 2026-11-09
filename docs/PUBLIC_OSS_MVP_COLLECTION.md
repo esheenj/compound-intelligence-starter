@@ -14,6 +14,10 @@ All seven source-verified Pages deployment jobs succeeded on their second attemp
 - [Form Experience Kit — GitHub-deployed demo](https://esheenj.github.io/form-experience-kit-oss/)
 - [Visual Regression Starter — GitHub-deployed demo](https://esheenj.github.io/visual-regression-starter-oss/)
 
+## Trust and support
+
+The seven projects share original, fictional intelligence methods. Our [public/private intelligence boundary](PUBLIC_INTELLIGENCE_BOUNDARY.md) explains what is deliberately excluded; the [support and sustainability page](SUPPORT_AND_SUSTAINABILITY.md) explains how to contribute and future voluntary funding without pretending a donation recipient is already configured. A sponsor does not receive special code review authority, private systems or proprietary research.
+
 ## Developer-friendly public directory
 
 The original [single-page OSS directory](../site/index.html) includes all seven source repos, reproducible command examples and contribution links. It is entirely static, offline-readable, without analytics or remote assets. [Source packaging, real Chrome QA and one-time GitHub Pages setup](PUBLIC_DIRECTORY_DEPLOY.md) are documented separately; **this does not yet certify a hosted website**.
