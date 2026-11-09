@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      actions: read
       pages: write
       id-token: write
     environment:
@@ -65,6 +66,34 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist/pages
+      - name: Wait for a single consistently visible Pages artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          stable=0
+          for attempt in $(seq 1 12); do
+            curl --fail --silent --show-error \
+              --header 'Accept: application/vnd.github+json' \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages" \
+              --output /tmp/esheen-pages-artifacts.json
+            count="$(jq -r '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length' /tmp/esheen-pages-artifacts.json)"
+            if [[ "$count" == "1" ]]; then
+              stable=$((stable+1))
+            else
+              stable=0
+            fi
+            echo "Artifact visibility check $attempt: matches=$count, consecutive=$stable"
+            if (( stable >= 2 )); then
+              break
+            fi
+            sleep 3
+          done
+          if (( stable < 2 )); then
+            echo "::error::Pages artifact not uniquely visible; do not blindly retry this run (a retry can duplicate the artifact)."
+            exit 1
+          fi
       - name: Publish static directory only
         id: deployment
         uses: actions/deploy-pages@v4
