@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "max_active": 3,
+  "candidates": [
+    {
+      "id": "fictional-ux-audit",
+      "status": "implemented",
+      "value": 5,
+      "effort": 1,
+      "risk": 1,
+      "rights_reviewed": false,
+      "tests_verified": true
+    },
+    {
+      "id": "fictional-forms",
+      "status": "pages_deployed",
+      "value": 3,
+      "effort": 1,
+      "risk": 0,
+      "rights_reviewed": true,
+      "tests_verified": true
+    },
+    {
+      "id": "fictional-data-board",
+      "status": "scaffold",
+      "value": 4,
+      "effort": 2,
+      "risk": 1,
+      "rights_reviewed": false,
+      "tests_verified": false
+    },
+    {
+      "id": "fictional-component",
+      "status": "source_published",
+      "value": 4,
+      "effort": 1,
+      "risk": 1,
+      "rights_reviewed": true,
+      "tests_verified": true
+    }
+  ]
+}
