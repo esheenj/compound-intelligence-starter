@@ -74,7 +74,7 @@ class StreamingBenchmarkTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("cargo"), "Rust toolchain unavailable locally; mandatory in CI")
     def test_rust_parity(self) -> None:
-        manifest = RUST.parent.parent / "Cargo.toml"
+        manifest = RUST.parents[2] / "Cargo.toml"
         subprocess.run(["cargo", "build", "--release", "--manifest-path", str(manifest)], check=True, timeout=150)
         self.assertEqual(execute([str(RUST)], FIXTURE), EXPECTED)
         stream = generate(1000)
