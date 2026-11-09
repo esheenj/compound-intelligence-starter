@@ -33,3 +33,14 @@ After correctness passes: measure a warmed, compiled Rust binary versus Python w
 Adopt Rust for a shared function only if correctness, real workload benefit, portable packaging, and maintenance justify it. Prefer Python for low-volume orchestration and AI experiments. Only share a component across projects once two independent permitted consumers need it.
 
 Potential follow-ups: deterministic fuzz cases, a reproducible benchmark harness, ARM64 testing, Go implementation, and optional PyO3 interoperability. No live Commander, trading or project permission changes are part of this experiment.
+
+## Reproducible, informational performance comparison
+
+After building Rust, run:
+
+```bash
+cargo build --manifest-path experiments/receipt_validator/rust/Cargo.toml
+python -m experiments.receipt_validator.benchmark --rows 100000 --trials 5 --output local-data/receipt-validator-benchmark.json
+```
+
+The harness alternates trial order, warms both processes, checks **all output bytes** against the same Python reference and reports fixture/input SHA-256, checkout SHA, runtime identity, elapsed batch times, median, nearest-rank p95 over batch trials and rows per second. It deliberately does not claim per-row p95 latency, memory benefit, energy savings or any production workload advantage. GitHub-hosted CI runner contention and process startup make these illustrative measurements only. No test asserts Rust must be faster.
