@@ -13,6 +13,8 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **[Open the GitHub-deployed seven-MVP directory](https://esheenj.github.io/compound-intelligence-starter/)** — GitHub Actions successfully published this URL on 9 November 2026. External browser/HTTPS rendering has not yet been independently checked from this release environment; report issues through GitHub.
 
+**[Support and sustainability](docs/SUPPORT_AND_SUSTAINABILITY.md)** · **[Public/private intelligence boundary](docs/PUBLIC_INTELLIGENCE_BOUNDARY.md)** — original, fictional open-source examples; no unverified payment links or private trading and finance disclosures.
+
 **Explore the wider [Esheen Labs public MVP collection](docs/PUBLIC_OSS_MVP_COLLECTION.md)** — seven independent, runnable tools spanning AI experiments, interface flows, form UX, design tokens, tables and synthetic visual comparisons.
 
 **New developer directory:** The [public OSS project directory source](site/index.html) offers a single browsable index of seven runnable tools and contribution paths. To preview the exact website bundle locally, run `mkdir -p dist && python scripts/stage_showcase.py --output dist/pages`, then serve `dist/pages` with Python's localhost server. [Pages deployment and live acceptance](docs/PUBLIC_DIRECTORY_DEPLOY.md) are separate; no hosted URL is claimed before it passes HTTPS verification.
