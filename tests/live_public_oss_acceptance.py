@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for eight existing public add-ons.
+"""Read-only LIVE HTTPS Chrome acceptance for 19 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -10,6 +10,22 @@ import json
 import socket
 import time
 from browser_check_issue_report import Driver, driver_executable
+
+ENTRY_SITES = {
+    "compound-intelligence-starter": "https://esheenj.github.io/compound-intelligence-starter/",
+    "design-system-foundations-oss": "https://esheenj.github.io/design-system-foundations-oss/",
+    "mobile-first-flow-kit-oss": "https://esheenj.github.io/mobile-first-flow-kit-oss/",
+    "data-table-interactions-oss": "https://esheenj.github.io/data-table-interactions-oss/",
+    "flow-state-machine-oss": "https://esheenj.github.io/flow-state-machine-oss/",
+    "form-experience-kit-oss": "https://esheenj.github.io/form-experience-kit-oss/",
+    "visual-regression-starter-oss": "https://esheenj.github.io/visual-regression-starter-oss/",
+}
+EARLY_URLS = {
+    "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
+    "recovery": "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html",
+    "audit": "https://esheenj.github.io/design-system-foundations-oss/audit.html",
+    "experiment": "https://esheenj.github.io/data-table-interactions-oss/experiment.html",
+}
 
 URLS = {
     "onboarding": "https://esheenj.github.io/form-experience-kit-oss/onboarding.html",
@@ -36,6 +52,69 @@ READY = {
 def verify(value: bool, code: str) -> None:
     if value is not True:
         raise AssertionError(code)
+
+
+def open_static(driver: Driver, label: str, url: str) -> None:
+    """Verify an actual public HTTPS page and its semantic visible content."""
+    driver.command("POST", "url", {"url": url})
+    for _ in range(45):
+        loaded = driver.js("""
+            return document.readyState!=='loading' &&
+              document.querySelector('h1')?.textContent.trim().length>0 &&
+              document.querySelectorAll('main').length===1;
+        """)
+        if loaded is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_" + label.upper() + "_SITE_NOT_READY")
+    origin = driver.js("return location.protocol==='https:' && location.host==='esheenj.github.io';")
+    verify(origin is True, "LIVE_" + label.upper() + "_HTTPS_ORIGIN")
+
+
+def interact_early(driver: Driver, kind: str) -> None:
+    """Small live actions on the four previously browser-smoked early add-ons."""
+    if kind == "wave":
+        verify(driver.js("""
+            document.querySelector('#plan').click();
+            const good=document.querySelectorAll('#results li').length===3;
+            document.querySelector('#fixture').value='{"invalid":true}';
+            document.querySelector('#plan').click();
+            return good && document.querySelector('#status').textContent.startsWith('Rejected:')
+                && document.querySelectorAll('#results li').length===0;
+        """) is True, "LIVE_WAVE_PLANNER_AND_INVALID")
+    elif kind == "recovery":
+        verify(driver.js("""
+            const $=id=>document.getElementById(id);
+            if($('phase').textContent!=='Ready')return false;
+            $('start').click();$('fail').click();
+            if($('phase').textContent!=='Recovery needed')return false;
+            for(let i=0;i<2;i++){$('retry').click();$('fail').click();}
+            const exhausted=$('status').textContent.includes('budget reached')
+                && $('retry').hidden;
+            $('reset').click();
+            return exhausted && $('phase').textContent==='Ready';
+        """) is True, "LIVE_RECOVERY_BOUNDED_RETRIES")
+    elif kind == "audit":
+        verify(driver.js("""
+            document.querySelector('#run-audit').click();
+            const good=document.querySelector('#status').textContent.includes('3 illustrative findings')
+                && document.querySelectorAll('#rows li').length===2;
+            document.querySelector('#fixture').value='[{"bad":true}]';
+            document.querySelector('#run-audit').click();
+            return good && document.querySelector('#status').textContent.includes('Rejected:');
+        """) is True, "LIVE_AUDIT_FINDINGS_AND_INVALID")
+    elif kind == "experiment":
+        verify(driver.js("""
+            const $=id=>document.getElementById(id);
+            const good=$('decision').textContent==='DESCRIPTIVE UPLIFT ONLY';
+            const data=JSON.parse($('sheet').value);
+            data.candidate.errors=17;
+            $('sheet').value=JSON.stringify(data);$('evaluate').click();
+            const held=$('decision').textContent==='HOLD ERROR GUARDRAIL';
+            $('sheet').value='{"baseline":{}}';$('evaluate').click();
+            return good&&held&&$('status').textContent.startsWith('Rejected:');
+        """) is True, "LIVE_EXPERIMENT_HOLD_AND_INVALID")
 
 
 def open_page(driver: Driver, kind: str) -> None:
@@ -184,6 +263,20 @@ def run() -> dict:
     checked = []
     try:
         version = driver.start()
+        for repo, url in ENTRY_SITES.items():
+            open_static(driver, repo, url)
+            checked.append({"kind": "repository-home", "repo": repo, "url": url,
+                            "result": "PASS", "interaction_scope": "HTTPS load and semantic landmarks"})
+        for kind, url in EARLY_URLS.items():
+            open_static(driver, kind, url)
+            interact_early(driver, kind)
+            for width, height in ((320, 720), (1440, 900)):
+                driver.viewport(width, height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+                       "LIVE_" + kind.upper() + "_RESPONSIVE_" + str(width))
+            checked.append({"kind": "early-addon", "tool": kind, "url": url,
+                            "result": "PASS", "interaction_scope": "HTTPS interaction",
+                            "responsive_widths": [320, 1440]})
         for kind in URLS:
             open_page(driver, kind)
             interact(driver, kind)
@@ -200,7 +293,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS + actual Chrome DOM interactions, not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 12 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
