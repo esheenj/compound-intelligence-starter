@@ -28,7 +28,7 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
         self.assertEqual(report["additionalHostedToolCount"], 2)
-        self.assertEqual(report["additionalLinkedPublicToolCount"], 9)
+        self.assertEqual(report["additionalLinkedPublicToolCount"], 10)
         self.assertIn(b"https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html", content)
         self.assertIn(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", content)
         self.assertIn(b"https://esheenj.github.io/data-table-interactions-oss/experiment.html", content)
@@ -42,6 +42,7 @@ class ShowcaseStageTests(unittest.TestCase):
             b"https://esheenj.github.io/form-experience-kit-oss/consent.html",
             b"https://esheenj.github.io/mobile-first-flow-kit-oss/notifications.html",
             b"https://esheenj.github.io/flow-state-machine-oss/blueprint.html",
+            b"https://esheenj.github.io/flow-state-machine-oss/approval.html",
         ):
             self.assertIn(tool_url, content)
         agentops = self.output.joinpath("agentops.html").read_bytes()
@@ -77,6 +78,8 @@ class ShowcaseStageTests(unittest.TestCase):
             verify_catalog(source.replace(b'href="agentops.html"', b'href="agentops-invalid.html"'))
         with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
             verify_catalog(source.replace(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", b"https://esheenj.github.io/design-system-foundations-oss/"))
+        with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
+            verify_catalog(source.replace(b"https://esheenj.github.io/flow-state-machine-oss/approval.html", b"https://esheenj.github.io/flow-state-machine-oss/"))
         with self.assertRaisesRegex(ValueError, "CATALOG_EXTERNAL_LINK_NOT_ALLOWED"):
             verify_catalog(source.replace(b'href="#projects"', b'href="https://example.invalid/projects"'))
         with self.assertRaisesRegex(ValueError, "PUBLIC_CARD_LINK_MISMATCH"):
