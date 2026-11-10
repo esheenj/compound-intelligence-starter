@@ -15,6 +15,19 @@ REPORT = "agentcredits.replay.v1"
 IDENT = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._:-]{0,99}\Z")
 
 
+def _unique_pairs(pairs: list[tuple[str, object]]) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON object key: " + key)
+        result[key] = value
+    return result
+
+
+def _reject_constant(value: str) -> None:
+    raise ValueError("non-finite JSON number: " + value)
+
+
 def fictional_journal() -> dict:
     return {"schema": SCHEMA, "events": [
         {"event_id": "g1", "account": "demo-team", "op": "grant", "amount": 100},
@@ -59,7 +72,7 @@ def replay(journal: object) -> dict:
         required = {"event_id", "account", "op", "amount"}
         if op in {"reserve", "settle", "refund"}:
             required.add("request_id")
-        if op not in {"grant", "reserve", "settle", "refund"} or set(event) != required:
+        if type(op) is not str or op not in {"grant", "reserve", "settle", "refund"} or set(event) != required:
             return _fail("unknown operation or fields", index)
         event_id, account, amount = event["event_id"], event["account"], event["amount"]
         if not _valid_ident(event_id) or not _valid_ident(account):
@@ -124,7 +137,7 @@ def main() -> int:
     group.add_argument("--input", type=Path)
     args = parser.parse_args()
     try:
-        journal = fictional_journal() if args.demo else json.loads(args.input.read_text(encoding="utf-8"))
+        journal = fictional_journal() if args.demo else json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=_unique_pairs, parse_constant=_reject_constant)
         report = replay(journal)
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
         report = _fail("input rejected: " + str(exc))

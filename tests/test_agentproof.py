@@ -55,6 +55,16 @@ class AgentProofTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_manifest('{"a":NaN}')
 
+    def test_malformed_status_does_not_crash(self):
+        sample = fictional_manifest()
+        sample["events"][0]["status"] = []
+        self.assertIn("invalid status", str(verify_manifest(sample)["errors"]))
+
+    def test_bad_event_object_does_not_crash(self):
+        sample = fictional_manifest()
+        sample["events"][1] = []
+        self.assertFalse(verify_manifest(sample)["integrity_valid"])
+
     def test_cli_demo(self):
         result = subprocess.run(
             [sys.executable, "-m", "src.compound_intelligence.agentproof", "--demo"],

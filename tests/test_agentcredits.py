@@ -51,6 +51,24 @@ class AgentCreditsTests(unittest.TestCase):
         journal["events"][0]["amount"] = True
         self.assertFalse(replay(journal)["valid"])
 
+    def test_malformed_op_does_not_crash(self):
+        journal = fictional_journal()
+        journal["events"][1]["op"] = []
+        self.assertFalse(replay(journal)["valid"])
+
+    def test_cli_rejects_duplicate_json_keys(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "bad.json"
+            path.write_text('{"schema":"x","schema":"y","events":[]}', encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, "-m", "src.compound_intelligence.agentcredits", "--input", str(path)],
+                capture_output=True, text=True,
+            )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("duplicate JSON", result.stdout)
+
     def test_cli_demo(self):
         result = subprocess.run(
             [sys.executable, "-m", "src.compound_intelligence.agentcredits", "--demo"],

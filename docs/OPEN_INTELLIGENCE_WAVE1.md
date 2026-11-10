@@ -8,7 +8,7 @@ Run at the repository root:
 
     python -m src.compound_intelligence.agentproof --demo
     python -m src.compound_intelligence.agentcredits --demo
-    python -m unittest tests.test_agentproof tests.test_agentcredits -v
+    python -m unittest discover -s tests -p 'test_agent*.py' -v
 
 Each command is offline. Both demonstrations use original, fictional data. Structured JSON output separates result status from the scope of what was actually tested.
 

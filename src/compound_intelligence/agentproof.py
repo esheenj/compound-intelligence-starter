@@ -99,7 +99,7 @@ def verify_manifest(manifest: object) -> dict:
             errors.append(prefix + "duplicate event_id")
         else:
             seen.add(event_id)
-        if event.get("status") not in STATES:
+        if type(event.get("status")) is not str or event["status"] not in STATES:
             errors.append(prefix + "invalid status")
         producer = event.get("claimed_producer")
         if type(producer) is not str or ID_PATTERN.fullmatch(producer) is None:
