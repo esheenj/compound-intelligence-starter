@@ -46,7 +46,8 @@ class LocalModelFitTests(unittest.TestCase):
         sample["models"][0]["context_capacity_tokens"] = 2048
         result = evaluate(sample)
         self.assertFalse(result["any_candidate_fits"])
-        self.assertIn("context_capacity_below_requirement", result["candidates"][0]["reasons"])
+        self.assertIn("context_capacity_below_requirement",
+                      next(x for x in result["candidates"] if x["model_id"] == "fictional-small-q4")["reasons"])
 
     def test_negative_boolean_and_zero_values_fail_closed(self):
         for value in [-1, True, [], "1000", 1000001]:
