@@ -11,6 +11,9 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
+**Wave 2 approval-gate simulation:** [Offline review, denial, expiry and action-report replay](docs/OPEN_INTELLIGENCE_WAVE2_APPROVALS.md) — `python -m src.compound_intelligence.agent_review_gate --demo`. Fictional actor claims only; `execution_authority: NONE`.
+
+
 **Wave 2 AgentOps preview:** [Offline usage metering, trace reconciliation and retry-safe replay](docs/OPEN_INTELLIGENCE_WAVE2.md) — `python -m src.compound_intelligence.agentops_replay --demo`. Deterministic simulated receipts only: no private worker, real execution, provider billing or live exchange.
 
 
