@@ -11,6 +11,8 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
+**Open Intelligence Wave 1 — original offline previews:** [AgentProof receipt verifier and AgentCredits synthetic ledger](docs/OPEN_INTELLIGENCE_WAVE1.md). Try `python -m src.compound_intelligence.agentproof --demo` and `python -m src.compound_intelligence.agentcredits --demo`. These are local educational tools, not factual-truth attestation, payment services or live autonomous execution. [Public roadmap](https://github.com/esheenj/compound-intelligence-starter/issues/40) · [Wave 1 issue](https://github.com/esheenj/compound-intelligence-starter/issues/41).
+
 **[Open the GitHub-deployed seven-MVP directory](https://esheenj.github.io/compound-intelligence-starter/)** — All seven project entry pages and four add-on tools loaded over HTTPS in a separate browser check on 10 November 2026. See the [live check scope](docs/PUBLIC_DIRECTORY_DEPLOY.md#final-https-acceptance) or report an issue on GitHub.
 
 **[Support and sustainability](docs/SUPPORT_AND_SUSTAINABILITY.md)** · **[Public/private intelligence boundary](docs/PUBLIC_INTELLIGENCE_BOUNDARY.md)** — original, fictional open-source examples; no unverified payment links or private trading and finance disclosures.
