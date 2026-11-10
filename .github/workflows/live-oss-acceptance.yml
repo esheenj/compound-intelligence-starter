@@ -1,0 +1,30 @@
+name: Independent public HTTPS Chrome acceptance
+on:
+  push:
+    branches: [main, 'feat/live-public-oss-acceptance-*']
+    paths:
+      - 'tests/live_public_oss_acceptance.py'
+      - '.github/workflows/live-oss-acceptance.yml'
+  pull_request:
+    paths:
+      - 'tests/live_public_oss_acceptance.py'
+      - '.github/workflows/live-oss-acceptance.yml'
+permissions:
+  contents: read
+jobs:
+  verify-live-public-pages:
+    name: Read-only live Chrome across eight published add-ons
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Identify browser/driver
+        run: |
+          python3 --version
+          google-chrome --version
+          "$CHROMEWEBDRIVER/chromedriver" --version
+      - name: Exercise fixed allowlisted public HTTPS Pages
+        run: python3 tests/live_public_oss_acceptance.py
