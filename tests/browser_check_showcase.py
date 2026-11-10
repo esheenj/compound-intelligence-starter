@@ -49,9 +49,10 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 10 and page["language"] == "en",
+                   and page["extraTools"] == 11 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 10 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 11 and "mvp-wave.html" in page["extraLinks"]
+                   and "agentops.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -119,11 +120,51 @@ def run():
             driver.viewport(320, 720)
             verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
                    "MVP_WAVE_MOBILE_NO_OVERFLOW")
+            driver.command("POST", "url", {"url": (path / "agentops.html").resolve().as_uri()})
+            agentops = driver.js("""
+                document.getElementById('inspect').click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    units:document.getElementById('units').textContent,
+                    duplicates:document.getElementById('duplicates').textContent,
+                    incomplete:document.getElementById('incomplete').textContent,
+                    runs:document.querySelectorAll('#runrows tr').length,
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                    network:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
+                };
+            """)
+            verify(agentops["status"].startswith("PASS:") and agentops["units"] == "7"
+                   and agentops["duplicates"] == "1" and agentops["incomplete"] == "0"
+                   and agentops["runs"] == 1 and agentops["network"] == 0
+                   and "connect-src 'none'" in agentops["csp"], "AGENTOPS_VALID_OFFLINE")
+            hold = driver.js("""
+                document.getElementById('missing').click();
+                return {status:document.getElementById('status').textContent,
+                        incomplete:document.getElementById('incomplete').textContent,
+                        state:document.querySelector('#runrows tr td:nth-child(3)')?.textContent};
+            """)
+            verify(hold["status"].startswith("HOLD:") and hold["incomplete"] == "1"
+                   and hold["state"] == "INCOMPLETE", "AGENTOPS_MISSING_TERMINAL")
+            conflict = driver.js("""
+                document.getElementById('conflict').click();
+                return {status:document.getElementById('status').textContent,
+                        rows:document.querySelectorAll('#runrows tr').length,
+                        units:document.getElementById('units').textContent};
+            """)
+            verify(conflict["status"].startswith("Rejected:") and conflict["rows"] == 0
+                   and conflict["units"] == "—", "AGENTOPS_DUPLICATE_CONFLICT")
+            for width, height in ((320, 720), (375, 812), (812, 375), (1440, 900)):
+                driver.viewport(width, height)
+                verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
+                       "AGENTOPS_NO_OVERFLOW_" + str(width))
+            driver.js("document.getElementById('reset').click(); return true;")
+            verify(driver.js("return document.getElementById('status').textContent.startsWith('PASS:');") is True,
+                   "AGENTOPS_RECOVERY_FROM_INVALID_INPUT")
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":10,
+                "browser":version,"publicCards":7,"additionalToolsLinked":11,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":1,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":2,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
