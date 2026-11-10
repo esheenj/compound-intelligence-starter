@@ -36,6 +36,7 @@ EXTRA_TOOL_URLS = {
     "https://esheenj.github.io/form-experience-kit-oss/consent.html",
     "https://esheenj.github.io/mobile-first-flow-kit-oss/notifications.html",
     "https://esheenj.github.io/flow-state-machine-oss/blueprint.html",
+    "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 
 
