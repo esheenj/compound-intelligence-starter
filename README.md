@@ -12,6 +12,8 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
 
+**Open Intelligence Wave 2 — agent lifecycle and evidence checks:** [Agent Flight Recorder + Claim–Evidence Mapper](docs/OPEN_INTELLIGENCE_WAVE2.md) are two original metadata-only CLI demos. Try `python -m src.compound_intelligence.agent_flight_recorder --demo` and `python -m src.compound_intelligence.claim_evidence_map --demo`. They detect synthetic missing terminal receipts and missing quoted excerpts; they cannot attest actual execution or the factual truth of claims. These are public source add-ons, not new independent repositories or hosted APIs.
+
 **More Wave 1 guard utilities:** [Prompt Regression Guard and Agent Budget Guard](docs/OPEN_INTELLIGENCE_WAVE1_PART2.md) demonstrate critical-case regression detection and duplicate-safe synthetic cap admission; examples are offline and do not evaluate real AI quality or spend real credits.
 
 **Open Intelligence Wave 1 — original offline previews:** [AgentProof receipt verifier and AgentCredits synthetic ledger](docs/OPEN_INTELLIGENCE_WAVE1.md). Try `python -m src.compound_intelligence.agentproof --demo` and `python -m src.compound_intelligence.agentcredits --demo`. These are local educational tools, not factual-truth attestation, payment services or live autonomous execution. [Public roadmap](https://github.com/esheenj/compound-intelligence-starter/issues/40) · [Wave 1 issue](https://github.com/esheenj/compound-intelligence-starter/issues/41).
