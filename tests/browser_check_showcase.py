@@ -49,15 +49,18 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 7 and page["language"] == "en",
+                   and page["extraTools"] == 10 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 7 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 10 and "mvp-wave.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
                    and "https://esheenj.github.io/form-experience-kit-oss/onboarding.html" in page["extraLinks"]
                    and "https://esheenj.github.io/flow-state-machine-oss/journey.html" in page["extraLinks"]
-                   and "https://esheenj.github.io/data-table-interactions-oss/quality.html" in page["extraLinks"],
+                   and "https://esheenj.github.io/data-table-interactions-oss/quality.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/form-experience-kit-oss/consent.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/mobile-first-flow-kit-oss/notifications.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/flow-state-machine-oss/blueprint.html" in page["extraLinks"],
                    "EXACT_PUBLIC_TOOL_DISCOVERY")
             verify(page["script"] == 0 and page["externalAssets"] == 0
                    and "connect-src 'none'" in page["csp"]
@@ -118,7 +121,7 @@ def run():
                    "MVP_WAVE_MOBILE_NO_OVERFLOW")
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":7,
+                "browser":version,"publicCards":7,"additionalToolsLinked":10,
                 "responsiveWidths":[320,375,812,1440],
                 "networkAssets":0,"interactiveToolsChecked":1,"screenReaderTested":False
             },sort_keys=True))
