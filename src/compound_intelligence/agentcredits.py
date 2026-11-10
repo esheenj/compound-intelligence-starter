@@ -70,7 +70,7 @@ def replay(journal: object) -> dict:
             return _fail("event is not an object", index)
         op = event.get("op")
         required = {"event_id", "account", "op", "amount"}
-        if op in {"reserve", "settle", "refund"}:
+        if type(op) is str and op in {"reserve", "settle", "refund"}:
             required.add("request_id")
         if type(op) is not str or op not in {"grant", "reserve", "settle", "refund"} or set(event) != required:
             return _fail("unknown operation or fields", index)
