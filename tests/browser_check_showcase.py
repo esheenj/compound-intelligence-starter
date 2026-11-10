@@ -51,10 +51,13 @@ def run():
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
                    and page["extraTools"] == 7 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 4 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 7 and "mvp-wave.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
-                   and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"],
+                   and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/form-experience-kit-oss/onboarding.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/flow-state-machine-oss/journey.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/data-table-interactions-oss/quality.html" in page["extraLinks"],
                    "EXACT_PUBLIC_TOOL_DISCOVERY")
             verify(page["script"] == 0 and page["externalAssets"] == 0
                    and "connect-src 'none'" in page["csp"]
