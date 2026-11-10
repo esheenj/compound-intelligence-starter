@@ -35,6 +35,7 @@ def run():
                     h1:document.querySelectorAll('h1').length,
                     main:document.querySelectorAll('main').length,
                     cards:document.querySelectorAll('article.card').length,
+                    extraTools:document.querySelectorAll("#additional-tools li").length,
                     projectLinks:[...document.querySelectorAll('article.card .links')]
                       .every(x=>x.querySelectorAll('a').length===3),
                     githubPagesLinks:[...document.querySelectorAll('article.card a')]
@@ -47,7 +48,8 @@ def run():
                 };
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
-                   and page["projectLinks"] is True and page["githubPagesLinks"] == 7 and page["language"] == "en",
+                   and page["projectLinks"] is True and page["githubPagesLinks"] == 7
+                   and page["extraTools"] == 7 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
             verify(len(page["extraLinks"]) == 4 and "mvp-wave.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
@@ -113,7 +115,7 @@ def run():
                    "MVP_WAVE_MOBILE_NO_OVERFLOW")
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,
+                "browser":version,"publicCards":7,"additionalToolsLinked":7,
                 "responsiveWidths":[320,375,812,1440],
                 "networkAssets":0,"interactiveToolsChecked":1,"screenReaderTested":False
             },sort_keys=True))
