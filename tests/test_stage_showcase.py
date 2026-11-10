@@ -28,6 +28,10 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
         self.assertEqual(report["additionalHostedToolCount"], 1)
+        self.assertEqual(report["additionalLinkedPublicToolCount"], 3)
+        self.assertIn(b"https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html", content)
+        self.assertIn(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", content)
+        self.assertIn(b"https://esheenj.github.io/data-table-interactions-oss/experiment.html", content)
         wave = self.output.joinpath("mvp-wave.html").read_bytes()
         self.assertEqual(wave, MVP_WAVE_SOURCE.read_bytes())
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
@@ -51,6 +55,8 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(verify_catalog(source)["repoCount"], 7)
         with self.assertRaisesRegex(ValueError, "PUBLIC_REPOSITORY_LINK_MISSING"):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
+        with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
+            verify_catalog(source.replace(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", b"https://esheenj.github.io/design-system-foundations-oss/"))
         with self.assertRaisesRegex(ValueError, "CATALOG_EXTERNAL_LINK_NOT_ALLOWED"):
             verify_catalog(source.replace(b'href="#projects"', b'href="https://example.invalid/projects"'))
         with self.assertRaisesRegex(ValueError, "PUBLIC_CARD_LINK_MISMATCH"):
