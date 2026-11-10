@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, stage_catalog, verify_catalog
+from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, stage_catalog, verify_catalog
 
 
 class ShowcaseStageTests(unittest.TestCase):
@@ -23,11 +23,11 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["githubDeployedUrlCount"], 7)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
-        self.assertEqual(report["files"], [".nojekyll", "index.html", "mvp-wave.html"])
+        self.assertEqual(report["files"], [".nojekyll", "agentops.html", "index.html", "mvp-wave.html"])
         content = self.output.joinpath("index.html").read_bytes()
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
-        self.assertEqual(report["additionalHostedToolCount"], 1)
+        self.assertEqual(report["additionalHostedToolCount"], 2)
         self.assertEqual(report["additionalLinkedPublicToolCount"], 9)
         self.assertIn(b"https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html", content)
         self.assertIn(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", content)
@@ -44,12 +44,18 @@ class ShowcaseStageTests(unittest.TestCase):
             b"https://esheenj.github.io/flow-state-machine-oss/blueprint.html",
         ):
             self.assertIn(tool_url, content)
+        agentops = self.output.joinpath("agentops.html").read_bytes()
+        self.assertEqual(agentops, AGENTOPS_SOURCE.read_bytes())
+        self.assertEqual(report["agentOpsSha256"], hashlib.sha256(agentops).hexdigest())
+        self.assertIn(b"connect-src 'none'", agentops)
+        self.assertIn(b"agentops.html", content)
+        self.assertIn(b"Open AgentOps replay studio", content)
         wave = self.output.joinpath("mvp-wave.html").read_bytes()
         self.assertEqual(wave, MVP_WAVE_SOURCE.read_bytes())
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
         self.assertIn(b"connect-src 'none'", wave)
         self.assertIn(b"offline interactive planning playground", content)
-        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "index.html", "mvp-wave.html"])
+        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agentops.html", "index.html", "mvp-wave.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
         self.assertEqual(content.count(b">Deployed demo</a>"), 7)
@@ -67,6 +73,8 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(verify_catalog(source)["repoCount"], 7)
         with self.assertRaisesRegex(ValueError, "PUBLIC_REPOSITORY_LINK_MISSING"):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
+        with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
+            verify_catalog(source.replace(b'href="agentops.html"', b'href="agentops-invalid.html"'))
         with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
             verify_catalog(source.replace(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", b"https://esheenj.github.io/design-system-foundations-oss/"))
         with self.assertRaisesRegex(ValueError, "CATALOG_EXTERNAL_LINK_NOT_ALLOWED"):
