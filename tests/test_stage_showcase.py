@@ -28,10 +28,16 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
         self.assertEqual(report["additionalHostedToolCount"], 1)
-        self.assertEqual(report["additionalLinkedPublicToolCount"], 3)
+        self.assertEqual(report["additionalLinkedPublicToolCount"], 6)
         self.assertIn(b"https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html", content)
         self.assertIn(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", content)
         self.assertIn(b"https://esheenj.github.io/data-table-interactions-oss/experiment.html", content)
+        for tool_url in (
+            b"https://esheenj.github.io/form-experience-kit-oss/onboarding.html",
+            b"https://esheenj.github.io/flow-state-machine-oss/journey.html",
+            b"https://esheenj.github.io/data-table-interactions-oss/quality.html",
+        ):
+            self.assertIn(tool_url, content)
         wave = self.output.joinpath("mvp-wave.html").read_bytes()
         self.assertEqual(wave, MVP_WAVE_SOURCE.read_bytes())
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
