@@ -25,6 +25,11 @@ REPOS = {
     "visual-regression-starter-oss",
 }
 DEPLOYED_PAGES = {"https://esheenj.github.io/" + repo + "/" for repo in REPOS}
+EXTRA_TOOL_URLS = {
+    "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html",
+    "https://esheenj.github.io/design-system-foundations-oss/audit.html",
+    "https://esheenj.github.io/data-table-interactions-oss/experiment.html",
+}
 
 
 class SourceCatalog(HTMLParser):
@@ -82,8 +87,10 @@ def verify_catalog(data: bytes) -> dict:
     observed = set(parser.links)
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
+    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1:
+        raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link == "mvp-wave.html"):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link == "mvp-wave.html"):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -146,6 +153,7 @@ def stage_catalog(output: Path) -> dict:
         "state": "STAGED_ONLY", "publicHostingVerified": False,
         "files": [".nojekyll", "index.html", "mvp-wave.html"],
         "additionalHostedToolCount": 1,
+        "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
         "mvpWaveSha256": hashlib.sha256(wave).hexdigest(), **summary
     }
 

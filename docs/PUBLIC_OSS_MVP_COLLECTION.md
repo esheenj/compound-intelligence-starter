@@ -14,6 +14,19 @@ All seven source-verified Pages deployment jobs succeeded on their second attemp
 - [Form Experience Kit — GitHub-deployed demo](https://esheenj.github.io/form-experience-kit-oss/)
 - [Visual Regression Starter — GitHub-deployed demo](https://esheenj.github.io/visual-regression-starter-oss/)
 
+## Four additional original browser tools — same seven repositories
+
+These are additional runnable, educational tools within existing already-public repositories. They **do not increase the independent repo count from seven**. Each uses invented data, no paid runtime dependencies or private backend; no deployment implies user adoption or accessibility certification. GitHub-provider deployment receipts are separate from independent external-browser acceptance, which remains pending.
+
+| Additional tool | Host repository and direct GitHub-deployed link | Merge source / verification |
+| --- | --- | --- |
+| [MVP Wave Planner](https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html) | Compound Intelligence Starter | [PR #34](https://github.com/esheenj/compound-intelligence-starter/pull/34), [publisher 42691002873](https://github.com/esheenj/compound-intelligence-starter/actions/runs/42691002873) at main \`da86033e561d389032f89c77fecd97f3ce424d6f\`; original source built via [PR #33](https://github.com/esheenj/compound-intelligence-starter/pull/33) |
+| [Error Recovery Playground](https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html) | Mobile-first Flow Kit | [PR #9](https://github.com/esheenj/mobile-first-flow-kit-oss/pull/9), Node 20/22/24 + Chrome [CI 42752694562](https://github.com/esheenj/mobile-first-flow-kit-oss/actions/runs/42752694562), [publisher 42753046824](https://github.com/esheenj/mobile-first-flow-kit-oss/actions/runs/42753046824) at main \`3ce4c28698ef4b2c74bf59818f0e4676624ef816\` |
+| [Control Audit Playground](https://esheenj.github.io/design-system-foundations-oss/audit.html) | Design System Foundations | [PR #19](https://github.com/esheenj/design-system-foundations-oss/pull/19), Node 20/22/24 + Chrome [CI 42752931483](https://github.com/esheenj/design-system-foundations-oss/actions/runs/42752931483), [publisher 42753109961](https://github.com/esheenj/design-system-foundations-oss/actions/runs/42753109961) at main \`abd2f044c2e4c6b5b39988709637577377b851d7\` |
+| [Synthetic Experiment Worksheet](https://esheenj.github.io/data-table-interactions-oss/experiment.html) | Data Table Interactions | [PR #12](https://github.com/esheenj/data-table-interactions-oss/pull/12), Node 20/22/24 + Chrome [CI 42753326847](https://github.com/esheenj/data-table-interactions-oss/actions/runs/42753326847), [publisher 42753479820](https://github.com/esheenj/data-table-interactions-oss/actions/runs/42753479820) at main \`b1e88ee75105d5d305d4d83f24b0cd969330af82\` |
+
+The public directory now links to all four tools using exact allowlisted destinations and read-only static HTML. Neither the directory nor the tools execute a private Cortex worker or trade with real money.
+
 ## Trust and support
 
 The seven projects share original, fictional intelligence methods. Our [public/private intelligence boundary](PUBLIC_INTELLIGENCE_BOUNDARY.md) explains what is deliberately excluded; the [support and sustainability page](SUPPORT_AND_SUSTAINABILITY.md) explains how to contribute and future voluntary funding without pretending a donation recipient is already configured. A sponsor does not receive special code review authority, private systems or proprietary research.
