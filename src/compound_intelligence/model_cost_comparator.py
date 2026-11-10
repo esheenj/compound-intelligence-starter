@@ -102,6 +102,8 @@ def compare(document: object) -> dict:
         seen[eid] = dict(event)
     result = []
     for mid, row in models.items():
+        if row["events"] == 0:
+            return _error("no usage events for model: " + mid)
         cost = (Decimal(row["input"]) * row["in"] +
                 Decimal(row["output"]) * row["out"]) / MILLION
         cost = cost.quantize(PRECISION)

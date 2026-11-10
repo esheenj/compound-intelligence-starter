@@ -67,6 +67,14 @@ class ModelCostTests(unittest.TestCase):
         x["events"][0]["output_tokens"] = 0
         self.assertFalse(compare(x)["valid_input"])
 
+    def test_unused_model_cannot_look_free(self):
+        sample = fixture()
+        sample["events"] = [x for x in sample["events"] if x["model_id"] == "sample-small"]
+        report = compare(sample)
+        self.assertFalse(report["valid_input"])
+        self.assertEqual(report["models"], [])
+        self.assertIn("no usage events", str(report["errors"]))
+
     def test_bad_prices(self):
         for invalid in ["NaN", "Infinity", "-1", "1e3", "0.1234567", 0.1, []]:
             x = fixture()
