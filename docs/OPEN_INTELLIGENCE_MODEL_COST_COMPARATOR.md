@@ -12,7 +12,7 @@ The demo intentionally returns exit 1 because two entirely fictional models cost
 
 A local JSON file can be passed using the --input argument. Its schema is model-cost-comparison.v1 and it includes a pinned price_book_revision label, a decimal string budget_usd, a rates array and a usage events array. Each rate contains model_id, input_usd_per_million, output_usd_per_million as decimal strings with up to six fractional digits. Each event has unique event_id, model_id, integer input_tokens and output_tokens. Decimal arithmetic produces exact 12-place output USD estimates for this bounded contract.
 
-The comparator ignores identical repeated event IDs; it rejects conflicting duplicates, unknown models, invalid rates and malformed events without publishing partial totals. Versioning the supplied prices helps reproducibility, but the revision label is not proof that a provider used those rates.
+Every listed model must have at least one usage event; an unobserved model must not appear artificially free. The comparator ignores identical repeated event IDs; it rejects conflicting duplicates, unknown models, invalid rates and malformed events without publishing partial totals. Versioning the supplied prices helps reproducibility, but the revision label is not proof that a provider used those rates.
 
 Return codes: 0 when all supplied scenarios are within the budget, 1 when any valid scenario exceeds it, and 2 for malformed inputs or output errors. The generated HTML file is local, escaped, without scripts or external assets.
 
