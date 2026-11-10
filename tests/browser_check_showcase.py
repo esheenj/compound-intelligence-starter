@@ -49,9 +49,9 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 11 and page["language"] == "en",
+                   and page["extraTools"] == 12 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 11 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 12 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
@@ -61,7 +61,8 @@ def run():
                    and "https://esheenj.github.io/data-table-interactions-oss/quality.html" in page["extraLinks"]
                    and "https://esheenj.github.io/form-experience-kit-oss/consent.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/notifications.html" in page["extraLinks"]
-                   and "https://esheenj.github.io/flow-state-machine-oss/blueprint.html" in page["extraLinks"],
+                   and "https://esheenj.github.io/flow-state-machine-oss/blueprint.html" in page["extraLinks"]
+                   and "https://esheenj.github.io/flow-state-machine-oss/approval.html" in page["extraLinks"],
                    "EXACT_PUBLIC_TOOL_DISCOVERY")
             verify(page["script"] == 0 and page["externalAssets"] == 0
                    and "connect-src 'none'" in page["csp"]
@@ -162,7 +163,7 @@ def run():
                    "AGENTOPS_RECOVERY_FROM_INVALID_INPUT")
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":11,
+                "browser":version,"publicCards":7,"additionalToolsLinked":12,
                 "responsiveWidths":[320,375,812,1440],
                 "networkAssets":0,"interactiveToolsChecked":2,"screenReaderTested":False
             },sort_keys=True))
