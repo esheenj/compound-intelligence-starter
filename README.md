@@ -11,6 +11,9 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
+**Wave 2 AgentOps preview:** [Offline usage metering, trace reconciliation and retry-safe replay](docs/OPEN_INTELLIGENCE_WAVE2.md) — `python -m src.compound_intelligence.agentops_replay --demo`. Deterministic simulated receipts only: no private worker, real execution, provider billing or live exchange.
+
+
 
 **More Wave 1 guard utilities:** [Prompt Regression Guard and Agent Budget Guard](docs/OPEN_INTELLIGENCE_WAVE1_PART2.md) demonstrate critical-case regression detection and duplicate-safe synthetic cap admission; examples are offline and do not evaluate real AI quality or spend real credits.
 
