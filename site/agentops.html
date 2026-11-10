@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>AgentOps Replay Studio · Esheen Labs</title>
+<style>
+:root{font:16px/1.5 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{max-width:70rem;margin:auto;padding:clamp(1rem,3vw,2.4rem)}a{color:LinkText}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:18rem;border:1px solid GrayText;border-radius:.7rem;padding:1rem;background:Canvas;color:CanvasText;font:.83rem/1.5 ui-monospace,monospace}
+button{min-height:44px;border:1px solid CanvasText;border-radius:.7rem;padding:.6rem 1rem;font:inherit;font-weight:bold;cursor:pointer;background:CanvasText;color:Canvas}
+button.alt{background:Canvas;color:CanvasText}.controls{display:flex;gap:.7rem;flex-wrap:wrap;margin:1rem 0}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.75rem}
+.metric{border:1px solid GrayText;border-radius:.6rem;padding:1rem}
+.metric strong{display:block;font-size:1.8rem}small{color:GrayText}
+.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:32rem}
+th,td{padding:.7rem;text-align:left;border-bottom:1px solid GrayText;overflow-wrap:anywhere}
+#status{font-weight:700}
+</style>
+</head>
+<body><main>
+<p><a href="./">← Back to public MVP directory</a></p>
+<p>Original offline reference · No AI calls or account required</p>
+<h1>AgentOps Replay Studio</h1>
+<p>Inspect synthetic agent usage, repeated receipts and missing completion evidence. This local browser simulation does not connect to an agent, provider billing or private infrastructure.</p>
+<section class="panel" aria-labelledby="inputs">
+<h2 id="inputs">1. Inspect an event journal</h2>
+<label for="fixture">Edit fictional JSON events (maximum 64 KiB)</label>
+<textarea id="fixture" spellcheck="false">{
+ "schema":"agentops.event-journal.v1",
+ "events":[
+  {"event_id":"s1","run_id":"demo-run","sequence":1,"agent_id":"demo-agent","kind":"STARTED"},
+  {"event_id":"u1","run_id":"demo-run","sequence":2,"agent_id":"demo-agent","kind":"USAGE","units":7},
+  {"event_id":"u1","run_id":"demo-run","sequence":2,"agent_id":"demo-agent","kind":"USAGE","units":7},
+  {"event_id":"c1","run_id":"demo-run","sequence":3,"agent_id":"demo-agent","kind":"COMPLETED"}
+ ]
+}</textarea>
+<div class="controls">
+<button type="button" id="inspect">Inspect journal</button>
+<button type="button" class="alt" id="missing">Remove completion receipt</button>
+<button type="button" class="alt" id="conflict">Simulate conflicting retry</button>
+<button type="button" class="alt" id="reset">Reset</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Inspect journal to evaluate fictional events.</p>
+</section>
+<section class="panel" aria-labelledby="results">
+<h2 id="results">2. Evidence-aware results</h2>
+<div class="metrics">
+<div class="metric"><small>Usage units supplied</small><strong id="units">—</strong></div>
+<div class="metric"><small>Duplicate receipts ignored</small><strong id="duplicates">—</strong></div>
+<div class="metric"><small>Incomplete runs</small><strong id="incomplete">—</strong></div>
+</div>
+<div class="tablewrap"><table><caption>Reconstructed runs from the supplied synthetic journal</caption>
+<thead><tr><th scope="col">Run</th><th scope="col">Agent</th><th scope="col">Recorded state</th><th scope="col">Units</th></tr></thead>
+<tbody id="runrows"></tbody></table></div>
+</section>
+<section class="panel">
+<h2>3. What is not verified</h2>
+<p>This checker evaluates only the self-supplied sequence, IDs, event types and units. It cannot prove an AI action happened, verify an identity, authenticate a receipt, settle money or resume a real worker.</p>
+<p>See <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_WAVE2.md">the Python implementation and limitations</a> and <a href="https://github.com/esheenj/compound-intelligence-starter/issues/42">Wave 2 issue</a>.</p>
+</section></main>
+<script>
+"use strict";
+(() => {
+ const input=document.getElementById("fixture"), original=input.value;
+ const status=document.getElementById("status"), rows=document.getElementById("runrows");
+ const types=["STARTED","USAGE","COMPLETED","FAILED"];
+ const validId=x=>typeof x==="string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(x);
+ const exact=(o,fields)=>o!==null && typeof o==="object" && !Array.isArray(o) &&
+   Object.keys(o).length===fields.length && fields.every(k=>Object.prototype.hasOwnProperty.call(o,k));
+ function inspect(journal){
+  if(!exact(journal,["schema","events"]) || journal.schema!=="agentops.event-journal.v1"
+     || !Array.isArray(journal.events) || journal.events.length<1 || journal.events.length>100){
+    throw Error("invalid journal");
+  }
+  const seen=new Map(), runs=new Map();
+  let duplicates=0,units=0;
+  for(const [index,e] of journal.events.entries()){
+    const n=index+1;
+    if(!e || typeof e.kind!=="string" || !types.includes(e.kind))throw Error("unknown event kind");
+    const fields=["event_id","run_id","sequence","agent_id","kind"];
+    if(e.kind==="USAGE")fields.push("units");
+    if(!exact(e,fields) || !validId(e.event_id) || !validId(e.run_id) || !validId(e.agent_id)
+       || !Number.isSafeInteger(e.sequence) || e.sequence<1)throw Error("invalid event fields");
+    if(e.kind==="USAGE" && (!Number.isSafeInteger(e.units) || e.units<1 || e.units>1000000000)){
+      throw Error("invalid usage");
+    }
+    const fingerprint=JSON.stringify([e.event_id,e.run_id,e.sequence,e.agent_id,e.kind,e.kind==="USAGE"?e.units:null]);
+    if(seen.has(e.event_id)){
+      if(seen.get(e.event_id)!==fingerprint)throw Error("conflicting duplicate event ID");
+      duplicates++;continue;
+    }
+    const run=runs.get(e.run_id);
+    if(!run){
+      if(e.kind!=="STARTED" || e.sequence!==1)throw Error("missing start");
+      runs.set(e.run_id,{agent:e.agent_id,state:"INCOMPLETE",seq:1,usage:0});
+    }else{
+      if(run.agent!==e.agent_id || e.sequence!==run.seq+1 || run.state!=="INCOMPLETE" || e.kind==="STARTED"){
+        throw Error("invalid state transition");
+      }
+      run.seq=e.sequence;
+      if(e.kind==="USAGE"){run.usage+=e.units;units+=e.units;}
+      else run.state=e.kind;
+    }
+    seen.set(e.event_id,fingerprint);
+  }
+  return {runs:[...runs.entries()].sort((a,b)=>a[0].localeCompare(b[0],"en")),
+    duplicates,units,incomplete:[...runs.values()].filter(r=>r.state==="INCOMPLETE").length};
+ }
+ function render(){
+  rows.replaceChildren();
+  for(const key of ["units","duplicates","incomplete"])document.getElementById(key).textContent="—";
+  if(input.value.length>65536){status.textContent="Rejected: input exceeds 64 KiB.";return;}
+  try{
+   const report=inspect(JSON.parse(input.value));
+   document.getElementById("units").textContent=String(report.units);
+   document.getElementById("duplicates").textContent=String(report.duplicates);
+   document.getElementById("incomplete").textContent=String(report.incomplete);
+   status.textContent=report.incomplete
+    ?"HOLD: missing terminal evidence; no successful execution inferred."
+    :"PASS: supplied journal consistent and all runs terminal. No actual AI work verified.";
+   for(const [name,run] of report.runs){
+    const tr=document.createElement("tr");
+    for(const value of [name,run.agent,run.state,String(run.usage)]){
+     const td=document.createElement("td");td.textContent=value;tr.append(td);
+    }
+    rows.append(tr);
+   }
+  }catch(_){status.textContent="Rejected: unsupported, malformed or conflicting journal. No partial result accepted.";}
+ }
+ document.getElementById("inspect").addEventListener("click",render);
+ document.getElementById("missing").addEventListener("click",()=>{
+  const j=JSON.parse(original);j.events.pop();input.value=JSON.stringify(j,null,2);render();
+ });
+ document.getElementById("conflict").addEventListener("click",()=>{
+  const j=JSON.parse(original);j.events[2].units=8;input.value=JSON.stringify(j,null,2);render();
+ });
+ document.getElementById("reset").addEventListener("click",()=>{input.value=original;render();});
+})();
+</script>
+</body></html>
