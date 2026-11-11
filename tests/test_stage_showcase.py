@@ -69,7 +69,7 @@ class ShowcaseStageTests(unittest.TestCase):
             ("context-preservation.html", CONTEXT_SOURCE, "contextSha256", b"Open Context Preservation Lab"),
             ("model-disagreement.html", DISAGREEMENT_SOURCE, "modelDisagreementSha256", b"Open Model Disagreement Lab"),
             ("decision-review.html", DECISION_REVIEW_SOURCE, "decisionReviewSha256", b"Open Explainable Decision Review Lab"),
-            ("agent-trust.html", AGENT_TRUST_SOURCE, "agentTrustSha256", b"Open Agent Trust & Identity Lab"),
+            ("agent-trust.html", AGENT_TRUST_SOURCE, "agentTrustSha256", b"Open Agent Trust &amp; Identity Lab"),
         ):
             page = self.output.joinpath(fname).read_bytes()
             self.assertEqual(page, original.read_bytes())
