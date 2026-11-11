@@ -78,7 +78,7 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
         self.assertIn(b"connect-src 'none'", wave)
         self.assertIn(b"offline interactive planning playground", content)
-        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "index.html", "mvp-wave.html"])
+        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "index.html", "model-cost.html", "model-fit.html", "mvp-wave.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
         self.assertEqual(content.count(b">Deployed demo</a>"), 7)
