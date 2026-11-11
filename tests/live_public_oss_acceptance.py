@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for nine existing public add-ons.
+"""Read-only LIVE HTTPS Chrome acceptance for ten existing public add-ons.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -20,6 +20,7 @@ URLS = {
     "blueprint": "https://esheenj.github.io/flow-state-machine-oss/blueprint.html",
     "agentops": "https://esheenj.github.io/compound-intelligence-starter/agentops.html",
     "agentproof": "https://esheenj.github.io/compound-intelligence-starter/agentproof.html",
+    "agentcredits": "https://esheenj.github.io/compound-intelligence-starter/agentcredits.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -31,6 +32,7 @@ READY = {
     "blueprint": "#status",
     "agentops": "#inspect",
     "agentproof": "#check",
+    "agentcredits": "#inspect",
     "approval": "#state",
 }
 
@@ -194,6 +196,37 @@ def interact(driver: Driver, kind: str) -> None:
         verify(driver.js("""
             return document.querySelector('#status').textContent.startsWith('PASS:');
         """) is True, "LIVE_AGENTPROOF_RESET")
+    elif kind == "agentcredits":
+        result = driver.js("""
+            document.getElementById('inspect').click();
+            return {
+                status:document.getElementById('status').textContent,
+                available:document.getElementById('available').textContent,
+                held:document.getElementById('held').textContent,
+                spent:document.getElementById('spent').textContent,
+                duplicates:document.getElementById('duplicates').textContent
+            };
+        """)
+        verify(result["status"].startswith("PASS:") and result["available"] == "80"
+               and result["held"] == "0" and result["spent"] == "20"
+               and result["duplicates"] == "1", "LIVE_AGENTCREDITS_BALANCE")
+        for button in ("overspend","conflict","refund"):
+            failed = driver.js("""
+                document.getElementById(arguments[0]).click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    balance:document.getElementById('available').textContent,
+                    partial:document.querySelectorAll('#rows tr').length
+                };
+            """,[button])
+            verify(failed["status"].startswith("REJECTED:")
+                   and failed["balance"] == "—" and failed["partial"] == 0,
+                   "LIVE_AGENTCREDITS_FAIL_CLOSED_"+button.upper())
+        driver.js("document.getElementById('reset').click();return true;")
+        verify(driver.js("""
+            return document.getElementById('status').textContent.startsWith('PASS:')
+                && document.getElementById('available').textContent==='80';
+        """) is True, "LIVE_AGENTCREDITS_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
