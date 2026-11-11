@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, stage_catalog, verify_catalog
+from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, stage_catalog, verify_catalog
 
 
 class ShowcaseStageTests(unittest.TestCase):
@@ -23,11 +23,11 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["githubDeployedUrlCount"], 7)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
-        self.assertEqual(report["files"], [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "index.html", "mvp-wave.html"])
+        self.assertEqual(report["files"], [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "index.html", "model-cost.html", "model-fit.html", "mvp-wave.html"])
         content = self.output.joinpath("index.html").read_bytes()
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
-        self.assertEqual(report["additionalHostedToolCount"], 4)
+        self.assertEqual(report["additionalHostedToolCount"], 6)
         self.assertEqual(report["additionalLinkedPublicToolCount"], 10)
         self.assertIn(b"https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html", content)
         self.assertIn(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", content)
@@ -63,6 +63,16 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertIn(b"connect-src 'none'", agentcredits)
         self.assertIn(b"agentcredits.html", content)
         self.assertIn(b"Open AgentCredits ledger studio", content)
+        for fname, original, digest_key, label in (
+            ("model-cost.html", MODEL_COST_SOURCE, "modelCostSha256", b"Open Model Cost Comparator"),
+            ("model-fit.html", MODEL_FIT_SOURCE, "modelFitSha256", b"Open Local Model Fit Planner"),
+        ):
+            page = self.output.joinpath(fname).read_bytes()
+            self.assertEqual(page, original.read_bytes())
+            self.assertEqual(report[digest_key], hashlib.sha256(page).hexdigest())
+            self.assertIn(b"connect-src 'none'", page)
+            self.assertIn(fname.encode(), content)
+            self.assertIn(label, content)
         wave = self.output.joinpath("mvp-wave.html").read_bytes()
         self.assertEqual(wave, MVP_WAVE_SOURCE.read_bytes())
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
@@ -86,6 +96,10 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(verify_catalog(source)["repoCount"], 7)
         with self.assertRaisesRegex(ValueError, "PUBLIC_REPOSITORY_LINK_MISSING"):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
+        for new_tool in (b"model-cost.html", b"model-fit.html"):
+            with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
+                verify_catalog(source.replace(b'href="' + new_tool + b'"',
+                                              b'href="missing-tool.html"'))
         with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
             verify_catalog(source.replace(b'href="agentcredits.html"', b'href="agentcredits-invalid.html"'))
         with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
