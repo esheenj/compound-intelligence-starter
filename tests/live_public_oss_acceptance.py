@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 27 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 28 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -44,6 +44,7 @@ URLS = {
     "model-disagreement": "https://esheenj.github.io/compound-intelligence-starter/model-disagreement.html",
     "decision-review": "https://esheenj.github.io/compound-intelligence-starter/decision-review.html",
     "agent-trust": "https://esheenj.github.io/compound-intelligence-starter/agent-trust.html",
+    "signed-agent": "https://esheenj.github.io/compound-intelligence-starter/signed-agent.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -62,6 +63,7 @@ READY = {
     "model-disagreement": "#inspect",
     "decision-review": "#inspect",
     "agent-trust": "#check",
+    "signed-agent": "#valid",
     "approval": "#state",
 }
 
@@ -655,6 +657,54 @@ def interact(driver: Driver, kind: str) -> None:
             time.sleep(.15)
         verify(reset["ok"] and reset["held"]=="10" and reset["matching"]=="1",
                "LIVE_AGENT_TRUST_RESET")
+    elif kind == "signed-agent":
+        initial={}
+        for _ in range(70):
+            initial=driver.js("""
+                const s=document.getElementById('status').textContent;
+                return {ready:s.startsWith('READY:'),fail:s.startsWith('REJECTED:'),status:s};
+            """)
+            if initial["ready"] or initial["fail"]:break
+            time.sleep(.12)
+        verify(initial["ready"],"LIVE_SIGNED_AGENT_WEB_CRYPTO_INITIALIZED_"+initial["status"][:60])
+        def action(btn,gate,signature):
+            driver.js("document.getElementById(arguments[0]).click();return true;",[btn])
+            data={}
+            for _ in range(70):
+                data=driver.js("""
+                    const s=document.getElementById('status').textContent;
+                    return {done:s.startsWith('RESULT:'),fail:s.startsWith('REJECTED:'),
+                            gate:document.getElementById('gate').textContent,
+                            sig:document.getElementById('signature').textContent,
+                            nonce:document.getElementById('nonce-state').textContent,
+                            authority:document.getElementById('authorization').textContent,
+                            challenge:document.getElementById('challenge').textContent};
+                """)
+                if data["done"] or data["fail"]:break
+                time.sleep(.12)
+            verify(data["done"] and data["gate"]==gate and data["sig"]==signature
+                   and data["authority"]=="NONE" and '"nonce"' in data["challenge"],
+                   "LIVE_SIGNED_AGENT_"+btn.upper()+"_"+data.get("gate","none"))
+            return data
+        good=action("valid","VERIFIED_NOT_AUTHORIZED","VALID")
+        verify(good["nonce"]=="YES","LIVE_SIGNED_AGENT_NONCE_CONSUMED")
+        action("wrong-key","INVALID_SIGNATURE","INVALID")
+        action("scope","UNAUTHORIZED_SCOPE","NOT CHECKED")
+        replay=action("replay","REPLAYED_CHALLENGE","VALID")
+        verify(replay["nonce"]=="ALREADY CONSUMED","LIVE_SIGNED_AGENT_REPLAY_REJECTED")
+        action("expired","EXPIRED_CHALLENGE","NOT CHECKED")
+        action("revoked","REVOKED_KEY","NOT CHECKED")
+        driver.js("document.getElementById('reset').click();return true;")
+        reset={}
+        for _ in range(70):
+            reset=driver.js("""
+                return {ready:document.getElementById('status').textContent.startsWith('READY:'),
+                        error:document.getElementById('status').textContent.startsWith('REJECTED:'),
+                        gate:document.getElementById('gate').textContent};
+            """)
+            if reset["ready"] or reset["error"]:break
+            time.sleep(.12)
+        verify(reset["ready"] and reset["gate"]=="READY","LIVE_SIGNED_AGENT_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -715,7 +765,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 20 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 21 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
