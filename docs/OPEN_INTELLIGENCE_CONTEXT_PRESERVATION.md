@@ -14,6 +14,12 @@ From the public repository root with Python 3.10+ standard library:
 
 The CLI accepts your own **non-sensitive, deliberately sanitized** local JSON with `--input path/to/fixture.json`. Do not upload private chats, API credentials, finance/trading execution secrets, customer data or corporate text to a public repository. No model or network connection is required, and the generated HTML report is local, script-free and escaped.
 
+## Interactive browser lab
+
+A separately tested, fully offline public browser UI is available at [Context Preservation Lab](https://esheenj.github.io/compound-intelligence-starter/context-preservation.html), with source `site/context-preservation.html`. Its fictional scenarios show a short checkpoint losing critical facts, an exact checkpoint retaining the reference, and a misleading checkpoint with stale, contradicted or promoted claims. Use the buttons to remove a critical fact, age a source version, promote a hypothesis or reset. All checks run locally in the browser, and no ChatGPT conversation, Cortex memory, API key, customer record or private model is accessed.
+
+**Release evidence:** browser PR #65 passed local Chrome and Python 3.10/3.12 CI, provider Pages publication succeeded, and independent public HTTPS Chrome acceptance [run 43006412216](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43006412216) reported **24/24 public URL checks passed** (7 repository homepages and 17 interactive add-ons). This is a text-preservation demonstration, not semantic understanding or actual agent identity verification.
+
 ## Evaluation model
 
 Input schema: `context-preservation.v1`, with one `source` and 1–10 `candidates` to compare. The source has `source_id`, integer `version`, and 1–100 synthetic `facts`. Each fact has a unique `fact_id`, string `value`, `source_ref`, `importance` (`CRITICAL` or `SUPPORTING`) and `evidence_status` (`DECLARED_VERIFIED` or `HYPOTHESIS`). Here *declared verified* is still just an untrusted statement from the input, not externally attested truth.
