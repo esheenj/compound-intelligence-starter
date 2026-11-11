@@ -1,5 +1,12 @@
 # Public open-source MVP directory
 
+## Signed Agent Challenge release verified — 11 November 2026
+
+The existing seven independent public OSS repositories and **21** browser add-ons were tested as **28/28 live public HTTPS URLs** in actual Chrome on merged-main revision `8e9d7ce7fe783e1786ac69bfc00fd396d77c304f`: [independent run 43064815195](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815195), PASS, with the new `signed-agent` interaction. Exact merged-main source regression suite [43064815232](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815232) PASS. The browser page was published by the CI-gated Pages workflow from merged source `f653770ddc8c089fdd6444067b72c8f9cc1c9712`, run [43064006755](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064006755) SUCCESS. New page: https://esheenj.github.io/compound-intelligence-starter/signed-agent.html .
+
+This is real browser ECDSA P-256 signature verification using locally created disposable keys; it is **not** independently trusted agent identity, private-key enrollment, user consent, server authorization or operational trading. The Node verifier separately tests atomic file-backed replay across a process restart and racing verification. The browser replay set resets when the page reloads. No external data, model calls, accounts or additional recurring costs (R0). No physical-device or assistive-technology acceptance is claimed. All 28 public URLs are *pages*, not 28 new GitHub repositories.
+
+
 The original [static directory source](../site/index.html) presents **seven verified public OSS MVP repositories** with commands, GitHub source links and contribution paths. It contains no images, external assets, JavaScript, visitor analytics or private integrations.
 
 ## Run locally
