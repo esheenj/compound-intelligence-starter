@@ -9,6 +9,8 @@ These seven public projects are independent, original educational tools. You can
 - Share a public demo or explain what was useful, giving proper attribution and avoiding invented performance claims.
 - Support someone else's public pull request with a reproducible test, clear technical feedback and a respectful review.
 
+**Payment-ready support preview:** The public [Esheen Labs support page](https://esheenj.github.io/compound-intelligence-starter/support.html) is generated from default-deny configurations. **No real checkout or public wallet is active yet.** The [payment-channel guide](PAYMENT_CHANNELS.md) compares South African fiat options, GitHub Sponsors, direct crypto and optional crypto-to-rand processors. Recipient verification is mandatory before publishing actual destinations. This informational page does not prove financial readiness or account enrollment.
+
 ## Voluntary funding
 
 We are preparing verified, voluntary funding channels. **No donation checkout or GitHub Sponsors recipient profile is asserted active by this page.** GitHub Sponsors accepts eligible maintainers from South Africa, but receiving payments depends on account approval and payout/tax setup. Once a verified recipient profile is active, we can add an official GitHub Sponsors button through `.github/FUNDING.yml`; until then we do **not** publish speculative payment links, bank details, wallet addresses or QR codes.
