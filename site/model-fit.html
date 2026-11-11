@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline local AI model RAM, storage and context feasibility worksheet with fictional resource profiles.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Local Model Fit Planner · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{max-width:72rem;margin:auto;padding:clamp(1rem,3vw,2.4rem)}
+a{color:LinkText;overflow-wrap:anywhere}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:.7rem 0}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:22rem;border:1px solid GrayText;background:Canvas;color:CanvasText;padding:1rem;border-radius:.7rem;font:.8rem/1.55 ui-monospace,monospace}
+.controls{display:flex;gap:.7rem;flex-wrap:wrap;margin:1rem 0}
+button{background:CanvasText;color:Canvas;border:1px solid CanvasText;border-radius:.7rem;cursor:pointer;font:inherit;font-weight:700;padding:.65rem 1rem;min-height:44px}
+button.alt{background:Canvas;color:CanvasText}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:1rem}
+.metric strong{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}table{width:100%;min-width:41rem;border-collapse:collapse}
+th,td{text-align:left;padding:.75rem;border-bottom:1px solid GrayText;overflow-wrap:anywhere}
+#status{font-weight:750;overflow-wrap:anywhere}.muted,small{color:GrayText}
+</style></head>
+<body><main>
+<p><a href="./">← Public AI tools directory</a></p>
+<p class="muted">Original offline local-model planning worksheet · Fictional model and device figures</p>
+<h1>Local Model Fit Planner</h1>
+<p>Estimate whether a hypothetical local language model meets a device's <strong>supplied</strong> memory, storage and context constraints. See explicit headroom or rejection reasons before attempting any actual installation.</p>
+<section class="panel" aria-labelledby="input-title">
+<h2 id="input-title">1. Explore the fictional device and model profiles</h2>
+<label for="fixture">Editable JSON (maximum 64 KiB; up to 100 models in this browser)</label>
+<textarea id="fixture" spellcheck="false">{
+ "schema":"local-model-fit.v1",
+ "device":{
+  "ram_mib":3072,
+  "reserved_ram_mib":512,
+  "free_storage_mib":2048,
+  "required_context_tokens":4096
+ },
+ "models":[
+  {"model_id":"fictional-small-q4","file_mib":850,"estimated_runtime_ram_mib":1750,"context_capacity_tokens":8192},
+  {"model_id":"fictional-large-q4","file_mib":2600,"estimated_runtime_ram_mib":3100,"context_capacity_tokens":32768}
+ ]
+}</textarea>
+<div class="controls">
+<button id="evaluate" type="button">Evaluate supplied limits</button>
+<button id="constrained" type="button" class="alt">Try constrained device</button>
+<button id="context" type="button" class="alt">Require longer context</button>
+<button id="duplicate" type="button" class="alt">Duplicate model ID</button>
+<button id="reset" type="button" class="alt">Reset sample</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Evaluate supplied limits to compare the fictional profiles.</p>
+</section>
+<section class="panel" aria-labelledby="result-title">
+<h2 id="result-title">2. Per-model resource headroom</h2>
+<div class="metrics">
+<div class="metric"><small>Available RAM after reserve (MiB)</small><strong id="available">—</strong></div>
+<div class="metric"><small>Fitting candidates</small><strong id="fits">—</strong></div>
+<div class="metric"><small>Non-fitting candidates</small><strong id="misses">—</strong></div>
+</div>
+<div class="tablewrap"><table>
+<caption>Headroom is derived from fictional input, not actual hardware measurements</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Supplied fit</th><th scope="col">RAM MiB</th><th scope="col">Storage MiB</th><th scope="col">Context tokens</th><th scope="col">Reasons</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+</section>
+<section class="panel">
+<h2>3. Before choosing a real local model</h2>
+<p>These calculations don't load a model or test hardware. Actual runtime RAM may differ with KV cache, context length, GPU offload, device thermals, operating-system reservations and framework overhead. This is not a quality, speed, license or privacy benchmark.</p>
+<p>For meaningful measurements, test the exact model file and inference runtime on the target device, verify model licenses and evaluate quality on your tasks. This demonstration runs entirely in your browser without network calls.</p>
+<p>Read the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_LOCAL_MODEL_FIT.md">Python reference implementation</a> or <a href="https://github.com/esheenj/compound-intelligence-starter/issues/43">Wave 3 engineering tracker</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const input=document.getElementById("fixture"),original=input.value;
+ const status=document.getElementById("status"),rows=document.getElementById("rows");
+ const fields=["available","fits","misses"];
+ const validId=value=>typeof value==="string" && /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,99}$/.test(value);
+ const exact=(x,keys)=>x!==null&&typeof x==="object"&&!Array.isArray(x)&&
+   Object.keys(x).length===keys.length&&keys.every(k=>Object.prototype.hasOwnProperty.call(x,k));
+ function integer(value,min,max){
+  if(!Number.isSafeInteger(value)||value<min||value>max)throw Error("Invalid integer resource");
+  return value;
+ }
+ function readStrict(text){
+  const doc=JSON.parse(text),stack=[];let mask="";
+  for(let i=0;i<text.length;i++){
+   const ch=text[i];
+   if(ch==='"'){
+    const start=i;i++;let escaped=false;
+    for(;i<text.length;i++){
+     if(escaped){escaped=false;continue;}
+     if(text[i]==="\\"){escaped=true;continue;}
+     if(text[i]==='"')break;
+    }
+    const key=JSON.parse(text.slice(start,i+1));mask+=" ";
+    let j=i+1;while(j<text.length&&/\s/.test(text[j]))j++;
+    if(text[j]===":"){
+     const parent=stack[stack.length-1];
+     if(!parent||!parent.keys||parent.keys.has(key))throw Error("Duplicate/malformed JSON key");
+     parent.keys.add(key);
+    }
+   }else if(ch==="{"){stack.push({keys:new Set()});mask+=ch;}
+   else if(ch==="["){stack.push({keys:null});mask+=ch;}
+   else if(ch==="}"||ch==="]"){stack.pop();mask+=ch;}
+   else mask+=ch;
+  }
+  for(const match of mask.matchAll(/-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g)){
+   if(match[0].includes(".")||/[eE]/.test(match[0]))throw Error("Only integer quantities");
+  }
+  return doc;
+ }
+ function evaluate(doc){
+  if(!exact(doc,["schema","device","models"])||doc.schema!=="local-model-fit.v1"||
+    !exact(doc.device,["ram_mib","reserved_ram_mib","free_storage_mib","required_context_tokens"])||
+    !Array.isArray(doc.models)||doc.models.length<1||doc.models.length>100)
+    throw Error("Invalid local model fit schema");
+  const device=doc.device;
+  const total=integer(device.ram_mib,1,1000000);
+  const reserve=integer(device.reserved_ram_mib,0,999999);
+  if(reserve>=total)throw Error("RAM reservation must be lower than total");
+  const disk=integer(device.free_storage_mib,0,1000000);
+  const context=integer(device.required_context_tokens,128,1000000);
+  const available=total-reserve,seen=new Set(),items=[];
+  for(const model of doc.models){
+   if(!exact(model,["model_id","file_mib","estimated_runtime_ram_mib","context_capacity_tokens"])||
+      !validId(model.model_id)||seen.has(model.model_id))throw Error("Invalid/duplicate model");
+   seen.add(model.model_id);
+   const file=integer(model.file_mib,1,1000000);
+   const runtime=integer(model.estimated_runtime_ram_mib,1,1000000);
+   const capacity=integer(model.context_capacity_tokens,128,1000000);
+   const ram=available-runtime,storage=disk-file,ctx=capacity-context;
+   const reasons=[];
+   if(ram<0)reasons.push("RAM below estimate");
+   if(storage<0)reasons.push("Insufficient storage");
+   if(ctx<0)reasons.push("Context limit too low");
+   items.push({name:model.model_id,ram,storage,ctx,reasons,fit:!reasons.length});
+  }
+  items.sort((a,b)=>Number(b.fit)-Number(a.fit)||a.name.localeCompare(b.name,"en"));
+  return {available,items,fits:items.filter(x=>x.fit).length};
+ }
+ function clear(){
+  rows.replaceChildren();
+  for(const id of fields)document.getElementById(id).textContent="—";
+ }
+ function run(){
+  clear();
+  if(new TextEncoder().encode(input.value).length>65536){status.textContent="REJECTED: JSON exceeds 64 KiB.";return;}
+  try{
+   const result=evaluate(readStrict(input.value));
+   for(const item of result.items){
+    const tr=document.createElement("tr");
+    for(const value of [item.name,item.fit?"Fits supplied limits":"Does not fit",item.ram,
+      item.storage,item.ctx,item.reasons.join("; ")||"None"]){
+     const td=document.createElement("td");td.textContent=String(value);tr.append(td);
+    }
+    rows.append(tr);
+   }
+   document.getElementById("available").textContent=String(result.available);
+   document.getElementById("fits").textContent=String(result.fits);
+   document.getElementById("misses").textContent=String(result.items.length-result.fits);
+   status.textContent=result.fits
+    ?"PASS: "+result.fits+" fictional model(s) fit the supplied resource limits; hardware not verified."
+    :"HOLD: no fictional models fit the supplied RAM, storage and context limits.";
+  }catch(_){clear();status.textContent="REJECTED: malformed, conflicting or unsupported resource estimates. No partial result accepted.";}
+ }
+ function scenario(mode){
+  const doc=JSON.parse(original);
+  if(mode==="constrained"){
+   doc.device.ram_mib=1024;doc.device.reserved_ram_mib=128;doc.device.free_storage_mib=400;
+  }
+  if(mode==="context")doc.device.required_context_tokens=65536;
+  if(mode==="duplicate")doc.models[1].model_id=doc.models[0].model_id;
+  input.value=JSON.stringify(doc,null,2);run();
+ }
+ document.getElementById("evaluate").addEventListener("click",run);
+ document.getElementById("constrained").addEventListener("click",()=>scenario("constrained"));
+ document.getElementById("context").addEventListener("click",()=>scenario("context"));
+ document.getElementById("duplicate").addEventListener("click",()=>scenario("duplicate"));
+ document.getElementById("reset").addEventListener("click",()=>{input.value=original;run();});
+})();
+</script>
+</body></html>
