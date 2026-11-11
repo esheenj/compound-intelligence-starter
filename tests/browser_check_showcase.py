@@ -50,9 +50,9 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 19 and page["language"] == "en",
+                   and page["extraTools"] == 20 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 19 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 20 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
                    and "agentcredits.html" in page["extraLinks"]
@@ -61,6 +61,7 @@ def run():
                    and "context-preservation.html" in page["extraLinks"]
                    and "model-disagreement.html" in page["extraLinks"]
                    and "decision-review.html" in page["extraLinks"]
+                   and "agent-trust.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -540,11 +541,110 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "EXPLAINABLE_NO_OVERFLOW_"+str(width))
+            driver.command("POST","url",{"url":(path/"agent-trust.html").resolve().as_uri()})
+            claim_info=None
+            for _ in range(30):
+                claim_info=driver.js("""
+                    const s=document.getElementById('status').textContent;
+                    return {ready:s.startsWith('RECORDED:'),
+                            error:s.startsWith('REJECTED:'),
+                            status:s};
+                """)
+                if claim_info["ready"] or claim_info["error"]:
+                    break
+                time.sleep(.12)
+            verify(claim_info["ready"],"TRUST_BROWSER_INITIALIZE_"+claim_info["status"][:65])
+            results=driver.js("""
+                return {total:document.getElementById('total').textContent,
+                        held:document.getElementById('held').textContent,
+                        matching:document.getElementById('matching').textContent,
+                        authenticated:document.getElementById('authenticated').textContent,
+                        rows:[...document.querySelectorAll('#rows tr')].map(r=>
+                           [...r.querySelectorAll('td')].map(x=>x.textContent)),
+                        csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                        remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length};
+            """)
+            by_id={r[0]:r for r in results["rows"]}
+            verify(results["total"]=="11" and results["held"]=="10"
+                   and results["matching"]=="1" and results["authenticated"]=="0"
+                   and by_id["matching-claim"][2]=="CLAIM_MATCH_ONLY"
+                   and by_id["revoked-agent"][2]=="HOLD"
+                   and by_id["unknown-agent"][2]=="HOLD"
+                   and by_id["wrong-origin"][2]=="HOLD"
+                   and by_id["wrong-key"][2]=="HOLD"
+                   and by_id["capability-escalation"][2]=="HOLD"
+                   and by_id["stale-registry"][2]=="HOLD"
+                   and by_id["nonce-replay-first"][2]=="HOLD"
+                   and by_id["nonce-replay-second"][2]=="HOLD"
+                   and by_id["expired"][2]=="HOLD"
+                   and by_id["checksum-tamper"][2]=="HOLD"
+                   and by_id["checksum-tamper"][4]=="MISMATCH"
+                   and all(r[5]=="NOT VERIFIED" for r in results["rows"])
+                   and results["remote"]==0
+                   and "connect-src 'none'" in results["csp"],
+                   "TRUST_BASELINE_FICTIONAL_HOLD_AND_NOT_AUTHENTICATED")
+            for btn,reason in (("revoke","REVOKED_REGISTRATION"),
+                               ("scope","CAPABILITY_NOT_DECLARED"),
+                               ("replay","REPLAYED_NONCE"),
+                               ("tamper","CHECKSUM_MISMATCH")):
+                driver.js("document.getElementById(arguments[0]).click();return true;",[btn])
+                info={}
+                for _ in range(30):
+                    info=driver.js("""
+                        const s=document.getElementById('status').textContent;
+                        const row=[...document.querySelectorAll('#rows tr')].find(x=>
+                            x.querySelector('td')?.textContent==='matching-claim');
+                        return {ready:s.startsWith('RECORDED:'),error:s.startsWith('REJECTED:'),
+                                held:document.getElementById('held').textContent,
+                                gate:row?.querySelectorAll('td')[2].textContent,
+                                reasons:row?.querySelectorAll('td')[3].textContent};
+                    """)
+                    if info["ready"] or info["error"]:
+                        break
+                    time.sleep(.12)
+                verify(info["ready"] and info["gate"]=="HOLD"
+                       and reason in info["reasons"] and info["held"]=="11",
+                       "TRUST_FICTIONAL_NEGATIVE_"+btn.upper())
+            duplicate=driver.js("""
+                document.getElementById('fixture').value=
+                  '{"schema":"agent-trust-claims.v1","schema":"wrong","registry":[],"claims":[],"evaluation_tick":1}';
+                document.getElementById('check').click();return true;
+            """)
+            bad={}
+            for _ in range(30):
+                bad=driver.js("""
+                    const s=document.getElementById('status').textContent;
+                    return {reject:s.startsWith('REJECTED:'),
+                            rows:document.querySelectorAll('#rows tr').length,
+                            metric:document.getElementById('total').textContent};
+                """)
+                if bad["reject"]:break
+                time.sleep(.12)
+            verify(bad["reject"] and bad["rows"]==0 and bad["metric"]=="—",
+                   "TRUST_DUPLICATE_JSON_FAIL_CLOSED")
+            driver.js("document.getElementById('reset').click();return true;")
+            recovered={}
+            for _ in range(30):
+                recovered=driver.js("""
+                    return {status:document.getElementById('status').textContent,
+                            held:document.getElementById('held').textContent,
+                            match:document.getElementById('matching').textContent};
+                """)
+                if recovered["status"].startswith("RECORDED:") or recovered["status"].startswith("REJECTED:"):
+                    break
+                time.sleep(.12)
+            verify(recovered["status"].startswith("RECORDED:") and
+                   recovered["held"]=="10" and recovered["match"]=="1",
+                   "TRUST_RESET")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "TRUST_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":19,
+                "browser":version,"publicCards":7,"additionalToolsLinked":20,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":9,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":10,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline fictional agent identity, revocation, capability and replay claim diagnostics.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Agent Trust & Identity Lab · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;color:CanvasText;background:Canvas}
+main{max-width:74rem;padding:clamp(1rem,3vw,2.3rem);margin:auto}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.14;margin:.7rem 0}
+h2{line-height:1.2}a{color:LinkText;overflow-wrap:anywhere}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(.9rem,2vw,1.5rem);margin:1.1rem 0}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:.85rem}
+.metric strong{font-size:1.6rem;display:block;font-variant-numeric:tabular-nums}
+.controls{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}
+button{border-radius:.7rem;border:1px solid CanvasText;background:CanvasText;color:Canvas;font:inherit;font-weight:700;cursor:pointer;padding:.55rem .9rem;min-height:44px}
+button.alt{background:Canvas;color:CanvasText}
+button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+textarea{width:100%;min-height:24rem;background:Canvas;color:CanvasText;border:1px solid GrayText;border-radius:.7rem;padding:.85rem;font:.78rem/1.5 ui-monospace,monospace}
+.scroll{overflow-x:auto}table{min-width:50rem;width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid GrayText;padding:.65rem;text-align:left;overflow-wrap:anywhere}
+#status{font-weight:700}.muted,small{color:GrayText}
+</style></head><body><main>
+<p><a href="./">← Public AI tools directory</a></p>
+<p class="muted">Original synthetic lab · Checks claims, not genuine identity · No real agent access</p>
+<h1>Agent Trust & Identity Lab</h1>
+<p><strong>How can an AI agent prove who it says it is?</strong> Start by detecting inconsistent identity and capability claims. This lab shows why registration checksums and self-declared signatures are <em>not</em> authentication.</p>
+<section class="panel" aria-labelledby="input-title">
+<h2 id="input-title">1. Inspect a fictional agent registry</h2>
+<label for="fixture">Editable JSON, up to 50 registered agents and 150 claim observations (64 KiB maximum)</label>
+<textarea id="fixture" spellcheck="false" aria-describedby="privacy"></textarea>
+<p id="privacy"><small>All inputs stay in your browser. Only enter invented or sanitized data. Never paste real private keys, production tokens, personal information, employer/client documents, trading credentials or infrastructure settings.</small></p>
+<div class="controls">
+<button type="button" id="check">Check agent claims</button>
+<button type="button" class="alt" id="revoke">Revoke an agent</button>
+<button type="button" class="alt" id="scope">Escalate a capability</button>
+<button type="button" class="alt" id="replay">Replay a challenge</button>
+<button type="button" class="alt" id="tamper">Tamper with a claim</button>
+<button type="button" class="alt" id="reset">Reset sample</button>
+</div>
+<p id="status" role="status" aria-live="polite">Preparing fictional checksums locally…</p>
+</section>
+<section class="panel" aria-labelledby="result-title">
+<h2 id="result-title">2. Claim consistency results</h2>
+<div class="metrics">
+<div class="metric"><small>Claim observations</small><strong id="total">—</strong></div>
+<div class="metric"><small>Held as inconsistent</small><strong id="held">—</strong></div>
+<div class="metric"><small>Matching claims, not authenticated</small><strong id="matching">—</strong></div>
+<div class="metric"><small>Authenticated agents</small><strong id="authenticated">0</strong></div>
+</div>
+<div class="scroll"><table><caption>No check on this page grants access or confirms a real agent's identity</caption>
+<thead><tr><th scope="col">Claim</th><th scope="col">Claimed agent</th><th scope="col">Gate</th><th scope="col">Mismatch reasons</th><th scope="col">Checksum</th><th scope="col">Signature proof</th></tr></thead>
+<tbody id="rows"></tbody></table></div>
+</section>
+<section class="panel">
+<h2>3. What's still needed for real agent verification?</h2>
+<p>This browser compares a <em>caller-supplied</em> registry with <em>caller-supplied</em> claims. Its SHA-256 checksum verifies only consistency of supplied bytes; anyone can generate a new checksum. Even “self-reported signed” is just an assertion. An authentic solution requires independent public-key challenge verification, trusted registry issuance, durable nonce replay protection, trusted time, key revocation, scoped authorization and server-side enforcement.</p>
+<p>It runs without network calls or storage. See the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_AGENT_TRUST.md">Python reference, tests and boundaries</a> and <a href="https://github.com/esheenj/compound-intelligence-starter/issues/43">Wave 3 tracker</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const field=document.getElementById("fixture"),status=document.getElementById("status"),
+       body=document.getElementById("rows"),metricIds=["total","held","matching"];
+ const ID=/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$/;
+ const ORIGIN=/^https:\/\/[a-z0-9][a-z0-9.-]{0,140}(\/[a-zA-Z0-9._/-]{0,80})?$/;
+ const HEX=/^[a-f0-9]{64}$/;
+ const ident=x=>typeof x==="string"&&ID.test(x);
+ const bounded=(x,min,max)=>Array.isArray(x)&&x.length>=min&&x.length<=max;
+ const exact=(x,names)=>x!==null&&typeof x==="object"&&!Array.isArray(x)&&
+    Object.keys(x).length===names.length&&names.every(k=>Object.prototype.hasOwnProperty.call(x,k));
+ const tick=x=>Number.isSafeInteger(x)&&x>=0&&x<=2000000000;
+ const revision=x=>Number.isSafeInteger(x)&&x>=1&&x<=999999;
+ const origin=x=>typeof x==="string"&&ORIGIN.test(x);
+ const digest=x=>typeof x==="string"&&HEX.test(x);
+ function strict(text){
+  const parsed=JSON.parse(text),stack=[];
+  for(let i=0;i<text.length;i++){
+   if(text[i]==='"'){
+    const begin=i;i++;let esc=false;
+    for(;i<text.length;i++){
+     if(esc){esc=false;continue;}
+     if(text[i]==="\\"){esc=true;continue;}
+     if(text[i]==='"')break;
+    }
+    const key=JSON.parse(text.slice(begin,i+1));
+    let next=i+1;while(next<text.length&&/\s/.test(text[next]))next++;
+    if(text[next]===":"){
+     const p=stack[stack.length-1];
+     if(!p||!p.keys||p.keys.has(key))throw Error("Duplicate/malformed JSON key");
+     p.keys.add(key);
+    }
+   }else if(text[i]==="{")stack.push({keys:new Set()});
+   else if(text[i]==="[")stack.push({keys:null});
+   else if(text[i]==="}"||text[i]==="]")stack.pop();
+  }
+  return parsed;
+ }
+ function registry(){
+  return [
+   {agent_id:"fictional-a",origin:"https://example.invalid/agent-a",
+    key_fingerprint:"a".repeat(64),revision:2,state:"ACTIVE",capabilities:["summarize","search"]},
+   {agent_id:"fictional-revoked",origin:"https://example.invalid/revoked",
+    key_fingerprint:"b".repeat(64),revision:3,state:"REVOKED",capabilities:["summarize"]}
+  ];
+ }
+ function newClaim(cid,agent,change={}){
+  return Object.assign({claim_id:cid,agent_id:agent.agent_id,origin:agent.origin,
+   key_fingerprint:agent.key_fingerprint,capability:"summarize",registry_revision:agent.revision,
+   nonce:cid,issued_tick:90,expires_tick:110,proof_claim:"SELF_REPORTED_SIGNED",
+   payload_sha256:"0".repeat(64)},change);
+ }
+ function sample(){
+  const [a,b]=registry();
+  return {schema:"agent-trust-claims.v1",evaluation_tick:100,registry:[a,b],claims:[
+   newClaim("matching-claim",a),
+   newClaim("revoked-agent",b),
+   newClaim("unknown-agent",a,{agent_id:"unregistered"}),
+   newClaim("wrong-origin",a,{origin:"https://elsewhere.invalid/agent"}),
+   newClaim("wrong-key",a,{key_fingerprint:"c".repeat(64)}),
+   newClaim("capability-escalation",a,{capability:"payments"}),
+   newClaim("stale-registry",a,{registry_revision:1}),
+   newClaim("nonce-replay-first",a,{nonce:"reused-challenge"}),
+   newClaim("nonce-replay-second",a,{nonce:"reused-challenge"}),
+   newClaim("expired",a,{issued_tick:10,expires_tick:20}),
+   newClaim("checksum-tamper",a)
+  ]};
+ }
+ const sorted=x=>Array.isArray(x)?x.map(sorted):
+   x&&typeof x==="object"?Object.fromEntries(Object.keys(x).sort().map(k=>[k,sorted(x[k])])):x;
+ async function hash(row){
+  if(!crypto.subtle)throw Error("This browser does not provide secure local SHA-256");
+  const payload={...row};delete payload.payload_sha256;
+  const bytes=new TextEncoder().encode(JSON.stringify(sorted(payload)));
+  const buffer=await crypto.subtle.digest("SHA-256",bytes);
+  return [...new Uint8Array(buffer)].map(x=>x.toString(16).padStart(2,"0")).join("");
+ }
+ async function built(mode){
+  const doc=sample();
+  for(const row of doc.claims)row.payload_sha256=await hash(row);
+  // Tamper occurs *after* the checksum is computed.
+  doc.claims.find(r=>r.claim_id==="checksum-tamper").capability="search";
+  const a=doc.claims.find(r=>r.claim_id==="matching-claim");
+  if(mode==="revoke")doc.registry[0].state="REVOKED";
+  if(mode==="scope"){a.capability="payments";a.payload_sha256=await hash(a);}
+  if(mode==="replay"){a.nonce="reused-challenge";a.payload_sha256=await hash(a);}
+  if(mode==="tamper")a.capability="search";
+  return doc;
+ }
+ function validate(d){
+  if(!exact(d,["schema","evaluation_tick","registry","claims"])||
+    d.schema!=="agent-trust-claims.v1"||!tick(d.evaluation_tick)||
+    !bounded(d.registry,1,50)||!bounded(d.claims,1,150))throw Error("Invalid schema");
+  const agents=new Map();
+  for(const r of d.registry){
+   if(!exact(r,["agent_id","origin","key_fingerprint","revision","state","capabilities"])||
+      !ident(r.agent_id)||agents.has(r.agent_id)||!origin(r.origin)||
+      !digest(r.key_fingerprint)||!revision(r.revision)||
+      !["ACTIVE","REVOKED"].includes(r.state)||!bounded(r.capabilities,1,16)||
+      !r.capabilities.every(ident)||new Set(r.capabilities).size!==r.capabilities.length)
+        throw Error("Invalid registry");
+   agents.set(r.agent_id,r);
+  }
+  const claims=new Set();
+  for(const r of d.claims){
+   if(!exact(r,["claim_id","agent_id","origin","key_fingerprint","capability",
+                "registry_revision","nonce","issued_tick","expires_tick",
+                "proof_claim","payload_sha256"])||
+      !ident(r.claim_id)||claims.has(r.claim_id)||!ident(r.agent_id)||
+      !origin(r.origin)||!digest(r.key_fingerprint)||!ident(r.capability)||
+      !revision(r.registry_revision)||!ident(r.nonce)||!tick(r.issued_tick)||
+      !tick(r.expires_tick)||r.expires_tick<r.issued_tick||
+      !["ABSENT","SELF_REPORTED_SIGNED"].includes(r.proof_claim)||!digest(r.payload_sha256))
+       throw Error("Invalid claim");
+   claims.add(r.claim_id);
+  }
+  return agents;
+ }
+ async function inspect(doc){
+  const agents=validate(doc),nonces=new Map();
+  for(const q of doc.claims){
+   const key=q.agent_id+":"+q.nonce;
+   nonces.set(key,(nonces.get(key)||0)+1);
+  }
+  const results=[];
+  for(const q of doc.claims){
+   const reg=agents.get(q.agent_id),reasons=[];
+   if(!reg)reasons.push("UNKNOWN_AGENT");
+   else {
+    if(reg.state==="REVOKED")reasons.push("REVOKED_REGISTRATION");
+    if(reg.origin!==q.origin)reasons.push("ORIGIN_MISMATCH");
+    if(reg.key_fingerprint!==q.key_fingerprint)reasons.push("KEY_FINGERPRINT_MISMATCH");
+    if(reg.revision!==q.registry_revision)reasons.push("STALE_REGISTRY_REVISION");
+    if(!reg.capabilities.includes(q.capability))reasons.push("CAPABILITY_NOT_DECLARED");
+   }
+   if(nonces.get(q.agent_id+":"+q.nonce)>1)reasons.push("REPLAYED_NONCE");
+   if(q.issued_tick>doc.evaluation_tick)reasons.push("NOT_YET_VALID");
+   if(q.expires_tick<doc.evaluation_tick)reasons.push("EXPIRED_CLAIM");
+   const matches=(await hash(q))===q.payload_sha256;
+   if(!matches)reasons.push("CHECKSUM_MISMATCH");
+   results.push({claim:q.claim_id,agent:q.agent_id,
+    gate:reasons.length?"HOLD":"CLAIM_MATCH_ONLY",reasons:reasons.sort(),
+    checksum:matches,proof:q.proof_claim});
+  }
+  return results.sort((a,b)=>a.claim.localeCompare(b.claim,"en"));
+ }
+ function clear(){
+  body.replaceChildren();
+  for(const id of metricIds)document.getElementById(id).textContent="—";
+  document.getElementById("authenticated").textContent="0";
+ }
+ async function run(){
+  clear();status.textContent="Checking supplied fictional data locally…";
+  if(new TextEncoder().encode(field.value).length>65536){
+   status.textContent="REJECTED: JSON exceeds 64 KiB.";return;
+  }
+  try{
+   const results=await inspect(strict(field.value));
+   for(const r of results){
+    const tr=document.createElement("tr");
+    for(const value of [r.claim,r.agent,r.gate,r.reasons.join(", ")||"no mismatch",
+      r.checksum?"MATCH":"MISMATCH","NOT VERIFIED"]){
+     const td=document.createElement("td");td.textContent=value;tr.append(td);
+    }
+    body.append(tr);
+   }
+   const held=results.filter(x=>x.gate==="HOLD").length,matching=results.length-held;
+   document.getElementById("total").textContent=String(results.length);
+   document.getElementById("held").textContent=String(held);
+   document.getElementById("matching").textContent=String(matching);
+   status.textContent="RECORDED: "+held+" held; "+matching+
+     " claim matches only; 0 identities authenticated. No action authorized.";
+  }catch(_){
+   clear();status.textContent="REJECTED: malformed, inconsistent, or unsupported evidence. No partial results.";
+  }
+ }
+ async function reset(mode="reset"){
+  status.textContent="Preparing synthetic examples…";
+  field.value=JSON.stringify(await built(mode),null,2);
+  await run();
+ }
+ document.getElementById("check").addEventListener("click",()=>{void run();});
+ for(const name of ["revoke","scope","replay","tamper","reset"])
+  document.getElementById(name).addEventListener("click",()=>{void reset(name);});
+ void reset();
+})();
+</script></body></html>
