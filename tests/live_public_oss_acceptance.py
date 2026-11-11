@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 25 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 26 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -42,6 +42,7 @@ URLS = {
     "model-fit": "https://esheenj.github.io/compound-intelligence-starter/model-fit.html",
     "context-preservation": "https://esheenj.github.io/compound-intelligence-starter/context-preservation.html",
     "model-disagreement": "https://esheenj.github.io/compound-intelligence-starter/model-disagreement.html",
+    "decision-review": "https://esheenj.github.io/compound-intelligence-starter/decision-review.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -58,6 +59,7 @@ READY = {
     "model-fit": "#evaluate",
     "context-preservation": "#evaluate",
     "model-disagreement": "#inspect",
+    "decision-review": "#inspect",
     "approval": "#state",
 }
 
@@ -502,6 +504,66 @@ def interact(driver: Driver, kind: str) -> None:
             return document.getElementById('status').textContent.startsWith('REVIEW:')
                 && document.getElementById('review').textContent==='4';
         """) is True,"LIVE_DISAGREEMENT_RESET")
+    elif kind == "decision-review":
+        baseline=driver.js("""
+            document.getElementById('inspect').click();
+            return {
+                status:document.getElementById('status').textContent,
+                total:document.getElementById('total').textContent,
+                holds:document.getElementById('holds').textContent,
+                needs:document.getElementById('needs').textContent,
+                recorded:document.getElementById('recorded').textContent,
+                rows:[...document.querySelectorAll('#rows tr')].map(r=>
+                     [...r.querySelectorAll('td')].map(x=>x.textContent)),
+                evidence:document.getElementById('evidence').textContent
+            };
+        """)
+        by_id={x[0]:x for x in baseline["rows"]}
+        verify(baseline["status"].startswith("RECORDED:")
+               and baseline["total"]=="6" and baseline["holds"]=="3"
+               and baseline["needs"]=="2" and baseline["recorded"]=="1"
+               and by_id["routine"][1]=="REVIEW_RECORDED_NOT_AUTHORIZED"
+               and by_id["high-impact"][1]=="HUMAN_REVIEW_REQUIRED"
+               and by_id["contradicted"][1]=="HOLD"
+               and by_id["stale"][1]=="HOLD"
+               and by_id["unverified"][1]=="HOLD"
+               and by_id["unscored"][1]=="HUMAN_REVIEW_REQUIRED"
+               and "DECLARED_VERIFIED_MATCH" in baseline["evidence"]
+               and "Execution authority: NONE" in baseline["evidence"],
+               "LIVE_EXPLAINABLE_EVIDENCE_AND_REVIEW_BOUNDARIES")
+        for button in ("stale","opposing","hypothesis","reject"):
+            bad=driver.js("""
+                document.getElementById(arguments[0]).click();
+                const x=[...document.querySelectorAll('#rows tr')].find(r=>
+                    r.querySelector('td')?.textContent==='routine');
+                return {gate:x?.querySelectorAll('td')[1].textContent,
+                        holds:document.getElementById('holds').textContent,
+                        recorded:document.getElementById('recorded').textContent};
+            """,[button])
+            verify(bad["gate"]=="HOLD" and bad["holds"]=="4"
+                   and bad["recorded"]=="0",
+                   "LIVE_EXPLAINABLE_HOLD_"+button.upper())
+        absent=driver.js("""
+            document.getElementById('no-confidence').click();
+            return {holds:document.getElementById('holds').textContent,
+                    needs:document.getElementById('needs').textContent,
+                    recorded:document.getElementById('recorded').textContent};
+        """)
+        verify(absent["holds"]=="3" and absent["needs"]=="3" and
+               absent["recorded"]=="0","LIVE_EXPLAINABLE_METHODOLOGY")
+        verify(driver.js("""
+            document.getElementById('fixture').value=
+              '{"schema":"explainable-review.fixtures.v1","schema":"bad","sources":[],"decisions":[]}';
+            document.getElementById('inspect').click();
+            return document.getElementById('status').textContent.startsWith('REJECTED:')
+                && document.querySelectorAll('#rows tr').length===0
+                && document.getElementById('total').textContent==='—';
+        """) is True,"LIVE_EXPLAINABLE_JSON_DUPLICATE_REJECT")
+        verify(driver.js("""
+            document.getElementById('reset').click();
+            return document.getElementById('status').textContent.startsWith('RECORDED:')
+                && document.getElementById('recorded').textContent==='1';
+        """) is True,"LIVE_EXPLAINABLE_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -562,7 +624,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 18 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 19 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
