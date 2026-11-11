@@ -187,7 +187,7 @@ li{padding:.2rem 0;overflow-wrap:anywhere}small,.muted{color:GrayText}
  }
  async function run(){
    const my=++version;resetOutput();status.textContent="Checking supplied JSON locally…";
-   if(input.value.length>65536){status.textContent="REJECTED: input exceeds 64 KiB.";return;}
+   if(new TextEncoder().encode(input.value).length>65536){status.textContent="REJECTED: input exceeds 64 KiB.";return;}
    try{
      const r=await inspect(input.value);
      if(my!==version)return;
