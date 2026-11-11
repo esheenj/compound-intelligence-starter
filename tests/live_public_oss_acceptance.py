@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 23 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 24 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -40,6 +40,7 @@ URLS = {
     "agentcredits": "https://esheenj.github.io/compound-intelligence-starter/agentcredits.html",
     "model-cost": "https://esheenj.github.io/compound-intelligence-starter/model-cost.html",
     "model-fit": "https://esheenj.github.io/compound-intelligence-starter/model-fit.html",
+    "context-preservation": "https://esheenj.github.io/compound-intelligence-starter/context-preservation.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -54,6 +55,7 @@ READY = {
     "agentcredits": "#inspect",
     "model-cost": "#compare",
     "model-fit": "#evaluate",
+    "context-preservation": "#evaluate",
     "approval": "#state",
 }
 
@@ -389,6 +391,54 @@ def interact(driver: Driver, kind: str) -> None:
             return document.querySelector('#status').textContent.startsWith('PASS:')
                 && document.querySelector('#fits').textContent==='1';
         """) is True,"LIVE_MODEL_FIT_RESET")
+    elif kind == "context-preservation":
+        result=driver.js("""
+            document.getElementById('evaluate').click();
+            const values=[...document.querySelectorAll('#rows tr')].map(row=>
+                [...row.querySelectorAll('td')].map(cell=>cell.textContent));
+            return {
+                status:document.getElementById('status').textContent,
+                candidates:document.getElementById('candidates').textContent,
+                lossless:document.getElementById('lossless').textContent,
+                held:document.getElementById('held').textContent,
+                rows:values
+            };
+        """)
+        by_name={x[0]:x for x in result["rows"]}
+        verify(result["status"].startswith("RECORDED:")
+               and result["candidates"]=="3" and result["lossless"]=="1"
+               and result["held"]=="2" and len(result["rows"])==3
+               and by_name["brief-chat"][1]=="HOLD"
+               and by_name["brief-chat"][2]=="1/4"
+               and by_name["evidence-checkpoint"][1]=="PASS_LOSSLESS"
+               and by_name["evidence-checkpoint"][2]=="4/4"
+               and by_name["unsafe-drift"][1]=="HOLD",
+               "LIVE_CONTEXT_PRESERVATION_THREE_REFERENCE_CASES")
+        for button in ("drop","stale","promote"):
+            bad=driver.js("""
+                document.getElementById(arguments[0]).click();
+                const matched=[...document.querySelectorAll('#rows tr')]
+                    .find(x=>x.querySelector('td')?.textContent==='evidence-checkpoint');
+                return {status:document.getElementById('status').textContent,
+                        lossless:document.getElementById('lossless').textContent,
+                        held:document.getElementById('held').textContent,
+                        gate:matched?.querySelectorAll('td')[1].textContent};
+            """,[button])
+            verify(bad["status"].startswith("RECORDED:") and
+                   bad["lossless"]=="0" and bad["held"]=="3" and bad["gate"]=="HOLD",
+                   "LIVE_CONTEXT_PRESERVATION_DRIFT_"+button.upper())
+        verify(driver.js("""
+            document.getElementById('fixture').value=
+              '{"schema":"context-preservation.v1","schema":"wrong","source":{},"candidates":[]}';
+            document.getElementById('evaluate').click();
+            return document.getElementById('status').textContent.startsWith('REJECTED:')
+                && document.querySelectorAll('#rows tr').length===0;
+        """) is True,"LIVE_CONTEXT_PRESERVATION_DUPLICATE_JSON")
+        verify(driver.js("""
+            document.getElementById('reset').click();
+            return document.getElementById('status').textContent.startsWith('RECORDED:')
+              && document.getElementById('lossless').textContent==='1';
+        """) is True,"LIVE_CONTEXT_PRESERVATION_RECOVER")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -449,7 +499,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 16 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 17 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
