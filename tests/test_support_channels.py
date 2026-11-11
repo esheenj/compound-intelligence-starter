@@ -37,20 +37,35 @@ def crypto():
 
 
 class SupportRenderTests(unittest.TestCase):
-    def test_actual_manifest_is_default_deny_and_no_live_destinations(self):
+    def test_actual_manifest_matches_exact_safe_render_in_any_reviewed_state(self):
         path = Path(__file__).resolve().parents[1] / "support/channels.json"
         manifest = load_channels(path)
-        self.assertEqual(manifest, default())
         page = render_support(manifest).decode("utf-8")
+        self.assertNotIn("<script", page)
+        self.assertNotIn("<form", page)
+        self.assertIn("connect-src 'none'", page)
+        self.assertIn("No Section 18A certificate", page)
+        self.assertNotIn("private_key", page)
+        self.assertNotIn("seed_phrase", page)
+        sponsor = manifest["github_sponsors"]
+        fiat = manifest["fiat"]
+        crypto = manifest["crypto"]
+        self.assertEqual("https://github.com/sponsors/esheenj" in page, sponsor["state"] == "active")
+        self.assertEqual("https://pay.yoco.com/" in page, fiat["state"] == "active" and fiat["provider"] == "yoco")
+        self.assertEqual("https://paystack.com/pay/" in page, fiat["state"] == "active" and fiat["provider"] == "paystack")
+        for entry in crypto["wallets"]:
+            self.assertIn(entry["network"], page)
+            self.assertIn(entry["address"], page)
+        if crypto["state"] == "pending":
+            self.assertIn("No public wallet address", page)
+
+    def test_default_pending_fixture_rejects_all_public_destinations(self):
+        page = render_support(default()).decode("utf-8")
         self.assertIn("No public wallet address", page)
         self.assertIn("Not connected yet", page)
         self.assertNotIn("https://pay.yoco.com/", page)
         self.assertNotIn("https://paystack.com/pay/", page)
         self.assertNotIn("https://github.com/sponsors/esheenj", page)
-        self.assertNotIn("<script", page)
-        self.assertNotIn("<form", page)
-        self.assertIn("connect-src 'none'", page)
-        self.assertIn("No Section 18A certificate", page)
 
     def test_active_example_fully_renders_only_if_explicitly_marked_verified(self):
         doc = default()
