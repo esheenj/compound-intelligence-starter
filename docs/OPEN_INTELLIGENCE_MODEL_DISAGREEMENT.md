@@ -4,6 +4,10 @@ The lab compares **user-supplied fictional outputs** of two to eight AI agents a
 
 **The central failure mode:** three agents may all agree on an invented answer and still disagree with a supplied reference. Agreement is a *signal*, not validation or confidence calibration. A supplied reference may itself be wrong, unauthenticated or incomplete.
 
+## Hosted, offline browser demo
+
+The publicly tested [Model Disagreement Lab](https://esheenj.github.io/compound-intelligence-starter/model-disagreement.html) provides an editable fictional JSON example, five positive/negative comparison cases, one-click disagreement/abstention/missing-response controls, and fail-closed malformed-input recovery. The browser runs without remote assets or network calls. Independent actual HTTPS Chrome [run 43022101376](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43022101376) verified **25/25 public URL pages** (7 repository homepages and 18 add-ons). This is not real LLM execution or factual-truth verification.
+
 ## Run locally
 
 With Python 3.10+ from the public repository root:
