@@ -13,7 +13,7 @@ permissions:
   contents: read
 jobs:
   verify-live-public-pages:
-    name: Read-only live Chrome across twenty-five public pages
+    name: Read-only live Chrome across twenty-six public pages
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
