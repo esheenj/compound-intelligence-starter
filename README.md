@@ -11,8 +11,6 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
-**Live public-browser acceptance:** The [read-only Chrome workflow](https://github.com/esheenj/compound-intelligence-starter/actions/workflows/live-oss-acceptance.yml) checks the seven project homepages and twelve additional hosted interactive tools through actual HTTPS, with fixed fictional controls, no secrets or remote agent execution. Results are independently recorded by GitHub Actions and must be distinguished from source CI and GitHub Pages publishing; this is not physical-device or assistive-technology certification.
-
 **Wave 2 approval-gate simulation:** [Offline review, denial, expiry and action-report replay](docs/OPEN_INTELLIGENCE_WAVE2_APPROVALS.md) — `python -m src.compound_intelligence.agent_review_gate --demo`. Fictional actor claims only; `execution_authority: NONE`.
 
 

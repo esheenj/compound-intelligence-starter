@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline fictional AI agent credits grant, reserve, settle, refund and replay simulator.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>AgentCredits Ledger Studio · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;background:Canvas;color:CanvasText}
+main{max-width:68rem;padding:clamp(1rem,3vw,2.4rem);margin:0 auto}
+a{color:LinkText;overflow-wrap:anywhere}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.12;margin:.8rem 0}
+.panel{border:1px solid GrayText;border-radius:1.1rem;padding:clamp(1rem,2.3vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:19rem;border:1px solid GrayText;border-radius:.7rem;padding:1rem;background:Canvas;color:CanvasText;font:.84rem/1.5 ui-monospace,monospace}
+.controls{display:flex;gap:.7rem;flex-wrap:wrap;margin:1rem 0}
+button{background:CanvasText;color:Canvas;border:1px solid CanvasText;border-radius:.7rem;cursor:pointer;min-height:44px;padding:.6rem 1rem;font:inherit;font-weight:700}
+button.secondary{background:Canvas;color:CanvasText}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:1rem}
+.metric strong{font-size:1.8rem;display:block;font-variant-numeric:tabular-nums}
+.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:30rem}
+th,td{text-align:left;padding:.7rem;border-bottom:1px solid GrayText;overflow-wrap:anywhere}
+#status{font-weight:700;overflow-wrap:anywhere}small,.muted{color:GrayText}
+</style>
+</head>
+<body><main>
+<p><a href="./">← Back to public AI tools</a></p>
+<p class="muted">Original fictional credit accounting demonstration · Offline · No payments or API keys</p>
+<h1>AgentCredits Ledger Studio</h1>
+<p>Try credit grants, reservations, settlement, refunds and duplicate-event replay. These are <strong>imaginary non-monetary units</strong>, not provider credits, customer balances or real payment processing.</p>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">1. Inspect a fictional credit journal</h2>
+<label for="journal">Editable JSON (limit 64 KiB; up to 100 events in the browser)</label>
+<textarea id="journal" spellcheck="false">{
+ "schema":"agentcredits.journal.v1",
+ "events":[
+  {"event_id":"g1","account":"demo-team","op":"grant","amount":100},
+  {"event_id":"r1","account":"demo-team","op":"reserve","request_id":"demo-run","amount":40},
+  {"event_id":"r1","account":"demo-team","op":"reserve","request_id":"demo-run","amount":40},
+  {"event_id":"s1","account":"demo-team","op":"settle","request_id":"demo-run","amount":25},
+  {"event_id":"f1","account":"demo-team","op":"refund","request_id":"demo-run","amount":5}
+ ]
+}</textarea>
+<div class="controls">
+<button type="button" id="inspect">Replay fictional journal</button>
+<button type="button" id="overspend" class="secondary">Simulate overspending</button>
+<button type="button" id="conflict" class="secondary">Conflicting duplicate ID</button>
+<button type="button" id="refund" class="secondary">Excessive refund</button>
+<button type="button" id="reset" class="secondary">Reset sample</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Replay fictional journal to calculate sample balances.</p>
+</section>
+<section class="panel" aria-labelledby="result-heading">
+<h2 id="result-heading">2. Synthetic journal result</h2>
+<div class="metrics">
+<div class="metric"><small>Available units</small><strong id="available">—</strong></div>
+<div class="metric"><small>Held units</small><strong id="held">—</strong></div>
+<div class="metric"><small>Spent units</small><strong id="spent">—</strong></div>
+<div class="metric"><small>Duplicate events ignored</small><strong id="duplicates">—</strong></div>
+</div>
+<div class="wrap"><table><caption>Per-account simulated credit balances</caption>
+<thead><tr><th scope="col">Fictional account</th><th scope="col">Available</th><th scope="col">Held</th><th scope="col">Spent</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+</section>
+<section class="panel">
+<h2>3. Trust and financial boundaries</h2>
+<p>Any invalid, contradictory or excessive event rejects the entire candidate journal without displaying partial balances. Repeating an event with the same stable ID and same contents has no additional effect.</p>
+<p>Real usage requires authenticated agents, transactional persistent storage, independent reconciliation and strong budget ownership. This demo is not a payment wallet, stablecoin, financial ledger, trading tool or assurance that a real API provider consumed any tokens. Nothing is transmitted, charged or stored.</p>
+<p><a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_WAVE1.md">Read the Python reference implementation</a> and <a href="https://github.com/esheenj/compound-intelligence-starter/issues/41">Wave 1 release tracker</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const input=document.getElementById("journal"),original=input.value;
+ const status=document.getElementById("status"),rows=document.getElementById("rows");
+ const counts=["available","held","spent","duplicates"];
+ const id=v=>typeof v==="string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(v);
+ const exact=(x,fields)=>x!==null && typeof x==="object" && !Array.isArray(x)
+  && Object.keys(x).length===fields.length && fields.every(k=>Object.prototype.hasOwnProperty.call(x,k));
+ function readStrict(text){
+  const data=JSON.parse(text),stack=[];let stripped="";
+  for(let i=0;i<text.length;i++){
+   const ch=text[i];
+   if(ch==='"'){
+    const start=i; i++;let escape=false;
+    for(;i<text.length;i++){
+     if(escape){escape=false;continue;}
+     if(text[i]==="\\"){escape=true;continue;}
+     if(text[i]==='"')break;
+    }
+    const key=JSON.parse(text.slice(start,i+1));
+    stripped+=" ";
+    let j=i+1;while(j<text.length && /\s/.test(text[j]))j++;
+    if(text[j]===":"){
+     const parent=stack[stack.length-1];
+     if(!parent || !parent.keys)throw Error("Invalid JSON member");
+     if(parent.keys.has(key))throw Error("Duplicate JSON member");
+     parent.keys.add(key);
+    }
+   }else if(ch==="{"){stack.push({keys:new Set()});stripped+=ch;}
+   else if(ch==="["){stack.push({keys:null});stripped+=ch;}
+   else if(ch==="}" || ch==="]"){stack.pop();stripped+=ch;}
+   else stripped+=ch;
+  }
+  for(const match of stripped.matchAll(/-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g)){
+   if(match[0].includes(".") || /[eE]/.test(match[0]))throw Error("Only integer values supported");
+  }
+  return data;
+ }
+ function replay(data){
+  if(!exact(data,["schema","events"]) || data.schema!=="agentcredits.journal.v1"
+      || !Array.isArray(data.events) || data.events.length<1 || data.events.length>100)
+   throw Error("Invalid schema or event count");
+  const seen=new Map(),accounts=new Map(),requests=new Map();let duplicates=0;
+  for(const [index,e] of data.events.entries()){
+   if(!e || typeof e!=="object" || Array.isArray(e))throw Error("Invalid event");
+   const required=["event_id","account","op","amount"];
+   if(["reserve","settle","refund"].includes(e.op))required.push("request_id");
+   if(!exact(e,required) || !["grant","reserve","settle","refund"].includes(e.op)
+      || !id(e.event_id) || !id(e.account) ||
+      !Number.isSafeInteger(e.amount) || e.amount<0 || (e.op!=="settle" && e.amount===0))
+    throw Error("Invalid operation or amount at event "+(index+1));
+   if(e.op!=="grant" && !id(e.request_id))throw Error("Invalid request ID");
+   const fingerprint=JSON.stringify([e.event_id,e.account,e.op,e.amount,e.request_id||null]);
+   if(seen.has(e.event_id)){
+    if(seen.get(e.event_id)!==fingerprint)throw Error("Conflicting duplicate event ID");
+    duplicates++;continue;
+   }
+   if(!accounts.has(e.account))accounts.set(e.account,{available:0,held:0,spent:0});
+   const acc=accounts.get(e.account),key=e.account+"\u0000"+(e.request_id||"");
+   if(e.op==="grant")acc.available+=e.amount;
+   else if(e.op==="reserve"){
+    if(requests.has(key))throw Error("Request already reserved");
+    if(e.amount>acc.available)throw Error("Insufficient available units");
+    acc.available-=e.amount;acc.held+=e.amount;
+    requests.set(key,{reserved:e.amount,settled:null,refunded:0});
+   }else if(e.op==="settle"){
+    const request=requests.get(key);
+    if(!request || request.settled!==null)throw Error("Missing or already settled reservation");
+    if(e.amount>request.reserved)throw Error("Settlement exceeds reservation");
+    acc.held-=request.reserved;
+    acc.available+=request.reserved-e.amount;
+    acc.spent+=e.amount;
+    request.settled=e.amount;
+   }else{
+    const request=requests.get(key);
+    if(!request || request.settled===null)throw Error("Refund requires settled request");
+    if(e.amount>request.settled-request.refunded)throw Error("Excessive refund");
+    acc.spent-=e.amount;acc.available+=e.amount;request.refunded+=e.amount;
+   }
+   if(![acc.available,acc.held,acc.spent].every(Number.isSafeInteger))
+     throw Error("Unsafe integer balance");
+   seen.set(e.event_id,fingerprint);
+  }
+  return{accounts:[...accounts.entries()].sort((a,b)=>a[0].localeCompare(b[0],"en")),
+    applied:seen.size,duplicates};
+ }
+ function resetResult(){
+  rows.replaceChildren();
+  for(const name of counts)document.getElementById(name).textContent="—";
+ }
+ function render(){
+  resetResult();
+  if(new TextEncoder().encode(input.value).length>65536){
+   status.textContent="REJECTED: journal exceeds 64 KiB.";return;
+  }
+  try{
+   const result=replay(readStrict(input.value));
+   let available=0,held=0,spent=0;
+   for(const [account,state] of result.accounts){
+    const tr=document.createElement("tr");
+    for(const value of [account,state.available,state.held,state.spent]){
+     const td=document.createElement("td");td.textContent=String(value);tr.append(td);
+    }
+    rows.append(tr);
+    available+=state.available;held+=state.held;spent+=state.spent;
+   }
+   document.getElementById("available").textContent=String(available);
+   document.getElementById("held").textContent=String(held);
+   document.getElementById("spent").textContent=String(spent);
+   document.getElementById("duplicates").textContent=String(result.duplicates);
+   status.textContent="PASS: "+result.applied+" distinct fictional events applied; "+
+      result.duplicates+" repeated event(s) ignored. No money was processed.";
+  }catch(_){
+   resetResult();
+   status.textContent="REJECTED: invalid or conflicting journal. No partial balance accepted.";
+  }
+ }
+ function scenario(which){
+  const x=JSON.parse(original);
+  if(which==="overspend"){x.events[1].amount=200;x.events[2].amount=200;}
+  if(which==="conflict")x.events[2].amount=41;
+  if(which==="refund")x.events[4].amount=30;
+  input.value=JSON.stringify(x,null,2);render();
+ }
+ document.getElementById("inspect").addEventListener("click",render);
+ document.getElementById("overspend").addEventListener("click",()=>scenario("overspend"));
+ document.getElementById("conflict").addEventListener("click",()=>scenario("conflict"));
+ document.getElementById("refund").addEventListener("click",()=>scenario("refund"));
+ document.getElementById("reset").addEventListener("click",()=>{input.value=original;render();});
+})();
+</script>
+</body></html>

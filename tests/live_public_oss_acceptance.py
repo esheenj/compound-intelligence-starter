@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 19 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 21 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -35,6 +35,8 @@ URLS = {
     "notifications": "https://esheenj.github.io/mobile-first-flow-kit-oss/notifications.html",
     "blueprint": "https://esheenj.github.io/flow-state-machine-oss/blueprint.html",
     "agentops": "https://esheenj.github.io/compound-intelligence-starter/agentops.html",
+    "agentproof": "https://esheenj.github.io/compound-intelligence-starter/agentproof.html",
+    "agentcredits": "https://esheenj.github.io/compound-intelligence-starter/agentcredits.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -45,6 +47,8 @@ READY = {
     "notifications": "#status",
     "blueprint": "#status",
     "agentops": "#inspect",
+    "agentproof": "#check",
+    "agentcredits": "#inspect",
     "approval": "#state",
 }
 
@@ -239,6 +243,69 @@ def interact(driver: Driver, kind: str) -> None:
             document.querySelector('#reset').click();
             return held && rejected && document.querySelector('#status').textContent.startsWith('PASS:');
         """) is True, "LIVE_AGENTOPS_HOLD_CONFLICT_RECOVERY")
+    elif kind == "agentproof":
+        driver.js("document.querySelector('#check').click();return true;")
+        time.sleep(0.4)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('PASS:')
+                && document.querySelector('#count').textContent==='3'
+                && document.querySelector('#digests').textContent==='3'
+                && document.querySelector('#failures').textContent==='0';
+        """) is True, "LIVE_AGENTPROOF_HASH_BASELINE")
+        driver.js("document.querySelector('#tamper').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelector('#findings').textContent.includes('digest mismatch');
+        """) is True, "LIVE_AGENTPROOF_TAMPER")
+        driver.js("document.querySelector('#duplicate').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelector('#findings').textContent.includes('duplicate event ID');
+        """) is True, "LIVE_AGENTPROOF_REPLAY_ID")
+        driver.js("document.querySelector('#missing').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelector('#findings').textContent.includes('missing or unexpected fields');
+        """) is True, "LIVE_AGENTPROOF_MISSING_ISSUER")
+        driver.js("document.querySelector('#reset').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('PASS:');
+        """) is True, "LIVE_AGENTPROOF_RESET")
+    elif kind == "agentcredits":
+        result = driver.js("""
+            document.getElementById('inspect').click();
+            return {
+                status:document.getElementById('status').textContent,
+                available:document.getElementById('available').textContent,
+                held:document.getElementById('held').textContent,
+                spent:document.getElementById('spent').textContent,
+                duplicates:document.getElementById('duplicates').textContent
+            };
+        """)
+        verify(result["status"].startswith("PASS:") and result["available"] == "80"
+               and result["held"] == "0" and result["spent"] == "20"
+               and result["duplicates"] == "1", "LIVE_AGENTCREDITS_BALANCE")
+        for button in ("overspend","conflict","refund"):
+            failed = driver.js("""
+                document.getElementById(arguments[0]).click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    balance:document.getElementById('available').textContent,
+                    partial:document.querySelectorAll('#rows tr').length
+                };
+            """,[button])
+            verify(failed["status"].startswith("REJECTED:")
+                   and failed["balance"] == "—" and failed["partial"] == 0,
+                   "LIVE_AGENTCREDITS_FAIL_CLOSED_"+button.upper())
+        driver.js("document.getElementById('reset').click();return true;")
+        verify(driver.js("""
+            return document.getElementById('status').textContent.startsWith('PASS:')
+                && document.getElementById('available').textContent==='80';
+        """) is True, "LIVE_AGENTCREDITS_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -293,7 +360,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 12 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 14 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
