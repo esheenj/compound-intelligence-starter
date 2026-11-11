@@ -97,11 +97,8 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(verify_catalog(source)["repoCount"], 7)
         with self.assertRaisesRegex(ValueError, "PUBLIC_REPOSITORY_LINK_MISSING"):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
-        for new_tool in (b"model-cost.html", b"model-fit.html"):
+        for new_tool in (b"model-cost.html", b"model-fit.html", b"context-preservation.html"):
             with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
-            verify_catalog(source.replace(b'href="context-preservation.html"',
-                                          b'href="other-tool.html"'))
-        with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
                 verify_catalog(source.replace(b'href="' + new_tool + b'"',
                                               b'href="missing-tool.html"'))
         with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
