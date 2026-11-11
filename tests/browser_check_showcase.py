@@ -50,15 +50,16 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 17 and page["language"] == "en",
+                   and page["extraTools"] == 18 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 17 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 18 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
                    and "agentcredits.html" in page["extraLinks"]
                    and "model-cost.html" in page["extraLinks"]
                    and "model-fit.html" in page["extraLinks"]
                    and "context-preservation.html" in page["extraLinks"]
+                   and "model-disagreement.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -405,11 +406,75 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "CONTEXT_PRESERVATION_NO_OVERFLOW_"+str(width))
+            driver.command("POST","url",{"url":(path/"model-disagreement.html").resolve().as_uri()})
+            disagreement=driver.js("""
+                document.getElementById('inspect').click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    cases:document.getElementById('cases').textContent,
+                    review:document.getElementById('review').textContent,
+                    critical:document.getElementById('critical').textContent,
+                    rows:[...document.querySelectorAll('#rows tr')].map(row=>
+                        [...row.querySelectorAll('td')].map(cell=>cell.textContent)),
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                    remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
+                };
+            """)
+            cases={x[0]:x for x in disagreement["rows"]}
+            verify(disagreement["status"].startswith("REVIEW:") and
+                   disagreement["cases"]=="5" and disagreement["review"]=="4"
+                   and disagreement["critical"]=="2" and len(cases)==5
+                   and cases["unverified-consensus"][1]=="UNVERIFIED_CONSENSUS"
+                   and cases["split-critical-decision"][1]=="DISAGREEMENT"
+                   and cases["unanimous-wrong"][1]=="CONTRADICTS_SUPPLIED_REFERENCE"
+                   and cases["missing-and-abstained"][1]=="INCOMPLETE"
+                   and cases["matches-supplied"][1]=="MATCHES_SUPPLIED_REFERENCE"
+                   and disagreement["remote"]==0
+                   and "connect-src 'none'" in disagreement["csp"],
+                   "MODEL_DISAGREEMENT_BASELINE_AND_FALSE_CONSENSUS")
+            corrected=driver.js("""
+                document.getElementById('reference').click();
+                return {review:document.getElementById('review').textContent,
+                        critical:document.getElementById('critical').textContent,
+                        state:[...document.querySelectorAll('#rows tr')].find(r=>
+                           r.querySelector('td')?.textContent==='unanimous-wrong')
+                           ?.querySelectorAll('td')[1].textContent};
+            """)
+            verify(corrected["review"]=="3" and corrected["critical"]=="1" and
+                   corrected["state"]=="MATCHES_SUPPLIED_REFERENCE",
+                   "MODEL_DISAGREEMENT_CORRECTED_FICTIONAL_CONSENSUS")
+            for button,state in (("split","DISAGREEMENT"),("missing","INCOMPLETE"),("abstain","INCOMPLETE")):
+                outcome=driver.js("""
+                    document.getElementById(arguments[0]).click();
+                    const name=arguments[1];
+                    return [...document.querySelectorAll('#rows tr')].find(r=>
+                        r.querySelector('td')?.textContent===name)
+                        ?.querySelectorAll('td')[1].textContent;
+                """,[button,"unverified-consensus" if button=="split" else "matches-supplied"])
+                verify(outcome==state,"MODEL_DISAGREEMENT_NEGATIVE_"+button.upper())
+            duplicate=driver.js("""
+                document.getElementById('fixture').value=
+                  '{"schema":"model-disagreement.fixtures.v1","schema":"bad","models":[],"cases":[]}';
+                document.getElementById('inspect').click();
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                    && document.querySelectorAll('#rows tr').length===0
+                    && document.getElementById('cases').textContent==='—';
+            """)
+            verify(duplicate is True,"MODEL_DISAGREEMENT_DUPLICATE_JSON_FAIL_CLOSED")
+            driver.js("document.getElementById('reset').click();return true;")
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('REVIEW:')
+                    && document.getElementById('review').textContent==='4';
+            """) is True,"MODEL_DISAGREEMENT_RESET")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "MODEL_DISAGREEMENT_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":17,
+                "browser":version,"publicCards":7,"additionalToolsLinked":18,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":7,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":8,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
