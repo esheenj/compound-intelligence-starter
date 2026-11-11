@@ -50,11 +50,12 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 13 and page["language"] == "en",
+                   and page["extraTools"] == 14 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 13 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 14 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
+                   and "agentcredits.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -216,11 +217,59 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
                        "AGENTPROOF_NO_OVERFLOW_" + str(width))
+            driver.command("POST","url",{"url":(path / "agentcredits.html").resolve().as_uri()})
+            credits = driver.js("""
+                document.getElementById('inspect').click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    available:document.getElementById('available').textContent,
+                    held:document.getElementById('held').textContent,
+                    spent:document.getElementById('spent').textContent,
+                    duplicates:document.getElementById('duplicates').textContent,
+                    rows:document.querySelectorAll('#rows tr').length,
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                    remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
+                };
+            """)
+            verify(credits["status"].startswith("PASS:") and credits["available"]=="80"
+                   and credits["held"]=="0" and credits["spent"]=="20"
+                   and credits["duplicates"]=="1" and credits["rows"]==1
+                   and credits["remote"]==0 and "connect-src 'none'" in credits["csp"],
+                   "AGENTCREDITS_POSITIVE_BALANCES")
+            for button in ("overspend","conflict","refund"):
+                result = driver.js("""
+                    document.getElementById(arguments[0]).click();
+                    return {
+                        status:document.getElementById('status').textContent,
+                        available:document.getElementById('available').textContent,
+                        count:document.querySelectorAll('#rows tr').length
+                    };
+                """,[button])
+                verify(result["status"].startswith("REJECTED:")
+                       and result["available"]=="—" and result["count"]==0,
+                       "AGENTCREDITS_FAIL_CLOSED_"+button.upper())
+            duplicate_json = driver.js("""
+                document.getElementById('journal').value=
+                    '{"schema":"agentcredits.journal.v1","schema":"agentcredits.journal.v1","events":[]}';
+                document.getElementById('inspect').click();
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                    && document.querySelectorAll('#rows tr').length===0;
+            """)
+            verify(duplicate_json is True, "AGENTCREDITS_DUPLICATE_JSON_KEY")
+            driver.js("document.getElementById('reset').click();return true;")
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('PASS:')
+                    && document.getElementById('available').textContent==='80';
+            """) is True, "AGENTCREDITS_RESET_RECOVERY")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
+                       "AGENTCREDITS_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":13,
+                "browser":version,"publicCards":7,"additionalToolsLinked":14,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":3,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":4,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
