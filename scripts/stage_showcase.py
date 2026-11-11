@@ -173,11 +173,11 @@ def stage_catalog(output: Path) -> dict:
     for name, source in (("MODEL_COST", MODEL_COST_SOURCE), ("MODEL_FIT", MODEL_FIT_SOURCE)):
         if source.is_symlink() or source.parent.is_symlink() or not source.is_file():
             raise ValueError(name + "_SOURCE_INVALID")
-        data = source.read_bytes()
-        if (len(data) > 65536 or b"\x00" in data or
-                b"connect-src 'none'" not in data or b"default-src 'none'" not in data or
-                data.count(b"<script>") != 1 or b"<script src" in data or
-                b"innerHTML" in data or b"XMLHttpRequest" in data or b"fetch(" in data):
+        page_bytes = source.read_bytes()
+        if (len(page_bytes) > 65536 or b"\x00" in page_bytes or
+                b"connect-src 'none'" not in page_bytes or b"default-src 'none'" not in page_bytes or
+                page_bytes.count(b"<script>") != 1 or b"<script src" in page_bytes or
+                b"innerHTML" in page_bytes or b"XMLHttpRequest" in page_bytes or b"fetch(" in page_bytes):
             raise ValueError(name + "_SAFETY_CONTRACT")
     model_cost = MODEL_COST_SOURCE.read_bytes()
     model_fit = MODEL_FIT_SOURCE.read_bytes()
