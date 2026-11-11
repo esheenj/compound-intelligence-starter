@@ -20,6 +20,7 @@ AGENTCREDITS_SOURCE = ROOT / "site" / "agentcredits.html"
 MODEL_COST_SOURCE = ROOT / "site" / "model-cost.html"
 MODEL_FIT_SOURCE = ROOT / "site" / "model-fit.html"
 CONTEXT_SOURCE = ROOT / "site" / "context-preservation.html"
+DISAGREEMENT_SOURCE = ROOT / "site" / "model-disagreement.html"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
     "compound-intelligence-starter",
@@ -100,10 +101,10 @@ def verify_catalog(data: bytes) -> dict:
     observed = set(parser.links)
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
-    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1:
+    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1:
         raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html"}):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html"}):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -171,7 +172,7 @@ def stage_catalog(output: Path) -> dict:
             agentcredits.count(b"<script>") != 1 or b"<script src" in agentcredits or
             b"innerHTML" in agentcredits or b"XMLHttpRequest" in agentcredits or b"fetch(" in agentcredits):
         raise ValueError("AGENTCREDITS_SAFETY_CONTRACT")
-    for name, source in (("MODEL_COST", MODEL_COST_SOURCE), ("MODEL_FIT", MODEL_FIT_SOURCE), ("CONTEXT", CONTEXT_SOURCE)):
+    for name, source in (("MODEL_COST", MODEL_COST_SOURCE), ("MODEL_FIT", MODEL_FIT_SOURCE), ("CONTEXT", CONTEXT_SOURCE), ("DISAGREEMENT", DISAGREEMENT_SOURCE)):
         if source.is_symlink() or source.parent.is_symlink() or not source.is_file():
             raise ValueError(name + "_SOURCE_INVALID")
         page_bytes = source.read_bytes()
@@ -183,6 +184,7 @@ def stage_catalog(output: Path) -> dict:
     model_cost = MODEL_COST_SOURCE.read_bytes()
     model_fit = MODEL_FIT_SOURCE.read_bytes()
     context = CONTEXT_SOURCE.read_bytes()
+    disagreement = DISAGREEMENT_SOURCE.read_bytes()
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
     if not output.parent.exists() or output.parent.is_symlink():
@@ -197,8 +199,9 @@ def stage_catalog(output: Path) -> dict:
         (output / "model-cost.html").write_bytes(model_cost)
         (output / "model-fit.html").write_bytes(model_fit)
         (output / "context-preservation.html").write_bytes(context)
+        (output / "model-disagreement.html").write_bytes(disagreement)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "index.html", "model-cost.html", "model-fit.html", "mvp-wave.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -206,8 +209,8 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "index.html", "model-cost.html", "model-fit.html", "mvp-wave.html"],
-        "additionalHostedToolCount": 7,
+        "files": [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html"],
+        "additionalHostedToolCount": 8,
         "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
         "mvpWaveSha256": hashlib.sha256(wave).hexdigest(),
         "agentOpsSha256": hashlib.sha256(agentops).hexdigest(),
@@ -215,7 +218,8 @@ def stage_catalog(output: Path) -> dict:
         "agentCreditsSha256": hashlib.sha256(agentcredits).hexdigest(),
         "modelCostSha256": hashlib.sha256(model_cost).hexdigest(),
         "modelFitSha256": hashlib.sha256(model_fit).hexdigest(),
-        "contextSha256": hashlib.sha256(context).hexdigest(), **summary
+        "contextSha256": hashlib.sha256(context).hexdigest(),
+        "modelDisagreementSha256": hashlib.sha256(disagreement).hexdigest(), **summary
     }
 
 
