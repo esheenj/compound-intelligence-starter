@@ -11,6 +11,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 import shutil
 
+from scripts.render_support import load_channels, render_support
+
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "site" / "index.html"
 MVP_WAVE_SOURCE = ROOT / "site" / "mvp-wave.html"
@@ -24,6 +26,7 @@ DISAGREEMENT_SOURCE = ROOT / "site" / "model-disagreement.html"
 DECISION_REVIEW_SOURCE = ROOT / "site" / "decision-review.html"
 AGENT_TRUST_SOURCE = ROOT / "site" / "agent-trust.html"
 SIGNED_AGENT_SOURCE = ROOT / "site" / "signed-agent.html"
+SUPPORT_CONFIG_SOURCE = ROOT / "support" / "channels.json"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
     "compound-intelligence-starter",
@@ -104,10 +107,10 @@ def verify_catalog(data: bytes) -> dict:
     observed = set(parser.links)
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
-    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1 or parser.links.count("decision-review.html") != 1 or parser.links.count("agent-trust.html") != 1 or parser.links.count("signed-agent.html") != 1:
+    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1 or parser.links.count("decision-review.html") != 1 or parser.links.count("agent-trust.html") != 1 or parser.links.count("signed-agent.html") != 1 or parser.links.count("support.html") != 1:
         raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html"}):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html"}):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -191,6 +194,7 @@ def stage_catalog(output: Path) -> dict:
     decision_review = DECISION_REVIEW_SOURCE.read_bytes()
     agent_trust = AGENT_TRUST_SOURCE.read_bytes()
     signed_agent = SIGNED_AGENT_SOURCE.read_bytes()
+    support = render_support(load_channels(SUPPORT_CONFIG_SOURCE))
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
     if not output.parent.exists() or output.parent.is_symlink():
@@ -209,8 +213,9 @@ def stage_catalog(output: Path) -> dict:
         (output / "decision-review.html").write_bytes(decision_review)
         (output / "agent-trust.html").write_bytes(agent_trust)
         (output / "signed-agent.html").write_bytes(signed_agent)
+        (output / "support.html").write_bytes(support)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -218,8 +223,9 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html"],
+        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"],
         "additionalHostedToolCount": 11,
+        "supportPageSha256": hashlib.sha256(support).hexdigest(),
         "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
         "mvpWaveSha256": hashlib.sha256(wave).hexdigest(),
         "agentOpsSha256": hashlib.sha256(agentops).hexdigest(),
