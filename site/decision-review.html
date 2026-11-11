@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline synthetic AI decision explanations, evidence and human-review gates.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Explainable Decision Review Lab · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{max-width:75rem;margin:auto;padding:clamp(1rem,3vw,2.5rem)}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.12;margin:.7rem 0}
+h2{line-height:1.25}a{color:LinkText;overflow-wrap:anywhere}
+button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:26rem;border:1px solid GrayText;background:Canvas;color:CanvasText;padding:1rem;border-radius:.7rem;font:.82rem/1.5 ui-monospace,monospace}
+.controls{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}
+button{background:CanvasText;color:Canvas;border:1px solid CanvasText;border-radius:.7rem;cursor:pointer;font:inherit;font-weight:700;padding:.6rem .85rem;min-height:44px}
+button.alt{background:Canvas;color:CanvasText}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:.9rem}
+.metric strong{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}table{width:100%;min-width:55rem;border-collapse:collapse}
+th,td{text-align:left;padding:.7rem;border-bottom:1px solid GrayText;overflow-wrap:anywhere}
+.muted,small{color:GrayText}#status{font-weight:750;overflow-wrap:anywhere}
+#evidence li{margin:.5rem 0;overflow-wrap:anywhere}
+</style></head><body><main>
+<p><a href="./">← Public OSS AI tools directory</a></p>
+<p class="muted">Original local-only review tool · Invented evidence · No real decision execution</p>
+<h1>Explainable Decision Review Lab</h1>
+<p><strong>Why did AI recommend this action, and what is still uncertain?</strong> Inspect fictional source revisions, supporting and opposing claims, impact, self-reported test examples and simulated reviewer decisions. A recorded review is never permission to act.</p>
+<section class="panel" aria-labelledby="editor-heading">
+<h2 id="editor-heading">1. Explore the fictional decision file</h2>
+<label for="fixture">Editable JSON: up to 100 reference sources and 50 decisions, 64 KiB maximum</label>
+<textarea id="fixture" spellcheck="false" aria-describedby="data-warning"></textarea>
+<p id="data-warning"><small>Only use fictional, non-sensitive text. Do not paste private chats, personal information, client records, credentials, trading instructions or employer documents.</small></p>
+<div class="controls">
+<button type="button" id="inspect">Explain decisions</button>
+<button type="button" class="alt" id="stale">Use old source</button>
+<button type="button" class="alt" id="opposing">Add opposing evidence</button>
+<button type="button" class="alt" id="hypothesis">Use a hypothesis</button>
+<button type="button" class="alt" id="reject">Record a rejection</button>
+<button type="button" class="alt" id="no-confidence">Remove methodology</button>
+<button type="button" class="alt" id="reset">Reset example</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Explain decisions to test the fictional sample.</p>
+</section>
+<section class="panel" aria-labelledby="results-heading">
+<h2 id="results-heading">2. Review diagnostics</h2>
+<div class="metrics">
+<div class="metric"><small>Fictional decisions</small><strong id="total">—</strong></div>
+<div class="metric"><small>Held</small><strong id="holds">—</strong></div>
+<div class="metric"><small>Human review required</small><strong id="needs">—</strong></div>
+<div class="metric"><small>Review recorded (not authorized)</small><strong id="recorded">—</strong></div>
+</div>
+<div class="tablewrap"><table>
+<caption>These gates are educational and cannot authorize real actions</caption>
+<thead><tr><th scope="col">Decision</th><th scope="col">Triage</th><th scope="col">Impact</th><th scope="col">Reasons</th><th scope="col">Reported methodology</th><th scope="col">Review claim</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+<h3>Evidence and source lineage</h3>
+<ul id="evidence" aria-label="Source references and declared evidence status"></ul>
+</section>
+<section class="panel">
+<h2>3. Read the limits before acting</h2>
+<p>A source marked “declared verified” is still just a claim supplied in JSON. Even a match to a reference does not prove that the action follows from the evidence. “8/10 sample outcomes” is a self-reported count, <strong>not an 80% confidence level</strong>, probability of success or calibrated model quality score.</p>
+<p>All browser logic runs locally, with no network connection, file upload, storage or AI model call. It cannot read your ChatGPT, Cortex, Commander or SIGMA data. Read the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_EXPLAINABLE_REVIEW.md">offline Python benchmark and adversarial tests</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const field=document.getElementById("fixture"),status=document.getElementById("status"),
+       rows=document.getElementById("rows"),evidence=document.getElementById("evidence");
+ const METRICS=["total","holds","needs","recorded"];
+ const IDS=/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$/;
+ const id=x=>typeof x==="string"&&IDS.test(x);
+ const exact=(v,keys)=>v!==null&&typeof v==="object"&&!Array.isArray(v)&&
+   Object.keys(v).length===keys.length&&keys.every(k=>Object.prototype.hasOwnProperty.call(v,k));
+ const txt=(x,n=240)=>typeof x==="string"&&x.length>=1&&x.length<=n&&
+   x.trim()!==""&&!x.includes("\0");
+ const bounded=(x,min,max)=>Array.isArray(x)&&x.length>=min&&x.length<=max;
+ const source=(source_id,statement,revision,evidence_status)=>
+  ({source_id,statement,revision,evidence_status});
+ const ref=(source_id,revision)=>({source_id,revision});
+ const confidence=(correct,cases)=>({method:correct===null?"NONE":"SELF_REPORTED_SAMPLE",correct,cases});
+ const item=(decision_id,action,impact,support,oppose,confidenceValue,review)=>
+  ({decision_id,action,impact,support,oppose,confidence:confidenceValue,review});
+ function sample(){
+  return {schema:"explainable-review.fixtures.v1",sources:[
+   source("policy","Fictional onboarding guide revision 2.",2,"DECLARED_VERIFIED"),
+   source("audit","Fictional review checklist completed.",1,"DECLARED_VERIFIED"),
+   source("experiment","Unproven optional workflow hypothesis.",1,"HYPOTHESIS"),
+   source("latency","Fictional processing delay was observed.",1,"DECLARED_VERIFIED")
+  ],decisions:[
+   item("routine","Suggest a fictional onboarding checklist","LOW",[ref("policy",2)],[],
+        confidence(8,10),"RECORDED_APPROVE"),
+   item("high-impact","Suggest changing a fictional service policy","HIGH",[ref("audit",1)],[],
+        confidence(9,10),"PENDING"),
+   item("contradicted","Suggest fictional routing change","LOW",[ref("policy",2)],[ref("audit",1)],
+        confidence(5,5),"PENDING"),
+   item("stale","Suggest outdated fictional instructions","LOW",[ref("policy",1)],[],
+        confidence(5,5),"RECORDED_APPROVE"),
+   item("unverified","Suggest untested fictional enhancement","LOW",[ref("experiment",1)],[],
+        confidence(3,3),"RECORDED_APPROVE"),
+   item("unscored","Consider a fictional follow-up","LOW",[ref("latency",1)],[],
+        confidence(null,null),"PENDING")
+  ]};
+ }
+ const initial=JSON.stringify(sample(),null,2);field.value=initial;
+ function strict(text){
+  const doc=JSON.parse(text),stack=[];
+  for(let i=0;i<text.length;i++){
+   if(text[i]==='"'){
+    const begin=i;i++;let esc=false;
+    for(;i<text.length;i++){
+     if(esc){esc=false;continue;}
+     if(text[i]==="\\"){esc=true;continue;}
+     if(text[i]==='"')break;
+    }
+    const key=JSON.parse(text.slice(begin,i+1));
+    let j=i+1;while(j<text.length&&/\s/.test(text[j]))j++;
+    if(text[j]===":"){
+     const p=stack[stack.length-1];
+     if(!p||!p.keys||p.keys.has(key))throw Error("Duplicate/malformed JSON key");
+     p.keys.add(key);
+    }
+   }else if(text[i]==="{")stack.push({keys:new Set()});
+   else if(text[i]==="[")stack.push({keys:null});
+   else if(text[i]==="}"||text[i]==="]")stack.pop();
+  }
+  return doc;
+ }
+ const revision=x=>Number.isSafeInteger(x)&&x>=1&&x<=999999;
+ function validate(d){
+  if(!exact(d,["schema","sources","decisions"])||d.schema!=="explainable-review.fixtures.v1"||
+     !bounded(d.sources,1,100)||!bounded(d.decisions,1,50))throw Error("Invalid schema");
+  const byId=new Map();
+  for(const s of d.sources){
+   if(!exact(s,["source_id","statement","revision","evidence_status"])||
+     !id(s.source_id)||byId.has(s.source_id)||!txt(s.statement)||!revision(s.revision)||
+     !["DECLARED_VERIFIED","HYPOTHESIS"].includes(s.evidence_status))throw Error("Invalid source");
+   byId.set(s.source_id,s);
+  }
+  const seen=new Set();
+  for(const q of d.decisions){
+   if(!exact(q,["decision_id","action","impact","support","oppose","confidence","review"])||
+     !id(q.decision_id)||seen.has(q.decision_id)||!txt(q.action)||
+     !["LOW","HIGH"].includes(q.impact)||!["PENDING","RECORDED_APPROVE","RECORDED_REJECT"].includes(q.review)||
+     !bounded(q.support,0,100)||!bounded(q.oppose,0,100))throw Error("Invalid decision");
+   seen.add(q.decision_id);
+   const seenRefs=new Set();
+   for(const list of [q.support,q.oppose])for(const r of list){
+    if(!exact(r,["source_id","revision"])||!id(r.source_id)||!revision(r.revision)||
+       seenRefs.has(r.source_id))throw Error("Repeated/invalid reference");
+    seenRefs.add(r.source_id);
+   }
+   const c=q.confidence;
+   if(!exact(c,["method","correct","cases"]))throw Error("Invalid method");
+   if(c.method==="NONE"){
+    if(c.correct!==null||c.cases!==null)throw Error("Inconsistent no-method score");
+   }else if(c.method==="SELF_REPORTED_SAMPLE"){
+    if(!Number.isSafeInteger(c.cases)||!Number.isSafeInteger(c.correct)||
+       c.cases<1||c.cases>10000||c.correct<0||c.correct>c.cases)throw Error("Invalid sample");
+   }else throw Error("Unknown confidence methodology");
+  }
+  return byId;
+ }
+ function evaluate(d){
+  const sources=validate(d),results=[];
+  for(const q of d.decisions){
+   const reasons=new Set(),linked=[];
+   if(!q.support.length)reasons.add("NO_SUPPORT");
+   if(q.oppose.length)reasons.add("OPPOSING_EVIDENCE");
+   for(const stance of ["support","oppose"])for(const r of q[stance]){
+    const known=sources.get(r.source_id);
+    let state;
+    if(!known){state="UNKNOWN_SOURCE";reasons.add(state);}
+    else if(known.revision!==r.revision){state="STALE_REVISION";reasons.add(state);}
+    else if(known.evidence_status!=="DECLARED_VERIFIED"){state="UNVERIFIED_SOURCE";reasons.add(state);}
+    else state="DECLARED_VERIFIED_MATCH";
+    linked.push({id:r.source_id,stance,state,revision:r.revision,
+                 current:known?.revision??null,label:known?.evidence_status??"UNKNOWN",
+                 statement:known?.statement??"not supplied"});
+   }
+   if(q.review==="RECORDED_REJECT")reasons.add("REVIEW_REJECTED");
+   const blockers=["NO_SUPPORT","OPPOSING_EVIDENCE","UNKNOWN_SOURCE","STALE_REVISION",
+                   "UNVERIFIED_SOURCE","REVIEW_REJECTED"];
+   let gate;
+   if(blockers.some(x=>reasons.has(x)))gate="HOLD";
+   else if(q.impact==="HIGH"||q.review==="PENDING"||q.confidence.method==="NONE"){
+    gate="HUMAN_REVIEW_REQUIRED";
+    if(q.impact==="HIGH")reasons.add("HIGH_IMPACT");
+    if(q.review==="PENDING")reasons.add("REVIEW_PENDING");
+    if(q.confidence.method==="NONE")reasons.add("NO_CONFIDENCE_METHOD");
+   }else gate="REVIEW_RECORDED_NOT_AUTHORIZED";
+   results.push({id:q.decision_id,gate,impact:q.impact,review:q.review,
+                 reasons:[...reasons].sort(),confidence:q.confidence,linked});
+  }
+  return results.sort((a,b)=>a.id.localeCompare(b.id,"en"));
+ }
+ function clear(){
+  rows.replaceChildren();evidence.replaceChildren();
+  for(const x of METRICS)document.getElementById(x).textContent="—";
+ }
+ function inspect(){
+  clear();
+  if(new TextEncoder().encode(field.value).length>65536){
+   status.textContent="REJECTED: exceeds 64 KiB. No partial result.";return;
+  }
+  try{
+   const results=evaluate(strict(field.value));
+   for(const q of results){
+    const tr=document.createElement("tr");
+    const c=q.confidence.method==="NONE"?"NONE":
+       "SELF_REPORTED_SAMPLE "+q.confidence.correct+"/"+q.confidence.cases;
+    for(const value of [q.id,q.gate,q.impact,q.reasons.join(", ")||"none",c,q.review]){
+     const td=document.createElement("td");td.textContent=value;tr.append(td);
+    }
+    rows.append(tr);
+    const li=document.createElement("li");
+    const references=q.linked.map(x=>x.stance+" "+x.id+"@"+x.revision+
+      " (current "+String(x.current)+"): "+x.state+"; "+x.label+" — "+x.statement);
+    li.textContent=q.id+": "+(references.join(" | ")||"no supporting sources")+
+      ". Execution authority: NONE.";
+    evidence.append(li);
+   }
+   const held=results.filter(x=>x.gate==="HOLD").length;
+   const needs=results.filter(x=>x.gate==="HUMAN_REVIEW_REQUIRED").length;
+   const recorded=results.filter(x=>x.gate==="REVIEW_RECORDED_NOT_AUTHORIZED").length;
+   document.getElementById("total").textContent=String(results.length);
+   document.getElementById("holds").textContent=String(held);
+   document.getElementById("needs").textContent=String(needs);
+   document.getElementById("recorded").textContent=String(recorded);
+   status.textContent="RECORDED: "+held+" held, "+needs+" need human review, "+
+     recorded+" simulated review recorded. No execution authority.";
+  }catch(_){
+   clear();
+   status.textContent="REJECTED: invalid or inconsistent input. No partial result accepted.";
+  }
+ }
+ function scenario(which){
+  const d=sample(),routine=d.decisions.find(x=>x.decision_id==="routine");
+  if(which==="stale")routine.support[0].revision=1;
+  if(which==="opposing")routine.oppose.push(ref("audit",1));
+  if(which==="hypothesis")routine.support=[ref("experiment",1)];
+  if(which==="reject")routine.review="RECORDED_REJECT";
+  if(which==="no-confidence")routine.confidence=confidence(null,null);
+  field.value=JSON.stringify(d,null,2);inspect();
+ }
+ document.getElementById("inspect").addEventListener("click",inspect);
+ for(const button of ["stale","opposing","hypothesis","reject","no-confidence"])
+  document.getElementById(button).addEventListener("click",()=>scenario(button));
+ document.getElementById("reset").addEventListener("click",()=>{field.value=initial;inspect();});
+})();
+</script></body></html>
