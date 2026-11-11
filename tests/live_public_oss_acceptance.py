@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 26 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 27 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -43,6 +43,7 @@ URLS = {
     "context-preservation": "https://esheenj.github.io/compound-intelligence-starter/context-preservation.html",
     "model-disagreement": "https://esheenj.github.io/compound-intelligence-starter/model-disagreement.html",
     "decision-review": "https://esheenj.github.io/compound-intelligence-starter/decision-review.html",
+    "agent-trust": "https://esheenj.github.io/compound-intelligence-starter/agent-trust.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -60,6 +61,7 @@ READY = {
     "context-preservation": "#evaluate",
     "model-disagreement": "#inspect",
     "decision-review": "#inspect",
+    "agent-trust": "#check",
     "approval": "#state",
 }
 
@@ -564,6 +566,95 @@ def interact(driver: Driver, kind: str) -> None:
             return document.getElementById('status').textContent.startsWith('RECORDED:')
                 && document.getElementById('recorded').textContent==='1';
         """) is True,"LIVE_EXPLAINABLE_RESET")
+    elif kind == "agent-trust":
+        ready={}
+        for _ in range(40):
+            ready=driver.js("""
+                const s=document.getElementById('status').textContent;
+                return {ok:s.startsWith('RECORDED:'),error:s.startsWith('REJECTED:'),status:s};
+            """)
+            if ready["ok"] or ready["error"]:break
+            time.sleep(.15)
+        verify(ready["ok"],"LIVE_AGENT_TRUST_INITIALIZE_"+ready["status"][:80])
+        result=driver.js("""
+            return {
+                total:document.getElementById('total').textContent,
+                held:document.getElementById('held').textContent,
+                matching:document.getElementById('matching').textContent,
+                authenticated:document.getElementById('authenticated').textContent,
+                rows:[...document.querySelectorAll('#rows tr')].map(r=>
+                   [...r.querySelectorAll('td')].map(x=>x.textContent))
+            };
+        """)
+        by_id={x[0]:x for x in result["rows"]}
+        verify(result["total"]=="11" and result["held"]=="10"
+               and result["matching"]=="1" and result["authenticated"]=="0"
+               and len(by_id)==11
+               and by_id["matching-claim"][2]=="CLAIM_MATCH_ONLY"
+               and by_id["revoked-agent"][2]=="HOLD"
+               and by_id["unknown-agent"][2]=="HOLD"
+               and by_id["wrong-origin"][2]=="HOLD"
+               and by_id["wrong-key"][2]=="HOLD"
+               and by_id["capability-escalation"][2]=="HOLD"
+               and by_id["stale-registry"][2]=="HOLD"
+               and by_id["nonce-replay-first"][2]=="HOLD"
+               and by_id["nonce-replay-second"][2]=="HOLD"
+               and by_id["expired"][2]=="HOLD"
+               and by_id["checksum-tamper"][2]=="HOLD"
+               and by_id["checksum-tamper"][4]=="MISMATCH"
+               and all(x[5]=="NOT VERIFIED" for x in result["rows"]),
+               "LIVE_AGENT_TRUST_CLAIMS_NOT_AUTHENTICATED")
+        for btn,reason in (("revoke","REVOKED_REGISTRATION"),
+                           ("scope","CAPABILITY_NOT_DECLARED"),
+                           ("replay","REPLAYED_NONCE"),
+                           ("tamper","CHECKSUM_MISMATCH")):
+            driver.js("document.getElementById(arguments[0]).click();return true;",[btn])
+            updated={}
+            for _ in range(40):
+                updated=driver.js("""
+                    const s=document.getElementById('status').textContent;
+                    const row=[...document.querySelectorAll('#rows tr')].find(r=>
+                        r.querySelector('td')?.textContent==='matching-claim');
+                    return {ready:s.startsWith('RECORDED:'),error:s.startsWith('REJECTED:'),
+                      held:document.getElementById('held').textContent,
+                      gate:row?.querySelectorAll('td')[2].textContent,
+                      reasons:row?.querySelectorAll('td')[3].textContent};
+                """)
+                if updated["ready"] or updated["error"]:break
+                time.sleep(.15)
+            verify(updated["ready"] and updated["held"]=="11"
+                   and updated["gate"]=="HOLD" and reason in updated["reasons"],
+                   "LIVE_AGENT_TRUST_NEGATIVE_"+btn.upper())
+        driver.js("""
+            document.getElementById('fixture').value=
+              '{"schema":"agent-trust-claims.v1","schema":"bad","registry":[],"claims":[],"evaluation_tick":1}';
+            document.getElementById('check').click();return true;
+        """)
+        bad={}
+        for _ in range(40):
+            bad=driver.js("""
+                const s=document.getElementById('status').textContent;
+                return {failed:s.startsWith('REJECTED:'),
+                  rows:document.querySelectorAll('#rows tr').length,
+                  total:document.getElementById('total').textContent};
+            """)
+            if bad["failed"]:break
+            time.sleep(.15)
+        verify(bad["failed"] and bad["rows"]==0 and bad["total"]=="—",
+               "LIVE_AGENT_TRUST_DUPLICATE_JSON_REJECTED")
+        driver.js("document.getElementById('reset').click();return true;")
+        reset={}
+        for _ in range(40):
+            reset=driver.js("""
+                const s=document.getElementById('status').textContent;
+                return {ok:s.startsWith('RECORDED:'),error:s.startsWith('REJECTED:'),
+                  held:document.getElementById('held').textContent,
+                  matching:document.getElementById('matching').textContent};
+            """)
+            if reset["ok"] or reset["error"]:break
+            time.sleep(.15)
+        verify(reset["ok"] and reset["held"]=="10" and reset["matching"]=="1",
+               "LIVE_AGENT_TRUST_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -624,7 +715,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 19 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 20 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
