@@ -409,10 +409,12 @@ def run() -> dict:
     try:
         version = driver.start()
         for repo, url in ENTRY_SITES.items():
+            print(json.dumps({"phase":"opening-home","id":repo,"url":url}), flush=True)
             open_static(driver, repo, url)
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope": "HTTPS load and semantic landmarks"})
         for kind, url in EARLY_URLS.items():
+            print(json.dumps({"phase":"opening-early","id":kind,"url":url}), flush=True)
             open_static(driver, kind, url)
             interact_early(driver, kind)
             for width, height in ((320, 720), (1440, 900)):
@@ -423,12 +425,14 @@ def run() -> dict:
                             "result": "PASS", "interaction_scope": "HTTPS interaction",
                             "responsive_widths": [320, 1440]})
         for kind in URLS:
+            print(json.dumps({"phase":"opening-addon","id":kind,"url":URLS[kind]}), flush=True)
             open_page(driver, kind)
             interact(driver, kind)
             for width, height in ((320, 720), (1440, 900)):
                 driver.viewport(width, height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
                        "LIVE_" + kind.upper() + "_RESPONSIVE_" + str(width))
+            print(json.dumps({"phase":"accepted-addon","id":kind}), flush=True)
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
