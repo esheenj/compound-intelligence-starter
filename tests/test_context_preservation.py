@@ -111,6 +111,12 @@ class ContextPreservationTests(unittest.TestCase):
         bad = copy.deepcopy(base)
         bad["source"]["facts"][0]["secret"] = "unexpected"
         variants.append(bad)
+        bad = copy.deepcopy(base)
+        bad["source"]["facts"][0]["importance"] = ["CRITICAL"]
+        variants.append(bad)
+        bad = copy.deepcopy(base)
+        bad["source"]["facts"][0]["evidence_status"] = {"status": "DECLARED_VERIFIED"}
+        variants.append(bad)
         for variant in variants:
             with self.subTest(variant=str(variant)[:80]):
                 with self.assertRaises(ValueError):

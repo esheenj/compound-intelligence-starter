@@ -81,9 +81,9 @@ def validate(document: object) -> tuple[dict, dict[str, dict], list[tuple[str, d
             raise ValueError("duplicate source fact ID")
         _value(entry["value"])
         _name(entry["source_ref"], "source_ref")
-        if entry["importance"] not in IMPORTANCE or type(entry["importance"]) is not str:
+        if type(entry["importance"]) is not str or entry["importance"] not in IMPORTANCE:
             raise ValueError("invalid importance")
-        if entry["evidence_status"] not in EVIDENCE or type(entry["evidence_status"]) is not str:
+        if type(entry["evidence_status"]) is not str or entry["evidence_status"] not in EVIDENCE:
             raise ValueError("invalid evidence status")
         facts[fid] = entry
     candidates = []
