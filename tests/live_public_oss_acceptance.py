@@ -312,6 +312,7 @@ def interact(driver: Driver, kind: str) -> None:
                 && document.getElementById('available').textContent==='80';
         """) is True, "LIVE_AGENTCREDITS_RESET")
     elif kind == "model-cost":
+        print(json.dumps({"phase":"cost-baseline","buttons":driver.js("return [...document.querySelectorAll('button')].map(x=>x.id);")}), flush=True)
         result=driver.js("""
             document.querySelector('#compare').click();
             return{
@@ -329,12 +330,14 @@ def interact(driver: Driver, kind: str) -> None:
                and result["rows"][0][3]=="0.000380000000"
                and result["rows"][1][3]=="0.000460000000",
                "LIVE_MODEL_COST_EXACT_DECIMAL")
+        print(json.dumps({"phase":"cost-budget"}), flush=True)
         verify(driver.js("""
             document.querySelector('#budget').click();
             return document.querySelector('#status').textContent.startsWith('PASS:')
                 && document.querySelector('#budget-display').textContent==='0.001000000000';
         """) is True,"LIVE_MODEL_COST_BUDGET")
         for button in ("conflict","missing"):
+            print(json.dumps({"phase":"cost-negative","button":button}), flush=True)
             bad=driver.js("""
                 document.querySelector(arguments[0]).click();
                 return{
@@ -345,6 +348,7 @@ def interact(driver: Driver, kind: str) -> None:
             """,[button])
             verify(bad["status"].startswith("REJECTED:") and bad["rows"]==0
                    and bad["budget"]=="—","LIVE_MODEL_COST_FAIL_CLOSED_"+button.upper())
+        print(json.dumps({"phase":"cost-reset"}), flush=True)
         verify(driver.js("""
             document.querySelector('#reset').click();
             return document.querySelector('#status').textContent.startsWith('HOLD:')
