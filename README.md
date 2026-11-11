@@ -11,6 +11,8 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Zero required subscriptions · Python standard library · Runs offline · MIT licensed**
 
+**Wave 3 Context Preservation Benchmark:** [Measure exact synthetic handover fidelity](docs/OPEN_INTELLIGENCE_CONTEXT_PRESERVATION.md) — `python -m src.compound_intelligence.context_preservation --demo`. Three fictional checkpoints expose missing critical facts, stale source versions, contradictory values, evidence-label promotion and invented claims. This does **not** measure real LLM understanding or grant execution authority.
+
 **Wave 2 approval-gate simulation:** [Offline review, denial, expiry and action-report replay](docs/OPEN_INTELLIGENCE_WAVE2_APPROVALS.md) — `python -m src.compound_intelligence.agent_review_gate --demo`. Fictional actor claims only; `execution_authority: NONE`.
 
 
