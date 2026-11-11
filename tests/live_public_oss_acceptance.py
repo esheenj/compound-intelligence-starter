@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for eight existing public add-ons.
+"""Read-only LIVE HTTPS Chrome acceptance for nine existing public add-ons.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -19,6 +19,7 @@ URLS = {
     "notifications": "https://esheenj.github.io/mobile-first-flow-kit-oss/notifications.html",
     "blueprint": "https://esheenj.github.io/flow-state-machine-oss/blueprint.html",
     "agentops": "https://esheenj.github.io/compound-intelligence-starter/agentops.html",
+    "agentproof": "https://esheenj.github.io/compound-intelligence-starter/agentproof.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -29,6 +30,7 @@ READY = {
     "notifications": "#status",
     "blueprint": "#status",
     "agentops": "#inspect",
+    "agentproof": "#check",
     "approval": "#state",
 }
 
@@ -160,6 +162,38 @@ def interact(driver: Driver, kind: str) -> None:
             document.querySelector('#reset').click();
             return held && rejected && document.querySelector('#status').textContent.startsWith('PASS:');
         """) is True, "LIVE_AGENTOPS_HOLD_CONFLICT_RECOVERY")
+    elif kind == "agentproof":
+        driver.js("document.querySelector('#check').click();return true;")
+        time.sleep(0.4)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('PASS:')
+                && document.querySelector('#count').textContent==='3'
+                && document.querySelector('#digests').textContent==='3'
+                && document.querySelector('#failures').textContent==='0';
+        """) is True, "LIVE_AGENTPROOF_HASH_BASELINE")
+        driver.js("document.querySelector('#tamper').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelector('#findings').textContent.includes('digest mismatch');
+        """) is True, "LIVE_AGENTPROOF_TAMPER")
+        driver.js("document.querySelector('#duplicate').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelector('#findings').textContent.includes('duplicate event ID');
+        """) is True, "LIVE_AGENTPROOF_REPLAY_ID")
+        driver.js("document.querySelector('#missing').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelector('#findings').textContent.includes('missing or unexpected fields');
+        """) is True, "LIVE_AGENTPROOF_MISSING_ISSUER")
+        driver.js("document.querySelector('#reset').click();return true;")
+        time.sleep(0.25)
+        verify(driver.js("""
+            return document.querySelector('#status').textContent.startsWith('PASS:');
+        """) is True, "LIVE_AGENTPROOF_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
