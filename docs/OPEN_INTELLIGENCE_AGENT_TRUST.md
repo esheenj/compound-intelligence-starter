@@ -2,6 +2,10 @@
 
 This original Python utility is a **diagnostic identity-claim mismatch checker**, not a registry of real people or agents. It compares a fictional agent's claimed ID, HTTPS origin, key fingerprint, capability and registry revision with a caller-supplied registry; flags revoked registrations, expired observations, repeat challenge nonces and SHA-256 mismatches. It never asserts that a real agent is who it says it is.
 
+## Hosted original browser release
+
+[Open the Agent Trust & Identity Lab](https://esheenj.github.io/compound-intelligence-starter/agent-trust.html), an offline mobile-friendly synthetic JSON editor with one-click simulated revocation, capability escalation, challenge replay and checksum tampering. The browser uses local Web Crypto SHA-256 for byte-consistency checks, **not** signature or real-agent authentication. Independent actual public HTTPS Chrome [27-page run 43036020756 (attempt 2)](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43036020756) **PASS** across seven public repository homepages and twenty add-ons; the first merged-main attempt was blocked on unrelated `model-fit.html` page readiness and was preserved as failed evidence.
+
 ## Try it
 
 ```sh
