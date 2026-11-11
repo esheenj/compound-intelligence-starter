@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline synthetic multi-model disagreement and false-consensus inspection tool.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'">
+<title>Model Disagreement Lab · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{max-width:74rem;margin:auto;padding:clamp(1rem,3vw,2.4rem)}
+h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.1;margin:.7rem 0}
+a{color:LinkText;overflow-wrap:anywhere}button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:25rem;border:1px solid GrayText;background:Canvas;color:CanvasText;padding:1rem;border-radius:.7rem;font:.81rem/1.55 ui-monospace,monospace}
+.controls{display:flex;gap:.7rem;flex-wrap:wrap;margin:1rem 0}
+button{background:CanvasText;color:Canvas;border:1px solid CanvasText;border-radius:.7rem;cursor:pointer;font:inherit;font-weight:700;padding:.6rem 1rem;min-height:44px}
+button.alt{background:Canvas;color:CanvasText}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:1rem}
+.metric strong{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}table{width:100%;min-width:48rem;border-collapse:collapse}
+th,td{text-align:left;padding:.7rem;border-bottom:1px solid GrayText;overflow-wrap:anywhere}
+.muted,small{color:GrayText}#status{font-weight:750;overflow-wrap:anywhere}
+</style></head><body><main>
+<p><a href="./">← Public AI tools directory</a></p>
+<p class="muted">Original local-only example · All model responses are fictional · No external AI calls</p>
+<h1>Model Disagreement Lab</h1>
+<p><strong>Three agents can agree and still be wrong.</strong> Compare invented model responses, reference mismatches, missing answers and abstentions. Agreement is not accuracy, independent fact-checking or permission to act.</p>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">1. Edit a fictional comparison</h2>
+<label for="fixture">Editable JSON: two to eight models, up to forty cases, 64 KiB maximum</label>
+<textarea id="fixture" spellcheck="false" aria-describedby="fixture-help"></textarea>
+<p id="fixture-help"><small>Use synthetic data only. Do not paste private conversations, work documents, user details, credentials or real trading information.</small></p>
+<div class="controls">
+<button type="button" id="inspect">Inspect supplied answers</button>
+<button type="button" class="alt" id="split">Make a split decision</button>
+<button type="button" class="alt" id="reference">Correct a fictional consensus</button>
+<button type="button" class="alt" id="missing">Omit one agent response</button>
+<button type="button" class="alt" id="abstain">Abstain on one case</button>
+<button type="button" class="alt" id="reset">Reset sample</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Inspect supplied answers to compare the examples.</p>
+</section>
+<section class="panel" aria-labelledby="results-heading">
+<h2 id="results-heading">2. Evidence and review results</h2>
+<div class="metrics">
+<div class="metric"><small>Fictional cases</small><strong id="cases">—</strong></div>
+<div class="metric"><small>Require review</small><strong id="review">—</strong></div>
+<div class="metric"><small>Critical cases requiring review</small><strong id="critical">—</strong></div>
+</div>
+<div class="tablewrap"><table>
+<caption>Reference matches mean only that the caller-supplied strings match</caption>
+<thead><tr><th scope="col">Case</th><th scope="col">Outcome</th><th scope="col">Triage</th><th scope="col">Observed answers</th><th scope="col">Abstentions</th><th scope="col">Missing</th><th scope="col">Reference matches</th></tr></thead>
+<tbody id="rows"></tbody></table></div>
+<h3>Distinct response groups</h3>
+<ul id="findings" aria-label="Response group counts and models"></ul>
+</section>
+<section class="panel">
+<h2>3. Interpretation limits</h2>
+<p>A unanimous group can contradict its supplied reference; a supplied reference may also be false. This example cannot generate answers, check semantic equivalence, establish truth, measure calibration, authenticate agents, or authorize work or trades.</p>
+<p>The browser runs locally with no network access or data storage. Read the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_MODEL_DISAGREEMENT.md">Python reference and adversarial tests</a> and see <a href="https://github.com/esheenj/compound-intelligence-starter/issues/43">the Wave 3 tracker</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const field=document.getElementById("fixture"),status=document.getElementById("status"),
+       rows=document.getElementById("rows"),findings=document.getElementById("findings");
+ const METRICS=["cases","review","critical"];
+ const VALID_ID=/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$/;
+ const validId=x=>typeof x==="string"&&VALID_ID.test(x);
+ const exact=(x,keys)=>x!==null&&typeof x==="object"&&!Array.isArray(x)&&
+  Object.keys(x).length===keys.length&&keys.every(k=>Object.prototype.hasOwnProperty.call(x,k));
+ const answer=x=>typeof x==="string"&&x.length>=1&&x.length<=160&&x.trim()!==""&&!x.includes("\0");
+ const bound=(x,min,max)=>Array.isArray(x)&&x.length>=min&&x.length<=max;
+ function row(model,answerText){
+  return {model_id:model,status:answerText===null?"ABSTAIN":"ANSWER",answer:answerText};
+ }
+ function sample(){
+  const models=["fictional-alpha","fictional-beta","fictional-gamma"];
+  const filled=xs=>xs.map((x,i)=>row(models[i],x));
+  return {schema:"model-disagreement.fixtures.v1",models,cases:[
+   {case_id:"unverified-consensus",critical:false,reference:null,
+    responses:filled(["route-a","route-a","route-a"])},
+   {case_id:"split-critical-decision",critical:true,reference:"deny",
+    responses:filled(["deny","approve","deny"])},
+   {case_id:"unanimous-wrong",critical:true,reference:"stop",
+    responses:filled(["run","run","run"])},
+   {case_id:"missing-and-abstained",critical:false,reference:null,
+    responses:filled(["pause",null])},
+   {case_id:"matches-supplied",critical:true,reference:"wait",
+    responses:filled(["wait","wait","wait"])}
+  ]};
+ }
+ const initial=JSON.stringify(sample(),null,2);field.value=initial;
+ function strict(text){
+  const doc=JSON.parse(text),stack=[];
+  for(let i=0;i<text.length;i++){
+   if(text[i]==='"'){
+    const start=i;i++;let escaped=false;
+    for(;i<text.length;i++){
+     if(escaped){escaped=false;continue;}
+     if(text[i]==="\\"){escaped=true;continue;}
+     if(text[i]==='"')break;
+    }
+    const key=JSON.parse(text.slice(start,i+1));
+    let j=i+1;while(j<text.length&&/\s/.test(text[j]))j++;
+    if(text[j]===":"){
+     const parent=stack[stack.length-1];
+     if(!parent||!parent.keys||parent.keys.has(key))throw Error("Duplicate/malformed JSON key");
+     parent.keys.add(key);
+    }
+   }else if(text[i]==="{")stack.push({keys:new Set()});
+   else if(text[i]==="[")stack.push({keys:null});
+   else if(text[i]==="}"||text[i]==="]")stack.pop();
+  }
+  return doc;
+ }
+ function validate(doc){
+  if(!exact(doc,["schema","models","cases"])||doc.schema!=="model-disagreement.fixtures.v1"||
+     !bound(doc.models,2,8)||!bound(doc.cases,1,40))throw Error("Invalid comparison schema");
+  const models=new Set();
+  for(const m of doc.models){if(!validId(m)||models.has(m))throw Error("Duplicate/invalid model");models.add(m);}
+  const ids=new Set();
+  for(const c of doc.cases){
+   if(!exact(c,["case_id","critical","reference","responses"])||!validId(c.case_id)||
+      ids.has(c.case_id)||typeof c.critical!=="boolean"||
+      (c.reference!==null&&!answer(c.reference))||!bound(c.responses,0,8))
+     throw Error("Invalid case");
+   ids.add(c.case_id);
+   const seen=new Set();
+   for(const r of c.responses){
+    if(!exact(r,["model_id","status","answer"])||!validId(r.model_id)||
+       !models.has(r.model_id)||seen.has(r.model_id))throw Error("Duplicate/unknown model response");
+    seen.add(r.model_id);
+    if(!(r.status==="ANSWER"&&answer(r.answer)||
+         r.status==="ABSTAIN"&&r.answer===null))throw Error("Invalid response status");
+   }
+  }
+  return models;
+ }
+ function evaluate(doc){
+  const models=validate(doc),out=[];
+  for(const c of doc.cases){
+   const given=new Set(),abstained=[],groups=new Map();
+   for(const r of c.responses){
+    given.add(r.model_id);
+    if(r.status==="ABSTAIN")abstained.push(r.model_id);
+    else groups.set(r.answer,[...(groups.get(r.answer)||[]),r.model_id]);
+   }
+   const missing=[...models].filter(x=>!given.has(x));
+   const choices=[...groups].map(([value,models])=>({value,models:models.sort()}))
+     .sort((a,b)=>a.value.localeCompare(b.value,"en"));
+   const observed=choices.reduce((n,g)=>n+g.models.length,0);
+   const matches=c.reference===null?null:choices.reduce((n,g)=>
+     n+(g.value===c.reference?g.models.length:0),0);
+   let state;
+   if(!choices.length)state="NO_ANSWERS";
+   else if(choices.length>1)state="DISAGREEMENT";
+   else if(abstained.length||missing.length)state="INCOMPLETE";
+   else if(c.reference===null)state="UNVERIFIED_CONSENSUS";
+   else state=choices[0].value===c.reference?"MATCHES_SUPPLIED_REFERENCE":"CONTRADICTS_SUPPLIED_REFERENCE";
+   const triage=state==="MATCHES_SUPPLIED_REFERENCE"?"REFERENCE_MATCH_ONLY":"REVIEW";
+   out.push({id:c.case_id,critical:c.critical,state,triage,observed,
+             missing:missing.sort(),abstained:abstained.sort(),matches,choices});
+  }
+  return out.sort((a,b)=>a.id.localeCompare(b.id,"en"));
+ }
+ function clear(){
+  rows.replaceChildren();findings.replaceChildren();
+  for(const name of METRICS)document.getElementById(name).textContent="—";
+ }
+ function display(){
+  clear();
+  if(new TextEncoder().encode(field.value).length>65536){
+   status.textContent="REJECTED: JSON exceeds 64 KiB. No partial result.";return;
+  }
+  try{
+   const parsed=strict(field.value),results=evaluate(parsed);
+   for(const r of results){
+    const tr=document.createElement("tr");
+    for(const item of [r.id,r.state,r.triage,r.observed,r.abstained.length,
+       r.missing.length,r.matches===null?"Not supplied":r.matches]){
+     const td=document.createElement("td");td.textContent=String(item);tr.append(td);
+    }
+    rows.append(tr);
+    const groups=r.choices.map(x=>x.value+" ("+x.models.length+": "+x.models.join(", ")+")");
+    const li=document.createElement("li");
+    li.textContent=r.id+": "+(groups.join(" | ")||"no substantive answers")+
+     "; missing "+r.missing.join(", ")+"; abstained "+r.abstained.join(", ");
+    findings.append(li);
+   }
+   const review=results.filter(x=>x.triage==="REVIEW").length,
+         critical=results.filter(x=>x.triage==="REVIEW"&&x.critical).length;
+   document.getElementById("cases").textContent=String(results.length);
+   document.getElementById("review").textContent=String(review);
+   document.getElementById("critical").textContent=String(critical);
+   status.textContent="REVIEW: "+review+" fictional cases require review; "+
+     critical+" are marked critical. Neither consensus nor a supplied reference proves truth.";
+  }catch(_){clear();status.textContent="REJECTED: invalid or conflicting evidence. No partial result accepted.";}
+ }
+ function scenario(kind){
+  const s=sample(),get=id=>s.cases.find(x=>x.case_id===id);
+  if(kind==="split")get("unverified-consensus").responses[2].answer="route-b";
+  if(kind==="reference")for(const r of get("unanimous-wrong").responses)r.answer="stop";
+  if(kind==="missing")get("matches-supplied").responses.pop();
+  if(kind==="abstain"){const r=get("matches-supplied").responses[0];r.status="ABSTAIN";r.answer=null;}
+  field.value=JSON.stringify(s,null,2);display();
+ }
+ document.getElementById("inspect").addEventListener("click",display);
+ for(const id of ["split","reference","missing","abstain"])
+  document.getElementById(id).addEventListener("click",()=>scenario(id));
+ document.getElementById("reset").addEventListener("click",()=>{field.value=initial;display();});
+})();
+</script></body></html>
