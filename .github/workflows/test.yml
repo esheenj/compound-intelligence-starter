@@ -18,6 +18,10 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Unit tests
         run: python -m unittest discover -s tests -v
+      - name: Cryptographic challenge and durable replay tests (Node.js built-in crypto)
+        run: |
+          node --version
+          node --test tests/test_agent_auth.mjs
       - name: Stage standalone seven-repo public directory
         run: |
           mkdir -p dist
