@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Experiment with real P-256 signature checks and synthetic agent challenges, without real accounts or authority.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Signed Agent Challenge · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{margin:auto;max-width:76rem;padding:clamp(1rem,3vw,2.5rem)}
+h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.15;margin:.8rem 0}
+h2{line-height:1.2}a{color:LinkText;overflow-wrap:anywhere}
+.panel{margin:1.1rem 0;padding:clamp(1rem,2vw,1.5rem);border:1px solid GrayText;border-radius:1rem}
+.controls{display:flex;flex-wrap:wrap;gap:.7rem}
+button{min-height:44px;border:1px solid CanvasText;background:CanvasText;color:Canvas;
+ border-radius:.65rem;font:inherit;font-weight:700;padding:.6rem .9rem;cursor:pointer}
+button.alt{background:Canvas;color:CanvasText}
+button:focus-visible,a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:.9rem}
+.metric strong{display:block;overflow-wrap:anywhere;font-size:1.1rem}
+code,pre{font-family:ui-monospace,monospace;font-size:.83rem}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;border:1px solid GrayText;
+ padding:.9rem;border-radius:.65rem;max-height:18rem;overflow-y:auto}
+#status{font-weight:750;overflow-wrap:anywhere}.muted,small{color:GrayText}
+</style></head><body><main>
+<p><a href="./">← Public AI tools directory</a></p>
+<p class="muted">Real ECDSA signature verification · Synthetic local keys · No authentic organization enrollment</p>
+<h1>Signed Agent Challenge</h1>
+<p>Can an AI agent prove it controls a key for a specific request? This experiment uses your browser's genuine <strong>P-256 ECDSA + SHA-256</strong> implementation to verify a challenge signed by a fresh disposable key. It never grants an agent access or proves who enrolled that key.</p>
+<section class="panel" aria-labelledby="controls-heading">
+<h2 id="controls-heading">1. Run a signature check</h2>
+<p><small>Every button creates a new synthetic challenge and a fresh ECDSA signature. The replay scenario submits the same challenge twice. The expiry scenario advances a <strong>simulated verifier clock</strong>, not your device clock.</small></p>
+<div class="controls">
+<button type="button" id="valid">Verify valid signature</button>
+<button type="button" id="wrong-key" class="alt">Wrong signer</button>
+<button type="button" id="scope" class="alt">Change capability</button>
+<button type="button" id="replay" class="alt">Replay nonce</button>
+<button type="button" id="expired" class="alt">Expired challenge</button>
+<button type="button" id="revoked" class="alt">Revoke key</button>
+<button type="button" id="reset" class="alt">New disposable keys</button>
+</div>
+<p id="status" role="status" aria-live="polite">Creating ephemeral browser keys…</p>
+</section>
+<section class="panel" aria-labelledby="proof-heading">
+<h2 id="proof-heading">2. Inspect the outcome</h2>
+<div class="metrics">
+<div class="metric"><small>Verifier result</small><strong id="gate">—</strong></div>
+<div class="metric"><small>Cryptographic signature check</small><strong id="signature">—</strong></div>
+<div class="metric"><small>Fresh nonce consumed</small><strong id="nonce-state">—</strong></div>
+<div class="metric"><small>Action authorization</small><strong id="authorization">NONE</strong></div>
+</div>
+<h3>Issued challenge fields</h3>
+<pre id="challenge" aria-label="Synthetic issued challenge">No challenge yet</pre>
+<h3>Explanation</h3>
+<p id="explanation">A valid signature means access to the private key corresponding to a locally generated public key. Enrollment identity is not independently verified.</p>
+</section>
+<section class="panel" aria-labelledby="limits">
+<h2 id="limits">3. Understand the security boundary</h2>
+<p>Public/private key operations here are real, but the browser is playing <strong>both issuer and signer</strong> for demonstration. It cannot certify a business, person or agent, or authorize tool/API actions. Replay state only lasts for this browser session. The separate Node.js verifier includes a durable, exclusive-file nonce ledger with restart and concurrency tests.</p>
+<p>Actual deployments require independently governed key enrollment, secure server-side challenge issuance, authenticated transport, expiry, revocation, durable replay protection across nodes, audit trails and separately authorized actions. The demo never connects to a real agent, exchanges data with a server, stores secrets or runs trading code.</p>
+<p><a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_SIGNED_CHALLENGE.md">View Node.js source, threat model and adversarial tests</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+  const status=document.getElementById("status");
+  const output=(key,value)=>{document.getElementById(key).textContent=value;};
+  const FIELDS=["schema","audience","agentId","keyId","capability","nonce","issuedAt","expiresAt"];
+  const PREFIX="ESHEEN_AGENT_CHALLENGE_V1\n";
+  let enrollment,alternate,issued,used,epoch=0,busy=false;
+  const encoder=new TextEncoder();
+  function bytes(c){return encoder.encode(PREFIX+JSON.stringify(FIELDS.map(k=>c[k])));}
+  function randomNonce(){
+    const a=new Uint8Array(24);crypto.getRandomValues(a);
+    return btoa(String.fromCharCode(...a)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"");
+  }
+  function issue(){
+    const now=Math.floor(Date.now()/1000);
+    const c={schema:"esheen-agent-challenge.v1",
+      audience:"local-verifier",agentId:"fictional-agent",keyId:"ephemeral-key",
+      capability:"summarize",nonce:randomNonce(),issuedAt:now,expiresAt:now+60};
+    issued.set(c.nonce,JSON.stringify(FIELDS.map(k=>c[k])));
+    return c;
+  }
+  async function sign(c,wrong=false){
+    const owner=wrong?alternate:enrollment;
+    return new Uint8Array(await crypto.subtle.sign(
+      {name:"ECDSA",hash:"SHA-256"},owner.privateKey,bytes(c)));
+  }
+  async function verify(c,sig,now){
+    if(now<c.issuedAt)return {gate:"NOT_YET_VALID",sig:"NOT CHECKED",consumed:"NO"};
+    if(now>c.expiresAt)return {gate:"EXPIRED_CHALLENGE",sig:"NOT CHECKED",consumed:"NO"};
+    if(enrollment.revoked)return {gate:"REVOKED_KEY",sig:"NOT CHECKED",consumed:"NO"};
+    if(c.audience!=="local-verifier"||c.agentId!=="fictional-agent"||
+       c.keyId!=="ephemeral-key"||c.capability!=="summarize")
+       return {gate:"UNAUTHORIZED_SCOPE",sig:"NOT CHECKED",consumed:"NO"};
+    if(issued.get(c.nonce)!==JSON.stringify(FIELDS.map(k=>c[k])))
+       return {gate:"CHALLENGE_NOT_ISSUED_AS_SHOWN",sig:"NOT CHECKED",consumed:"NO"};
+    const ok=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},
+                                       enrollment.publicKey,sig,bytes(c));
+    if(!ok)return {gate:"INVALID_SIGNATURE",sig:"INVALID",consumed:"NO"};
+    if(used.has(c.nonce))return {gate:"REPLAYED_CHALLENGE",sig:"VALID",consumed:"ALREADY CONSUMED"};
+    used.add(c.nonce);
+    return {gate:"VERIFIED_NOT_AUTHORIZED",sig:"VALID",consumed:"YES"};
+  }
+  function show(c,r,detail){
+    output("challenge",JSON.stringify(c,null,2));
+    output("gate",r.gate);output("signature",r.sig);
+    output("nonce-state",r.consumed);
+    output("authorization","NONE");
+    output("explanation",detail);
+    status.textContent="RESULT: "+r.gate+". Real cryptography; no independent identity enrollment.";
+  }
+  async function execute(type){
+    if(busy)return;
+    busy=true;status.textContent="Running local signature verification…";
+    try{
+      const c=issue(),valid=await sign(c);
+      let sig=valid,now=Math.floor(Date.now()/1000);
+      let detail="A real signature verified against a local disposable public key. Identity enrollment and permission are NOT established.";
+      if(type==="wrong-key"){sig=await sign(c,true);
+        detail="A different disposable private key cannot produce a signature accepted by the enrolled demo public key.";}
+      if(type==="scope"){c.capability="payments";
+        detail="The requested capability differs from the challenge and allowed demo capability; the signed request cannot be escalated.";}
+      if(type==="expired"){now=c.expiresAt+1;
+        detail="The simulated verifier clock was advanced past challenge expiry. Your real device clock was not changed.";}
+      if(type==="revoked"){enrollment.revoked=true;
+        detail="The local demo's enrollment was marked REVOKED before the proof was checked.";}
+      let r=await verify(c,sig,now);
+      if(type==="replay"){r=await verify(c,sig,now);
+        detail="The same valid signature and nonce were submitted twice. The second attempt is rejected by the in-memory replay set. Server-side replay persistence is in the separate Node reference.";}
+      show(c,r,detail);
+      enrollment.revoked=false;
+    }catch{
+      status.textContent="REJECTED: local cryptography unavailable or the check failed.";
+      output("gate","FAILED CLOSED");output("signature","—");output("nonce-state","—");
+    }finally{busy=false;}
+  }
+  async function reset(){
+    if(busy)return;
+    busy=true;status.textContent="Generating fresh local non-exportable signing keys…";
+    try{
+      const opts={name:"ECDSA",namedCurve:"P-256"};
+      const [pair,wrong]=await Promise.all([
+        crypto.subtle.generateKey(opts,false,["sign","verify"]),
+        crypto.subtle.generateKey(opts,false,["sign","verify"])]);
+      enrollment={...pair,revoked:false};
+      alternate=wrong;issued=new Map();used=new Set();epoch++;
+      output("gate","READY");output("signature","NOT YET CHECKED");
+      output("nonce-state","NONE");output("authorization","NONE");
+      output("challenge","No challenge issued. Disposable key generation "+epoch+".");
+      output("explanation","Fresh non-exportable private keys generated in the browser. No identity authority, accounts or private keys were imported.");
+      status.textContent="READY: two disposable P-256 key pairs generated locally.";
+    }catch{
+      status.textContent="REJECTED: this browser cannot generate Web Crypto P-256 keys.";
+      output("gate","FAILED CLOSED");
+    }finally{busy=false;}
+  }
+  document.getElementById("valid").addEventListener("click",()=>{void execute("valid");});
+  document.getElementById("wrong-key").addEventListener("click",()=>{void execute("wrong-key");});
+  document.getElementById("scope").addEventListener("click",()=>{void execute("scope");});
+  document.getElementById("replay").addEventListener("click",()=>{void execute("replay");});
+  document.getElementById("expired").addEventListener("click",()=>{void execute("expired");});
+  document.getElementById("revoked").addEventListener("click",()=>{void execute("revoked");});
+  document.getElementById("reset").addEventListener("click",()=>{void reset();});
+  void reset();
+})();
+</script></body></html>
