@@ -16,6 +16,7 @@ SOURCE = ROOT / "site" / "index.html"
 MVP_WAVE_SOURCE = ROOT / "site" / "mvp-wave.html"
 AGENTOPS_SOURCE = ROOT / "site" / "agentops.html"
 AGENTPROOF_SOURCE = ROOT / "site" / "agentproof.html"
+AGENTCREDITS_SOURCE = ROOT / "site" / "agentcredits.html"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
     "compound-intelligence-starter",
@@ -96,10 +97,10 @@ def verify_catalog(data: bytes) -> dict:
     observed = set(parser.links)
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
-    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1:
+    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1:
         raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html"}):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html"}):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -159,6 +160,14 @@ def stage_catalog(output: Path) -> dict:
             agentproof.count(b"<script>") != 1 or b"<script src" in agentproof or
             b"innerHTML" in agentproof or b"XMLHttpRequest" in agentproof or b"fetch(" in agentproof):
         raise ValueError("AGENTPROOF_SAFETY_CONTRACT")
+    if AGENTCREDITS_SOURCE.is_symlink() or AGENTCREDITS_SOURCE.parent.is_symlink() or not AGENTCREDITS_SOURCE.is_file():
+        raise ValueError("AGENTCREDITS_SOURCE_INVALID")
+    agentcredits = AGENTCREDITS_SOURCE.read_bytes()
+    if (len(agentcredits) > 65536 or b"\x00" in agentcredits or
+            b"connect-src 'none'" not in agentcredits or b"default-src 'none'" not in agentcredits or
+            agentcredits.count(b"<script>") != 1 or b"<script src" in agentcredits or
+            b"innerHTML" in agentcredits or b"XMLHttpRequest" in agentcredits or b"fetch(" in agentcredits):
+        raise ValueError("AGENTCREDITS_SAFETY_CONTRACT")
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
     if not output.parent.exists() or output.parent.is_symlink():
@@ -169,8 +178,9 @@ def stage_catalog(output: Path) -> dict:
         (output / "mvp-wave.html").write_bytes(wave)
         (output / "agentops.html").write_bytes(agentops)
         (output / "agentproof.html").write_bytes(agentproof)
+        (output / "agentcredits.html").write_bytes(agentcredits)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agentops.html", "agentproof.html", "index.html", "mvp-wave.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "index.html", "mvp-wave.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -178,12 +188,13 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "agentops.html", "agentproof.html", "index.html", "mvp-wave.html"],
-        "additionalHostedToolCount": 3,
+        "files": [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "index.html", "mvp-wave.html"],
+        "additionalHostedToolCount": 4,
         "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
         "mvpWaveSha256": hashlib.sha256(wave).hexdigest(),
         "agentOpsSha256": hashlib.sha256(agentops).hexdigest(),
-        "agentProofSha256": hashlib.sha256(agentproof).hexdigest(), **summary
+        "agentProofSha256": hashlib.sha256(agentproof).hexdigest(),
+        "agentCreditsSha256": hashlib.sha256(agentcredits).hexdigest(), **summary
     }
 
 
