@@ -4,7 +4,7 @@ This release productizes the existing **original, source-level** Model Cost Comp
 
 ## Model Cost Comparator
 
-Open `site/model-cost.html` locally or, **only after Pages deploy**, the hosted URL `https://esheenj.github.io/compound-intelligence-starter/model-cost.html`.
+Open `site/model-cost.html` locally or the **verified public Pages URL** `https://esheenj.github.io/compound-intelligence-starter/model-cost.html`.
 
 The editable `model-cost-comparison.v1` sample contains an invented two-model price book, a pinned revision label, a US-dollar budget string, and three fictional token events, one of which repeats an identical ID. The browser calculates exact decimal amounts using BigInt: rate USD per million tokens is normalized to integer millionths and multiplied by integer token counts, yielding exact USD values with 12 decimals. The sample costs are 0.000380000000 and 0.000460000000 USD; under the supplied 0.000400000000 budget, the second is **over**.
 
@@ -16,7 +16,7 @@ These are **caller-supplied fictional rates and workloads**, not live OpenAI/Ant
 
 ## Local Model Fit Planner
 
-Open `site/model-fit.html` locally or, **only after Pages deploy**, `https://esheenj.github.io/compound-intelligence-starter/model-fit.html`.
+Open `site/model-fit.html` locally or the **verified public Pages URL** `https://esheenj.github.io/compound-intelligence-starter/model-fit.html`.
 
 The editable `local-model-fit.v1` fixture has a completely fictional 3072 MiB RAM device, 512 MiB reserved, 2048 MiB free storage and a 4096-token context requirement. Its invented small model needs 1750 MiB estimated runtime RAM and 850 MiB storage, so its calculated memory headroom is 810 MiB. The invented large model fails memory and storage constraints. Try **Constrained device**, **Require longer context**, **Duplicate model ID**, and **Reset**. Invalid or contradictory profiles fail closed; all outputs are labeled as *supplied estimate*, not measured hardware compatibility.
 
@@ -24,7 +24,7 @@ The actual device may require more RAM for KV cache, framework, GPU offload, ope
 
 ## Acceptance and safety
 
-Both pages are statically allowlisted by `scripts/stage_showcase.py`, which independently hashes and checks CSP/source safety, and the existing Chrome CI tests their positive and negative paths and narrow/desktop layout. Source CI and actual GitHub Pages publishing are **separate** from independent live HTTPS Chrome acceptance; do not claim the page is live based only on the existence of its URL. The previous public collection had seven repositories and fourteen browser add-ons (21 URLs). When both new pages have **actually passed** Pages and live Chrome checks, it will have seven repositories, sixteen add-ons and 23 public URLs.
+Both pages are statically allowlisted by `scripts/stage_showcase.py`, which independently hashes and checks CSP/source safety, and the existing Chrome CI tests their positive and negative paths and narrow/desktop layout. Source CI and actual GitHub Pages publishing are **separate** from independent live HTTPS Chrome acceptance; do not claim the page is live based only on the existence of its URL. The release passed exact merged-main Python/Chrome and Pages publication at source `0693a89d`; independent HTTPS [PR #62](https://github.com/esheenj/compound-intelligence-starter/pull/62) passed on both exact PR head and merged-main run [42988973386](https://github.com/esheenj/compound-intelligence-starter/actions/runs/42988973386). The present collection has **seven independent repositories, sixteen interactive add-ons and 23 public URLs**. These are not 23 standalone repositories.
 
 No private SIGMA, Cortex or Commander data, real trading/payment or infrastructure authority, client/employer IP, model credentials or external network calls. Additional recurring spend **R0**.
 
