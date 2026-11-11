@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 24 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 25 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -41,6 +41,7 @@ URLS = {
     "model-cost": "https://esheenj.github.io/compound-intelligence-starter/model-cost.html",
     "model-fit": "https://esheenj.github.io/compound-intelligence-starter/model-fit.html",
     "context-preservation": "https://esheenj.github.io/compound-intelligence-starter/context-preservation.html",
+    "model-disagreement": "https://esheenj.github.io/compound-intelligence-starter/model-disagreement.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -56,6 +57,7 @@ READY = {
     "model-cost": "#compare",
     "model-fit": "#evaluate",
     "context-preservation": "#evaluate",
+    "model-disagreement": "#inspect",
     "approval": "#state",
 }
 
@@ -439,6 +441,67 @@ def interact(driver: Driver, kind: str) -> None:
             return document.getElementById('status').textContent.startsWith('RECORDED:')
               && document.getElementById('lossless').textContent==='1';
         """) is True,"LIVE_CONTEXT_PRESERVATION_RECOVER")
+    elif kind == "model-disagreement":
+        result=driver.js("""
+            document.getElementById('inspect').click();
+            const rows=[...document.querySelectorAll('#rows tr')].map(r=>
+                [...r.querySelectorAll('td')].map(x=>x.textContent));
+            return {
+                status:document.getElementById('status').textContent,
+                cases:document.getElementById('cases').textContent,
+                review:document.getElementById('review').textContent,
+                critical:document.getElementById('critical').textContent,
+                rows
+            };
+        """)
+        by_id={x[0]:x for x in result["rows"]}
+        verify(result["status"].startswith("REVIEW:") and
+               result["cases"]=="5" and result["review"]=="4"
+               and result["critical"]=="2" and len(by_id)==5
+               and by_id["unverified-consensus"][1]=="UNVERIFIED_CONSENSUS"
+               and by_id["split-critical-decision"][1]=="DISAGREEMENT"
+               and by_id["unanimous-wrong"][1]=="CONTRADICTS_SUPPLIED_REFERENCE"
+               and by_id["missing-and-abstained"][1]=="INCOMPLETE"
+               and by_id["matches-supplied"][1]=="MATCHES_SUPPLIED_REFERENCE",
+               "LIVE_DISAGREEMENT_FALSE_CONSENSUS_AND_ABSTENTIONS")
+        corrected=driver.js("""
+            document.getElementById('reference').click();
+            const updated=[...document.querySelectorAll('#rows tr')].find(r=>
+              r.querySelector('td')?.textContent==='unanimous-wrong');
+            return {
+                review:document.getElementById('review').textContent,
+                critical:document.getElementById('critical').textContent,
+                state:updated?.querySelectorAll('td')[1].textContent
+            };
+        """)
+        verify(corrected["review"]=="3" and corrected["critical"]=="1"
+               and corrected["state"]=="MATCHES_SUPPLIED_REFERENCE",
+               "LIVE_DISAGREEMENT_CORRECTED_REFERENCE")
+        for button,case,state in (
+            ("split","unverified-consensus","DISAGREEMENT"),
+            ("missing","matches-supplied","INCOMPLETE"),
+            ("abstain","matches-supplied","INCOMPLETE"),
+        ):
+            observed=driver.js("""
+                document.getElementById(arguments[0]).click();
+                const item=[...document.querySelectorAll('#rows tr')].find(r=>
+                    r.querySelector('td')?.textContent===arguments[1]);
+                return item?.querySelectorAll('td')[1].textContent;
+            """,[button,case])
+            verify(observed==state,"LIVE_DISAGREEMENT_NEGATIVE_"+button.upper())
+        verify(driver.js("""
+            document.getElementById('fixture').value=
+              '{"schema":"model-disagreement.fixtures.v1","schema":"wrong","models":[],"cases":[]}';
+            document.getElementById('inspect').click();
+            return document.getElementById('status').textContent.startsWith('REJECTED:')
+                && document.querySelectorAll('#rows tr').length===0
+                && document.getElementById('review').textContent==='—';
+        """) is True,"LIVE_DISAGREEMENT_DUPLICATE_JSON_REJECTED")
+        verify(driver.js("""
+            document.getElementById('reset').click();
+            return document.getElementById('status').textContent.startsWith('REVIEW:')
+                && document.getElementById('review').textContent==='4';
+        """) is True,"LIVE_DISAGREEMENT_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -499,7 +562,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 17 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 18 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
