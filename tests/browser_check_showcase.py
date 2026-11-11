@@ -50,9 +50,9 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 18 and page["language"] == "en",
+                   and page["extraTools"] == 19 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 18 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 19 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
                    and "agentcredits.html" in page["extraLinks"]
@@ -60,6 +60,7 @@ def run():
                    and "model-fit.html" in page["extraLinks"]
                    and "context-preservation.html" in page["extraLinks"]
                    and "model-disagreement.html" in page["extraLinks"]
+                   and "decision-review.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -470,11 +471,80 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "MODEL_DISAGREEMENT_NO_OVERFLOW_"+str(width))
+            driver.command("POST","url",{"url":(path/"decision-review.html").resolve().as_uri()})
+            explain=driver.js("""
+                document.getElementById('inspect').click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    total:document.getElementById('total').textContent,
+                    holds:document.getElementById('holds').textContent,
+                    needs:document.getElementById('needs').textContent,
+                    recorded:document.getElementById('recorded').textContent,
+                    rows:[...document.querySelectorAll('#rows tr')].map(r=>
+                        [...r.querySelectorAll('td')].map(x=>x.textContent)),
+                    evidence:document.getElementById('evidence').textContent,
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                    remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
+                };
+            """)
+            cases={r[0]:r for r in explain["rows"]}
+            verify(explain["status"].startswith("RECORDED:") and
+                   explain["total"]=="6" and explain["holds"]=="3"
+                   and explain["needs"]=="2" and explain["recorded"]=="1"
+                   and cases["routine"][1]=="REVIEW_RECORDED_NOT_AUTHORIZED"
+                   and cases["high-impact"][1]=="HUMAN_REVIEW_REQUIRED"
+                   and cases["contradicted"][1]=="HOLD"
+                   and cases["stale"][1]=="HOLD"
+                   and cases["unverified"][1]=="HOLD"
+                   and cases["unscored"][1]=="HUMAN_REVIEW_REQUIRED"
+                   and "source" not in cases["routine"][1].lower()
+                   and "DECLARED_VERIFIED_MATCH" in explain["evidence"]
+                   and "Execution authority: NONE" in explain["evidence"]
+                   and explain["remote"]==0 and "connect-src 'none'" in explain["csp"],
+                   "EXPLAINABLE_REVIEW_BOUNDARIES_AND_EVIDENCE")
+            for button in ("stale","opposing","hypothesis","reject"):
+                result=driver.js("""
+                    document.getElementById(arguments[0]).click();
+                    const item=[...document.querySelectorAll('#rows tr')].find(r=>
+                        r.querySelector('td')?.textContent==='routine');
+                    return {holds:document.getElementById('holds').textContent,
+                            recorded:document.getElementById('recorded').textContent,
+                            gate:item?.querySelectorAll('td')[1].textContent};
+                """,[button])
+                verify(result["holds"]=="4" and result["recorded"]=="0"
+                       and result["gate"]=="HOLD",
+                       "EXPLAINABLE_REVIEW_HOLD_"+button.upper())
+            review=driver.js("""
+                document.getElementById('no-confidence').click();
+                return {holds:document.getElementById('holds').textContent,
+                        needs:document.getElementById('needs').textContent,
+                        recorded:document.getElementById('recorded').textContent};
+            """)
+            verify(review["holds"]=="3" and review["needs"]=="3"
+                   and review["recorded"]=="0","EXPLAINABLE_NO_CONFIDENCE_METHOD_REVIEW")
+            invalid=driver.js("""
+                document.getElementById('fixture').value=
+                  '{"schema":"explainable-review.fixtures.v1","schema":"wrong","sources":[],"decisions":[]}';
+                document.getElementById('inspect').click();
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                    && document.querySelectorAll('#rows tr').length===0
+                    && document.getElementById('total').textContent==='—';
+            """)
+            verify(invalid is True,"EXPLAINABLE_DUPLICATE_JSON_FAIL_CLOSED")
+            driver.js("document.getElementById('reset').click();return true;")
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('RECORDED:')
+                    && document.getElementById('recorded').textContent==='1';
+            """) is True,"EXPLAINABLE_RESET")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "EXPLAINABLE_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":18,
+                "browser":version,"publicCards":7,"additionalToolsLinked":19,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":8,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":9,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()

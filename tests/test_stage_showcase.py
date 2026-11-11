@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, CONTEXT_SOURCE, DISAGREEMENT_SOURCE, stage_catalog, verify_catalog
+from scripts.stage_showcase import SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, CONTEXT_SOURCE, DISAGREEMENT_SOURCE, DECISION_REVIEW_SOURCE, stage_catalog, verify_catalog
 
 
 class ShowcaseStageTests(unittest.TestCase):
@@ -23,11 +23,11 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["githubDeployedUrlCount"], 7)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
-        self.assertEqual(report["files"], [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html"])
+        self.assertEqual(report["files"], [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html"])
         content = self.output.joinpath("index.html").read_bytes()
         self.assertEqual(content, SOURCE.read_bytes())
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
-        self.assertEqual(report["additionalHostedToolCount"], 8)
+        self.assertEqual(report["additionalHostedToolCount"], 9)
         self.assertEqual(report["additionalLinkedPublicToolCount"], 10)
         self.assertIn(b"https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html", content)
         self.assertIn(b"https://esheenj.github.io/design-system-foundations-oss/audit.html", content)
@@ -68,6 +68,7 @@ class ShowcaseStageTests(unittest.TestCase):
             ("model-fit.html", MODEL_FIT_SOURCE, "modelFitSha256", b"Open Local Model Fit Planner"),
             ("context-preservation.html", CONTEXT_SOURCE, "contextSha256", b"Open Context Preservation Lab"),
             ("model-disagreement.html", DISAGREEMENT_SOURCE, "modelDisagreementSha256", b"Open Model Disagreement Lab"),
+            ("decision-review.html", DECISION_REVIEW_SOURCE, "decisionReviewSha256", b"Open Explainable Decision Review Lab"),
         ):
             page = self.output.joinpath(fname).read_bytes()
             self.assertEqual(page, original.read_bytes())
@@ -80,7 +81,7 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
         self.assertIn(b"connect-src 'none'", wave)
         self.assertIn(b"offline interactive planning playground", content)
-        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html"])
+        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
         self.assertEqual(content.count(b">Deployed demo</a>"), 7)
@@ -98,7 +99,7 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(verify_catalog(source)["repoCount"], 7)
         with self.assertRaisesRegex(ValueError, "PUBLIC_REPOSITORY_LINK_MISSING"):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
-        for new_tool in (b"model-cost.html", b"model-fit.html", b"context-preservation.html", b"model-disagreement.html"):
+        for new_tool in (b"model-cost.html", b"model-fit.html", b"context-preservation.html", b"model-disagreement.html", b"decision-review.html"):
             with self.assertRaisesRegex(ValueError, "ADDITIONAL_TOOL_LINK_MISSING"):
                 verify_catalog(source.replace(b'href="' + new_tool + b'"',
                                               b'href="missing-tool.html"'))
