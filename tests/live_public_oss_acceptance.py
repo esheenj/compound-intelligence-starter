@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 21 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 23 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import socket
 import time
+import urllib.error
 from browser_check_issue_report import Driver, driver_executable
 
 ENTRY_SITES = {
@@ -37,6 +38,8 @@ URLS = {
     "agentops": "https://esheenj.github.io/compound-intelligence-starter/agentops.html",
     "agentproof": "https://esheenj.github.io/compound-intelligence-starter/agentproof.html",
     "agentcredits": "https://esheenj.github.io/compound-intelligence-starter/agentcredits.html",
+    "model-cost": "https://esheenj.github.io/compound-intelligence-starter/model-cost.html",
+    "model-fit": "https://esheenj.github.io/compound-intelligence-starter/model-fit.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -49,6 +52,8 @@ READY = {
     "agentops": "#inspect",
     "agentproof": "#check",
     "agentcredits": "#inspect",
+    "model-cost": "#compare",
+    "model-fit": "#evaluate",
     "approval": "#state",
 }
 
@@ -306,6 +311,84 @@ def interact(driver: Driver, kind: str) -> None:
             return document.getElementById('status').textContent.startsWith('PASS:')
                 && document.getElementById('available').textContent==='80';
         """) is True, "LIVE_AGENTCREDITS_RESET")
+    elif kind == "model-cost":
+        print(json.dumps({"phase":"cost-baseline","buttons":driver.js("return [...document.querySelectorAll('button')].map(x=>x.id);")}), flush=True)
+        result=driver.js("""
+            document.querySelector('#compare').click();
+            return{
+                status:document.querySelector('#status').textContent,
+                budget:document.querySelector('#budget-display').textContent,
+                applied:document.querySelector('#applied').textContent,
+                duplicates:document.querySelector('#duplicates').textContent,
+                rows:[...document.querySelectorAll('#rows tr')].map(x=>
+                    [...x.querySelectorAll('td')].map(td=>td.textContent))
+            };
+        """)
+        verify(result["status"].startswith("HOLD:") and
+               result["budget"]=="0.000400000000" and result["applied"]=="2"
+               and result["duplicates"]=="1" and len(result["rows"])==2
+               and result["rows"][0][3]=="0.000380000000"
+               and result["rows"][1][3]=="0.000460000000",
+               "LIVE_MODEL_COST_EXACT_DECIMAL")
+        print(json.dumps({"phase":"cost-budget"}), flush=True)
+        verify(driver.js("""
+            document.querySelector('#budget').click();
+            return document.querySelector('#status').textContent.startsWith('PASS:')
+                && document.querySelector('#budget-display').textContent==='0.001000000000';
+        """) is True,"LIVE_MODEL_COST_BUDGET")
+        for button in ("conflict","missing"):
+            print(json.dumps({"phase":"cost-negative","button":button}), flush=True)
+            bad=driver.js("""
+                document.getElementById(arguments[0]).click();
+                return{
+                    status:document.querySelector('#status').textContent,
+                    rows:document.querySelectorAll('#rows tr').length,
+                    budget:document.querySelector('#budget-display').textContent
+                };
+            """,[button])
+            verify(bad["status"].startswith("REJECTED:") and bad["rows"]==0
+                   and bad["budget"]=="—","LIVE_MODEL_COST_FAIL_CLOSED_"+button.upper())
+        print(json.dumps({"phase":"cost-reset"}), flush=True)
+        verify(driver.js("""
+            document.querySelector('#reset').click();
+            return document.querySelector('#status').textContent.startsWith('HOLD:')
+                && document.querySelectorAll('#rows tr').length===2;
+        """) is True,"LIVE_MODEL_COST_RESET")
+    elif kind == "model-fit":
+        result=driver.js("""
+            document.querySelector('#evaluate').click();
+            return{
+                status:document.querySelector('#status').textContent,
+                available:document.querySelector('#available').textContent,
+                fits:document.querySelector('#fits').textContent,
+                misses:document.querySelector('#misses').textContent,
+                rows:[...document.querySelectorAll('#rows tr')].map(x=>
+                    [...x.querySelectorAll('td')].map(td=>td.textContent))
+            };
+        """)
+        verify(result["status"].startswith("PASS:") and result["available"]=="2560"
+               and result["fits"]=="1" and result["misses"]=="1"
+               and len(result["rows"])==2
+               and result["rows"][0][0]=="fictional-small-q4"
+               and result["rows"][0][2]=="810",
+               "LIVE_MODEL_FIT_RESOURCE_HEADROOM")
+        for button in ("constrained","context"):
+            verify(driver.js("""
+                document.getElementById(arguments[0]).click();
+                return document.querySelector('#status').textContent.startsWith('HOLD:')
+                    && document.querySelector('#fits').textContent==='0';
+            """,[button]) is True,"LIVE_MODEL_FIT_HOLD_"+button.upper())
+        verify(driver.js("""
+            document.querySelector('#duplicate').click();
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelectorAll('#rows tr').length===0
+                && document.querySelector('#fits').textContent==='—';
+        """) is True,"LIVE_MODEL_FIT_DUPLICATE")
+        verify(driver.js("""
+            document.querySelector('#reset').click();
+            return document.querySelector('#status').textContent.startsWith('PASS:')
+                && document.querySelector('#fits').textContent==='1';
+        """) is True,"LIVE_MODEL_FIT_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -331,10 +414,12 @@ def run() -> dict:
     try:
         version = driver.start()
         for repo, url in ENTRY_SITES.items():
+            print(json.dumps({"phase":"opening-home","id":repo,"url":url}), flush=True)
             open_static(driver, repo, url)
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope": "HTTPS load and semantic landmarks"})
         for kind, url in EARLY_URLS.items():
+            print(json.dumps({"phase":"opening-early","id":kind,"url":url}), flush=True)
             open_static(driver, kind, url)
             interact_early(driver, kind)
             for width, height in ((320, 720), (1440, 900)):
@@ -345,12 +430,16 @@ def run() -> dict:
                             "result": "PASS", "interaction_scope": "HTTPS interaction",
                             "responsive_widths": [320, 1440]})
         for kind in URLS:
+            print(json.dumps({"phase":"opening-addon","id":kind,"url":URLS[kind]}), flush=True)
             open_page(driver, kind)
+            print(json.dumps({"phase":"loaded-addon","id":kind}), flush=True)
             interact(driver, kind)
+            print(json.dumps({"phase":"interacted-addon","id":kind}), flush=True)
             for width, height in ((320, 720), (1440, 900)):
                 driver.viewport(width, height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
                        "LIVE_" + kind.upper() + "_RESPONSIVE_" + str(width))
+            print(json.dumps({"phase":"accepted-addon","id":kind}), flush=True)
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
@@ -360,7 +449,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 14 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 16 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
@@ -370,6 +459,20 @@ if __name__ == "__main__":
     try:
         print(json.dumps(run(), sort_keys=True, indent=2))
     except (AssertionError, OSError, RuntimeError, TimeoutError) as exc:
-        print(json.dumps({"schema": "esheen-public-live-oss-acceptance-v1",
-                          "state": "FAILED", "error": str(exc)[:130]}, sort_keys=True))
+        diagnostic = {"schema": "esheen-public-live-oss-acceptance-v1",
+                      "state": "FAILED", "error": str(exc)[:130]}
+        cause = getattr(exc, "__cause__", None)
+        if isinstance(cause, urllib.error.HTTPError):
+            try:
+                response = json.loads(cause.read(4096))
+                value = response.get("value", {})
+                if isinstance(value, dict):
+                    category = str(value.get("error", ""))[:64]
+                    line = str(value.get("message", "")).splitlines()[0][:240]
+                    allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:_()[]-+/"
+                    diagnostic["webdriver_category"] = "".join(c for c in category if c in allowed)
+                    diagnostic["webdriver_hint"] = "".join(c for c in line if c in allowed)[:180]
+            except (ValueError, UnicodeError, TypeError, IndexError):
+                diagnostic["webdriver_hint"] = "UNREADABLE_RESPONSE"
+        print(json.dumps(diagnostic, sort_keys=True))
         raise SystemExit(1)
