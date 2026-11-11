@@ -2,6 +2,12 @@
 
 A usable **offline explanation and review sandbox** for AI-inspired proposals. It shows evidence links, source versions, disagreements, self-reported evaluation samples, impact and fictional reviewer records. All data is invented or user supplied. This is **not** a real AI decision service, factual truth certification, human approval integration or permission to execute an action.
 
+## Interactive browser lab
+
+Try the independently verified [Explainable Decision Review Lab](https://esheenj.github.io/compound-intelligence-starter/decision-review.html). The static browser UI presents six fictional decisions, evidence/revision details, self-reported methodology and conservative review gates, plus one-click contradictory, stale, hypothesis, rejected-review and no-methodology scenarios. It has no network access, remote assets, storage or connection to an actual model/agent.
+
+**Verification:** source PR #72 and browser PR #73 passed exact-head Python 3.10/3.12/Chrome; independent hosted HTTPS Chrome run [43026022613](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43026022613) verified **26/26 public Pages URLs** (7 independent OSS homepages, 19 interactive add-ons). This is not real agent authorization, human identity verification or a probabilistic model calibration study.
+
 ## Quickstart
 
 Python 3.10+ with no dependencies and no network:
