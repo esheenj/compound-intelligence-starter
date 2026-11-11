@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline synthetic AI model token-price and budget comparison with exact decimal arithmetic.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Model Cost Comparator · Esheen Labs</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{max-width:72rem;margin:auto;padding:clamp(1rem,3vw,2.4rem)}
+a{color:LinkText;overflow-wrap:anywhere}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:.7rem 0}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:24rem;border:1px solid GrayText;background:Canvas;color:CanvasText;padding:1rem;border-radius:.7rem;font:.8rem/1.55 ui-monospace,monospace}
+.controls{display:flex;gap:.7rem;flex-wrap:wrap;margin:1rem 0}
+button{background:CanvasText;color:Canvas;border:1px solid CanvasText;border-radius:.7rem;cursor:pointer;font:inherit;font-weight:700;padding:.65rem 1rem;min-height:44px}
+button.alt{background:Canvas;color:CanvasText}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.7rem;padding:1rem}
+.metric strong{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}table{width:100%;min-width:37rem;border-collapse:collapse}
+th,td{text-align:left;padding:.75rem;border-bottom:1px solid GrayText;overflow-wrap:anywhere}
+#status{font-weight:750;overflow-wrap:anywhere}.muted,small{color:GrayText}
+</style></head>
+<body><main>
+<p><a href="./">← Public AI tools directory</a></p>
+<p class="muted">Original offline model-cost worksheet · Fictional prices and usage · No real billing</p>
+<h1>Model Cost Comparator</h1>
+<p>Replay token usage with a <strong>caller-supplied price book</strong>. Compare exact USD estimates, find over-budget cases and reject duplicate usage records or missing observations. It does not call any AI model or retrieve live provider prices.</p>
+<section class="panel" aria-labelledby="input-title">
+<h2 id="input-title">1. Inspect the fictional price book and usage</h2>
+<label for="fixture">Editable JSON (maximum 64 KiB and 100 usage events in this browser)</label>
+<textarea id="fixture" spellcheck="false">{
+ "schema":"model-cost-comparison.v1",
+ "price_book_revision":"fictional-v1",
+ "budget_usd":"0.000400",
+ "rates":[
+  {"model_id":"sample-small","input_usd_per_million":"0.20","output_usd_per_million":"0.90"},
+  {"model_id":"sample-large","input_usd_per_million":"0.30","output_usd_per_million":"0.80"}
+ ],
+ "events":[
+  {"event_id":"small-1","model_id":"sample-small","input_tokens":1000,"output_tokens":200},
+  {"event_id":"small-1","model_id":"sample-small","input_tokens":1000,"output_tokens":200},
+  {"event_id":"large-1","model_id":"sample-large","input_tokens":1000,"output_tokens":200}
+ ]
+}</textarea>
+<div class="controls">
+<button id="compare" type="button">Compare supplied costs</button>
+<button id="budget" type="button" class="alt">Raise sample budget</button>
+<button id="conflict" type="button" class="alt">Conflicting retry</button>
+<button id="missing" type="button" class="alt">Remove model usage</button>
+<button id="reset" type="button" class="alt">Reset sample</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Compare supplied costs to inspect fictional estimates.</p>
+</section>
+<section class="panel" aria-labelledby="result-title">
+<h2 id="result-title">2. Compare exact decimal totals</h2>
+<div class="metrics">
+<div class="metric"><small>Supplied USD budget</small><strong id="budget-display">—</strong></div>
+<div class="metric"><small>Distinct events</small><strong id="applied">—</strong></div>
+<div class="metric"><small>Duplicate events ignored</small><strong id="duplicates">—</strong></div>
+</div>
+<div class="tablewrap"><table>
+<caption>Exact, synthetic USD estimates — no real invoice or quality benchmark</caption>
+<thead><tr><th scope="col">Fictional model</th><th scope="col">Input tokens</th><th scope="col">Output tokens</th><th scope="col">Estimated USD</th><th scope="col">Budget</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+</section>
+<section class="panel">
+<h2>3. Interpretation limits</h2>
+<p>Rates and usage are self-supplied; the price-book revision is just a label. This measures neither quality nor latency, and it does not represent provider billing, discounts, caching, taxes or actual spend. Different model workloads can make direct cost comparisons misleading.</p>
+<p>The browser calculates integer-scaled fixed-point USD values with <code>BigInt</code>, preserving up to twelve decimal places. An unobserved model is <strong>rejected</strong>, not ranked as free. All input is processed locally and never transmitted.</p>
+<p>Read the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_MODEL_COST_COMPARATOR.md">original Python reference and tests</a> or <a href="https://github.com/esheenj/compound-intelligence-starter/issues/42">the Wave 2 tracker</a>.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const input=document.getElementById("fixture"),original=input.value;
+ const status=document.getElementById("status"),rows=document.getElementById("rows");
+ const names=["budget-display","applied","duplicates"];
+ const id=x=>typeof x==="string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(x);
+ const exact=(o,fields)=>o!==null&&typeof o==="object"&&!Array.isArray(o)&&
+   Object.keys(o).length===fields.length&&fields.every(k=>Object.prototype.hasOwnProperty.call(o,k));
+ const pricePattern=/^(?:0|[1-9][0-9]{0,5})(?:\.[0-9]{1,6})?$/;
+ const SCALE=1000000000000n;
+ function parsePrice(value){
+  if(typeof value!=="string"||!pricePattern.test(value))throw Error("Malformed decimal rate");
+  const parts=value.split(".");
+  return BigInt(parts[0])*1000000n+BigInt((parts[1]||"").padEnd(6,"0"));
+ }
+ function money(value){const n=value<0n?-value:value;
+  return (value<0n?"-":"")+(n/SCALE).toString()+"."+(n%SCALE).toString().padStart(12,"0");
+ }
+ function readStrict(text){
+  const data=JSON.parse(text),stack=[];let mask="";
+  for(let i=0;i<text.length;i++){
+   const ch=text[i];
+   if(ch==='"'){
+    const start=i;i++;let escaped=false;
+    for(;i<text.length;i++){
+     if(escaped){escaped=false;continue;}
+     if(text[i]==="\\"){escaped=true;continue;}
+     if(text[i]==='"')break;
+    }
+    const k=JSON.parse(text.slice(start,i+1));mask+=" ";
+    let j=i+1;while(j<text.length&&/\s/.test(text[j]))j++;
+    if(text[j]===":"){
+     const parent=stack[stack.length-1];
+     if(!parent||!parent.keys||parent.keys.has(k))throw Error("Duplicate/malformed JSON key");
+     parent.keys.add(k);
+    }
+   }else if(ch==="{"){stack.push({keys:new Set()});mask+=ch;}
+   else if(ch==="["){stack.push({keys:null});mask+=ch;}
+   else if(ch==="}"||ch==="]"){stack.pop();mask+=ch;}
+   else mask+=ch;
+  }
+  for(const n of mask.matchAll(/-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g)){
+   if(n[0].includes(".")||/[eE]/.test(n[0]))throw Error("Only safe integer token numbers");
+  }
+  return data;
+ }
+ function evaluate(data){
+  if(!exact(data,["schema","price_book_revision","budget_usd","rates","events"])
+    ||data.schema!=="model-cost-comparison.v1"||!id(data.price_book_revision)
+    ||!Array.isArray(data.rates)||data.rates.length<1||data.rates.length>100
+    ||!Array.isArray(data.events)||data.events.length<1||data.events.length>100)
+    throw Error("Invalid cost comparison schema");
+  const budget=parsePrice(data.budget_usd)*1000000n,models=new Map(),seen=new Map();
+  let duplicates=0;
+  for(const rate of data.rates){
+   if(!exact(rate,["model_id","input_usd_per_million","output_usd_per_million"])||
+     !id(rate.model_id)||models.has(rate.model_id))throw Error("Invalid/duplicate model");
+   models.set(rate.model_id,{inputRate:parsePrice(rate.input_usd_per_million),
+     outputRate:parsePrice(rate.output_usd_per_million),input:0n,output:0n,events:0});
+  }
+  for(const event of data.events){
+   if(!exact(event,["event_id","model_id","input_tokens","output_tokens"])||
+      !id(event.event_id)||!models.has(event.model_id))throw Error("Invalid usage event");
+   for(const field of ["input_tokens","output_tokens"]){
+    if(!Number.isSafeInteger(event[field])||event[field]<0||event[field]>1000000000)
+      throw Error("Invalid token count");
+   }
+   if(event.input_tokens+event.output_tokens===0)throw Error("Empty usage");
+   const fingerprint=JSON.stringify([event.event_id,event.model_id,event.input_tokens,event.output_tokens]);
+   if(seen.has(event.event_id)){
+    if(seen.get(event.event_id)!==fingerprint)throw Error("Conflicting duplicate ID");
+    duplicates++;continue;
+   }
+   seen.set(event.event_id,fingerprint);
+   const m=models.get(event.model_id);
+   m.input+=BigInt(event.input_tokens);m.output+=BigInt(event.output_tokens);m.events++;
+  }
+  const result=[];
+  for(const [modelId,m] of models){
+   if(!m.events)throw Error("Unobserved model cannot be free");
+   const cost=m.input*m.inputRate+m.output*m.outputRate;
+   result.push({modelId,input:m.input.toString(),output:m.output.toString(),cost,
+     usd:money(cost),within:cost<=budget});
+  }
+  result.sort((a,b)=>a.cost<b.cost?-1:a.cost>b.cost?1:a.modelId.localeCompare(b.modelId,"en"));
+  return{result,duplicates,applied:seen.size,budget:money(budget),
+    allWithin:result.every(x=>x.within)};
+ }
+ function clear(){
+  rows.replaceChildren();
+  for(const name of names)document.getElementById(name).textContent="—";
+ }
+ function compare(){
+  clear();
+  if(new TextEncoder().encode(input.value).length>65536){status.textContent="REJECTED: JSON exceeds 64 KiB.";return;}
+  try{
+   const r=evaluate(readStrict(input.value));
+   for(const item of r.result){
+    const tr=document.createElement("tr");
+    for(const value of [item.modelId,item.input,item.output,item.usd,item.within?"Within":"Over"]){
+     const td=document.createElement("td");td.textContent=value;tr.append(td);
+    }
+    rows.append(tr);
+   }
+   document.getElementById("budget-display").textContent=r.budget;
+   document.getElementById("applied").textContent=String(r.applied);
+   document.getElementById("duplicates").textContent=String(r.duplicates);
+   status.textContent=(r.allWithin?"PASS: all scenarios within supplied budget.":"HOLD: at least one fictional model exceeds the supplied budget.")+
+     " No provider quote or model quality measured.";
+  }catch(_){clear();status.textContent="REJECTED: malformed, contradictory or unobserved usage. No partial comparison accepted.";}
+ }
+ function scenario(mode){
+  const data=JSON.parse(original);
+  if(mode==="budget")data.budget_usd="0.001000";
+  if(mode==="conflict")data.events[1].output_tokens=201;
+  if(mode==="missing")data.events=data.events.filter(e=>e.model_id!=="sample-large");
+  input.value=JSON.stringify(data,null,2);compare();
+ }
+ document.getElementById("compare").addEventListener("click",compare);
+ document.getElementById("budget").addEventListener("click",()=>scenario("budget"));
+ document.getElementById("conflict").addEventListener("click",()=>scenario("conflict"));
+ document.getElementById("missing").addEventListener("click",()=>scenario("missing"));
+ document.getElementById("reset").addEventListener("click",()=>{input.value=original;compare();});
+})();
+</script>
+</body></html>

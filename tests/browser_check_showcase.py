@@ -50,12 +50,14 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 14 and page["language"] == "en",
+                   and page["extraTools"] == 16 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 14 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 16 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
                    and "agentcredits.html" in page["extraLinks"]
+                   and "model-cost.html" in page["extraLinks"]
+                   and "model-fit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -265,11 +267,92 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
                        "AGENTCREDITS_NO_OVERFLOW_"+str(width))
+            driver.command("POST","url",{"url":(path/"model-cost.html").resolve().as_uri()})
+            costs=driver.js("""
+                document.getElementById('compare').click();
+                return{
+                    status:document.getElementById('status').textContent,
+                    budget:document.getElementById('budget-display').textContent,
+                    applied:document.getElementById('applied').textContent,
+                    duplicates:document.getElementById('duplicates').textContent,
+                    values:[...document.querySelectorAll('#rows tr')].map(row=>
+                        [...row.querySelectorAll('td')].map(cell=>cell.textContent)),
+                    remote:performance.getEntriesByType('resource').filter(e=>e.name.startsWith('http')).length
+                };
+            """)
+            verify(costs["status"].startswith("HOLD:") and costs["budget"]=="0.000400000000"
+                   and costs["applied"]=="2" and costs["duplicates"]=="1"
+                   and len(costs["values"])==2 and costs["values"][0][3]=="0.000380000000"
+                   and costs["values"][1][3]=="0.000460000000" and costs["remote"]==0,
+                   "MODEL_COST_EXACT_DECIMAL_HOLD")
+            verify(driver.js("""
+                document.getElementById('budget').click();
+                return document.getElementById('status').textContent.startsWith('PASS:')
+                  && document.getElementById('budget-display').textContent==='0.001000000000';
+            """) is True,"MODEL_COST_BUDGET_PROMOTION")
+            for button in ("conflict","missing"):
+                r=driver.js("""
+                    document.getElementById(arguments[0]).click();
+                    return{
+                        status:document.getElementById('status').textContent,
+                        count:document.querySelectorAll('#rows tr').length,
+                        budget:document.getElementById('budget-display').textContent
+                    };
+                """,[button])
+                verify(r["status"].startswith("REJECTED:") and r["count"]==0
+                       and r["budget"]=="—","MODEL_COST_FAIL_CLOSED_"+button.upper())
+            driver.js("document.getElementById('reset').click();return true;")
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('HOLD:')
+                  && document.querySelectorAll('#rows tr').length===2;
+            """) is True,"MODEL_COST_RESET")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "MODEL_COST_NO_OVERFLOW_"+str(width))
+            driver.command("POST","url",{"url":(path/"model-fit.html").resolve().as_uri()})
+            fit=driver.js("""
+                document.getElementById('evaluate').click();
+                return{
+                    status:document.getElementById('status').textContent,
+                    available:document.getElementById('available').textContent,
+                    fits:document.getElementById('fits').textContent,
+                    misses:document.getElementById('misses').textContent,
+                    rows:[...document.querySelectorAll('#rows tr')].map(row=>
+                        [...row.querySelectorAll('td')].map(cell=>cell.textContent)),
+                    remote:performance.getEntriesByType('resource').filter(e=>e.name.startsWith('http')).length
+                };
+            """)
+            verify(fit["status"].startswith("PASS:") and fit["available"]=="2560"
+                   and fit["fits"]=="1" and fit["misses"]=="1" and len(fit["rows"])==2
+                   and fit["rows"][0][0]=="fictional-small-q4" and fit["rows"][0][2]=="810"
+                   and "RAM below estimate" in fit["rows"][1][5]
+                   and fit["remote"]==0,"MODEL_FIT_EXPLICIT_RESOURCE_HEADROOM")
+            verify(driver.js("""
+                document.getElementById('constrained').click();
+                return document.getElementById('status').textContent.startsWith('HOLD:')
+                  && document.getElementById('fits').textContent==='0';
+            """) is True,"MODEL_FIT_CONSTRAINED_HOLD")
+            verify(driver.js("""
+                document.getElementById('duplicate').click();
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                  && document.querySelectorAll('#rows tr').length===0
+                  && document.getElementById('fits').textContent==='—';
+            """) is True,"MODEL_FIT_DUPLICATE_FAIL_CLOSED")
+            verify(driver.js("""
+                document.getElementById('reset').click();
+                return document.getElementById('status').textContent.startsWith('PASS:')
+                  && document.getElementById('fits').textContent==='1';
+            """) is True,"MODEL_FIT_RESET")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "MODEL_FIT_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":14,
+                "browser":version,"publicCards":7,"additionalToolsLinked":16,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":4,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":6,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; connect-src 'none'; style-src 'unsafe-inline'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
-<meta name="description" content="Explore seven public OSS repositories and fourteen original interactive add-ons covering agent trust, simulated credits, UX and reproducible engineering.">
+<meta name="description" content="Explore seven public OSS repositories and sixteen original interactive add-ons covering agent trust, simulated credits, UX and reproducible engineering.">
 <title>Esheen Labs · Explore and Contribute</title>
 <style>
 :root{font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}
@@ -111,9 +111,11 @@ code.command{display:block;background:color-mix(in srgb,CanvasText 7%,Canvas);pa
 </article>
 </div>
 <section id="additional-tools" class="steps" aria-labelledby="tools-heading">
-<h2 id="tools-heading">Fourteen more tools you can try</h2>
-<p>These are original, runnable tools <strong>within the existing seven repositories</strong>, not fourteen new standalone repos. Existing releases have distinct evidence levels. A single independent Chrome run on 11 November 2026 loaded all seven public homepages and exercised all fourteen listed add-ons over HTTPS (GitHub Actions run 42985295917). This is not a screen-reader, WCAG or production-services certification.</p>
+<h2 id="tools-heading">Sixteen more tools you can try</h2>
+<p>These are original, runnable tools <strong>within the existing seven repositories</strong>, not sixteen new standalone repos. Existing releases have distinct evidence levels. The previous fourteen add-ons were independently exercised in Chrome over HTTPS on 11 November 2026 (run 42985433084). The two new tools below must pass separate live HTTPS acceptance before they count as verified. No screen-reader, WCAG or backend certification is claimed.</p>
 <ul>
+<li><strong>Model Cost Comparator.</strong> Compare fictional AI model token rates and usage with exact decimal arithmetic, budget guards and replay-negative examples. <a href="model-cost.html">Open Model Cost Comparator</a> (this repository; no live model or provider pricing).</li>
+<li><strong>Local Model Fit Planner.</strong> Explore fictional device RAM, free storage and context requirements and model headroom with explicit failure reasons. <a href="model-fit.html">Open Local Model Fit Planner</a> (this repository; no real device benchmark).</li>
 <li><strong>AgentCredits Ledger Studio.</strong> Simulate fictional credit grants, reservations, settlements, refunds and idempotent duplicate handling. <a href="agentcredits.html">Open AgentCredits ledger studio</a> (this repository; no real money or provider billing).</li>
 <li><strong>AgentProof Receipt Verifier.</strong> Inspect fictional AI agent event receipts for altered payload hashes, duplicate event IDs and missing producer claims. <a href="agentproof.html">Open AgentProof verifier</a> (this repository; structural integrity, not authenticated identity).</li>
 <li><strong>AgentOps Replay Studio.</strong> Inspect synthetic agent usage, duplicate receipts and missing terminal evidence without network requests. <a href="agentops.html">Open AgentOps replay studio</a> (this repository; never executes a real agent).</li>
