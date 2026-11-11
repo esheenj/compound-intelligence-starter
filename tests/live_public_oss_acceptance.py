@@ -339,7 +339,7 @@ def interact(driver: Driver, kind: str) -> None:
         for button in ("conflict","missing"):
             print(json.dumps({"phase":"cost-negative","button":button}), flush=True)
             bad=driver.js("""
-                document.querySelector(arguments[0]).click();
+                document.getElementById(arguments[0]).click();
                 return{
                     status:document.querySelector('#status').textContent,
                     rows:document.querySelectorAll('#rows tr').length,
@@ -374,7 +374,7 @@ def interact(driver: Driver, kind: str) -> None:
                "LIVE_MODEL_FIT_RESOURCE_HEADROOM")
         for button in ("constrained","context"):
             verify(driver.js("""
-                document.querySelector(arguments[0]).click();
+                document.getElementById(arguments[0]).click();
                 return document.querySelector('#status').textContent.startsWith('HOLD:')
                     && document.querySelector('#fits').textContent==='0';
             """,[button]) is True,"LIVE_MODEL_FIT_HOLD_"+button.upper())
