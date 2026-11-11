@@ -11,7 +11,10 @@ from html.parser import HTMLParser
 from pathlib import Path
 import shutil
 
-from scripts.render_support import load_channels, render_support
+if __package__:
+    from .render_support import load_channels, render_support
+else:
+    from render_support import load_channels, render_support
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "site" / "index.html"
