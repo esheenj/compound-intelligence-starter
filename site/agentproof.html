@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Offline AgentProof AI receipt-integrity demonstration.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>AgentProof Receipt Verifier · Esheen Labs</title>
+<style>
+:root{font:16px/1.5 system-ui,-apple-system,sans-serif;color-scheme:light dark}
+*{box-sizing:border-box}body{margin:0;background:Canvas;color:CanvasText}
+main{margin:auto;max-width:66rem;padding:clamp(1rem,3vw,2.5rem)}
+a{color:LinkText;overflow-wrap:anywhere}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.13;margin:.7rem 0}
+.panel{border:1px solid GrayText;border-radius:1rem;padding:clamp(1rem,2vw,1.5rem);margin:1rem 0}
+textarea{width:100%;min-height:23rem;border:1px solid GrayText;border-radius:.7rem;background:Canvas;color:CanvasText;padding:1rem;font:.81rem/1.5 ui-monospace,monospace}
+button{min-height:44px;border:1px solid CanvasText;border-radius:.7rem;padding:.6rem 1rem;font:inherit;font-weight:700;cursor:pointer;background:CanvasText;color:Canvas}
+button.secondary{background:Canvas;color:CanvasText}
+.controls{display:flex;flex-wrap:wrap;gap:.65rem;margin:1rem 0}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.7rem}
+.metric{border:1px solid GrayText;border-radius:.65rem;padding:1rem}
+.metric strong{display:block;font-size:1.8rem;font-variant-numeric:tabular-nums}
+#status{font-weight:800;overflow-wrap:anywhere}#findings{padding-left:1.3rem}
+li{padding:.2rem 0;overflow-wrap:anywhere}small,.muted{color:GrayText}
+</style>
+</head>
+<body><main>
+<p><a href="./">← Public MVP directory</a></p>
+<p class="muted">Original educational tool · Fictional data · No accounts, servers or AI calls</p>
+<h1>AgentProof: inspect an AI receipt</h1>
+<p>Detect changes to a declared payload hash, missing producer claims, duplicated event IDs and sequence gaps. This <strong>does not</strong> prove the agent exists, owns an identity, or actually completed an action. Anyone can fabricate an unsigned manifest and its hashes.</p>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">1. Inspect a fictional receipt manifest</h2>
+<label for="fixture">Editable JSON receipt manifest (limit 64 KiB; browser demo limit 100 events)</label>
+<textarea id="fixture" spellcheck="false">{
+ "schema":"agentproof.receipts.v1",
+ "events":[
+  {"sequence":1,"event_id":"demo-start","status":"CREATED","claimed_producer":"fictional-agent","payload":{"task":"fictional-document-check"},"payload_sha256":"bc9e3fe2c061bfcd5babb208c96dbe0c1deb5ddd445f9c480c47dbcce411a696"},
+  {"sequence":2,"event_id":"demo-test","status":"ACCEPTED","claimed_producer":"fictional-agent","payload":{"test":"synthetic-input","passed":true},"payload_sha256":"15e369ec2035a998ff9a008be5ee36469da1a6ee5a5772fbb06e03e95f4a483a"},
+  {"sequence":3,"event_id":"demo-finish","status":"COMPLETED","claimed_producer":"fictional-agent","payload":{"receipt":"demo-only","count":2},"payload_sha256":"6d94787c3884fae01669365c1bdbd7f95b91c4b8f06dbc1a69fd5a09ae361757"}
+ ]
+}</textarea>
+<div class="controls">
+<button id="check" type="button">Verify supplied manifest</button>
+<button id="tamper" class="secondary" type="button">Simulate tampering</button>
+<button id="duplicate" class="secondary" type="button">Duplicate event ID</button>
+<button id="missing" class="secondary" type="button">Remove producer claim</button>
+<button id="reset" class="secondary" type="button">Reset sample</button>
+</div>
+<p id="status" role="status" aria-live="polite">Select Verify supplied manifest to check the fictional sample.</p>
+</section>
+<section class="panel" aria-labelledby="results-heading">
+<h2 id="results-heading">2. Recorded integrity checks</h2>
+<div class="metrics">
+<div class="metric"><small>Events inspected</small><strong id="count">—</strong></div>
+<div class="metric"><small>Payload digests checked</small><strong id="digests">—</strong></div>
+<div class="metric"><small>Structural/hash failures</small><strong id="failures">—</strong></div>
+</div>
+<ul id="findings" aria-label="Detailed integrity findings"></ul>
+</section>
+<section class="panel" aria-labelledby="limits-heading">
+<h2 id="limits-heading">3. Trust boundary</h2>
+<p>SHA-256 consistency can detect accidental or unauthorized alteration <em>relative to a trusted digest</em>. It cannot establish whether the original digest or claimed producer was trustworthy. Actual identity attestation needs a separately verified signing key, signature, scoped permissions and replay-safe trusted receipt source.</p>
+<p>The browser version accepts a restricted JSON subset with safe integer numbers and a maximum of 100 events; it rejects duplicate JSON keys. Use the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/OPEN_INTELLIGENCE_WAVE1.md">Python reference implementation</a> and its tests for the broader source contract. This page stores nothing and transmits nothing.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+ const input=document.getElementById("fixture");
+ const initial=input.value;
+ const status=document.getElementById("status");
+ const items=document.getElementById("findings");
+ const fields=["sequence","event_id","status","claimed_producer","payload","payload_sha256"];
+ const kinds=new Set(["CREATED","ACCEPTED","COMPLETED","REJECTED"]);
+ const ident=value=>typeof value==="string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(value);
+ const exact=(x,keys)=>x!==null && typeof x==="object" && !Array.isArray(x)
+   && Object.keys(x).length===keys.length && keys.every(k=>Object.prototype.hasOwnProperty.call(x,k));
+ let version=0;
+ function readStrict(text){
+   const value=JSON.parse(text);
+   const stack=[];
+   let stripped="";
+   for(let i=0;i<text.length;i++){
+     const ch=text[i];
+     if(ch==='"'){
+       const start=i;
+       i++;
+       let escaped=false;
+       for(;i<text.length;i++){
+         if(escaped){escaped=false;continue;}
+         if(text[i]==="\\"){escaped=true;continue;}
+         if(text[i]==='"')break;
+       }
+       const key=JSON.parse(text.slice(start,i+1));
+       stripped+=" ";
+       let j=i+1;
+       while(j<text.length && /\s/.test(text[j]))j++;
+       if(text[j]===":"){
+         const parent=stack[stack.length-1];
+         if(!parent || !parent.keys)throw Error("Invalid member");
+         if(parent.keys.has(key))throw Error("Duplicate JSON key: "+key);
+         parent.keys.add(key);
+       }
+     }else if(ch==="{"){stack.push({keys:new Set()});stripped+=ch;}
+     else if(ch==="["){stack.push({keys:null});stripped+=ch;}
+     else if(ch==="}" || ch==="]"){stack.pop();stripped+=ch;}
+     else stripped+=ch;
+   }
+   for(const match of stripped.matchAll(/-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g)){
+     if(match[0].includes(".") || /[eE]/.test(match[0]))throw Error("Only integer JSON numbers are supported");
+   }
+   return value;
+ }
+ function scalar(a){
+   for(let i=0;i<a.length;i++){
+     const n=a.charCodeAt(i);
+     if(n>=0xd800 && n<=0xdbff){
+       if(i+1>=a.length || a.charCodeAt(i+1)<0xdc00 || a.charCodeAt(i+1)>0xdfff)
+         throw Error("Invalid Unicode surrogate");
+       i++;
+     }else if(n>=0xdc00 && n<=0xdfff)throw Error("Invalid Unicode surrogate");
+   }
+ }
+ function keyCompare(a,b){
+   const left=Array.from(a),right=Array.from(b);
+   for(let i=0;i<Math.min(left.length,right.length);i++){
+     const diff=left[i].codePointAt(0)-right[i].codePointAt(0);
+     if(diff)return diff;
+   }
+   return left.length-right.length;
+ }
+ function canonical(value){
+   if(value===null)return "null";
+   if(typeof value==="number"){
+     if(!Number.isSafeInteger(value))throw Error("Only safe integer payload numbers are supported");
+     return JSON.stringify(value);
+   }
+   if(typeof value==="string"){scalar(value);return JSON.stringify(value);}
+   if(typeof value==="boolean")return JSON.stringify(value);
+   if(Array.isArray(value))return "["+value.map(canonical).join(",")+"]";
+   if(value && typeof value==="object"){
+     const keys=Object.keys(value).sort(keyCompare);
+     return "{"+keys.map(k=>{scalar(k);return JSON.stringify(k)+":"+canonical(value[k]);}).join(",")+"}";
+   }
+   throw Error("Unsupported payload type");
+ }
+ async function sha256(text){
+   if(!self.crypto || !self.crypto.subtle)throw Error("Browser SHA-256 API unavailable");
+   const hash=await self.crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));
+   return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("");
+ }
+ function resetOutput(){
+   items.replaceChildren();
+   for(const id of ["count","digests","failures"])document.getElementById(id).textContent="—";
+ }
+ async function inspect(text){
+   const manifest=readStrict(text);
+   if(!exact(manifest,["schema","events"]) || manifest.schema!=="agentproof.receipts.v1"
+     || !Array.isArray(manifest.events) || manifest.events.length<1 || manifest.events.length>100)
+     throw Error("Invalid manifest schema or event count");
+   const seen=new Set(), failures=[];
+   let checked=0;
+   for(const [index,e] of manifest.events.entries()){
+     const prefix="Event "+(index+1)+": ";
+     if(!exact(e,fields)){failures.push(prefix+"missing or unexpected fields");continue;}
+     if(!Number.isSafeInteger(e.sequence) || e.sequence!==index+1)
+       failures.push(prefix+"non-contiguous sequence");
+     if(!ident(e.event_id))failures.push(prefix+"invalid event ID");
+     else if(seen.has(e.event_id))failures.push(prefix+"duplicate event ID");
+     else seen.add(e.event_id);
+     if(typeof e.status!=="string" || !kinds.has(e.status))failures.push(prefix+"invalid status");
+     if(!ident(e.claimed_producer))failures.push(prefix+"missing or invalid claimed producer");
+     if(!exact(e.payload,Object.keys(e.payload||{})) || Object.keys(e.payload).length>100)
+       failures.push(prefix+"payload must be a bounded object");
+     else if(typeof e.payload_sha256!=="string" || !/^[0-9a-f]{64}$/.test(e.payload_sha256))
+       failures.push(prefix+"invalid lowercase SHA-256");
+     else{
+       const actual=await sha256(canonical(e.payload));
+       checked++;
+       if(actual!==e.payload_sha256)failures.push(prefix+"payload digest mismatch");
+     }
+   }
+   return {events:manifest.events.length,checked,failures};
+ }
+ async function run(){
+   const my=++version;resetOutput();status.textContent="Checking supplied JSON locally…";
+   if(input.value.length>65536){status.textContent="REJECTED: input exceeds 64 KiB.";return;}
+   try{
+     const r=await inspect(input.value);
+     if(my!==version)return;
+     document.getElementById("count").textContent=String(r.events);
+     document.getElementById("digests").textContent=String(r.checked);
+     document.getElementById("failures").textContent=String(r.failures.length);
+     status.textContent=r.failures.length
+       ?"REJECTED: "+r.failures.length+" structural or digest issue(s)."
+       :"PASS: supplied manifest internally consistent. Identity and real-world actions NOT verified.";
+     for(const issue of r.failures){
+       const li=document.createElement("li");li.textContent=issue;items.append(li);
+     }
+     if(!r.failures.length){
+       const li=document.createElement("li");
+       li.textContent="Three independent limits remain: unsigned producer identity, claimed event truth, and authority.";
+       items.append(li);
+     }
+   }catch(_){
+     if(my!==version)return;
+     status.textContent="REJECTED: invalid JSON, unsupported numeric data, duplicate key or browser hash API unavailable.";
+   }
+ }
+ function scenario(mode){
+   const doc=JSON.parse(initial);
+   if(mode==="tamper")doc.events[1].payload.passed=false;
+   else if(mode==="duplicate")doc.events[2].event_id=doc.events[0].event_id;
+   else if(mode==="missing")delete doc.events[1].claimed_producer;
+   input.value=JSON.stringify(doc,null,2);void run();
+ }
+ document.getElementById("check").addEventListener("click",()=>{void run();});
+ document.getElementById("tamper").addEventListener("click",()=>scenario("tamper"));
+ document.getElementById("duplicate").addEventListener("click",()=>scenario("duplicate"));
+ document.getElementById("missing").addEventListener("click",()=>scenario("missing"));
+ document.getElementById("reset").addEventListener("click",()=>{input.value=initial;void run();});
+})();
+</script>
+</body></html>
