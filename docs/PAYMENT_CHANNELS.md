@@ -19,6 +19,18 @@ Provider fees below are published standard rates, NOT personalized quotes, and m
 
 First launch stack: GitHub Sponsors plus either Yoco or Paystack hosted payment page plus one or two owner-controlled wallet destinations. Maintain **R0 additional recurring infrastructure expenditure**. Do not run BTCPay alongside sensitive SIGMA/Oracle trading processes just to claim free hosting.
 
+## Public GitHub payment infrastructure worth knowing
+
+These are **real open-source repositories**, not Esheen Labs-installed processors or proof of merchant onboarding:
+
+- [btcpayserver/btcpayserver](https://github.com/btcpayserver/btcpayserver): upstream non-custodial Bitcoin invoice server (MIT; full production deployment requires node/storage/security and maintenance).
+- [btcpayserver/btcpayserver-docker](https://github.com/btcpayserver/btcpayserver-docker): official deployment scaffolding, not a zero-resource service.
+- [lnbits/lnbits](https://github.com/lnbits/lnbits): Bitcoin Lightning wallet/account application; hosting and underlying funding custody still matter.
+- [Payfast/payfast-php-sdk](https://github.com/Payfast/payfast-php-sdk): Payfast's public PHP integration library for future commercial backends; **do not run payment completion from a browser redirect alone**.
+- [PaystackHQ/paystack-android](https://github.com/PaystackHQ/paystack-android) and [PaystackHQ/paystack-ios](https://github.com/PaystackHQ/paystack-ios): public client SDKs for mobile usage; for this static website the **provider-hosted Payment Page needs no SDK**.
+
+No external gateway code is vendored into the Labs repo. Before adopting a gateway dependency: verify maintainer, releases, license, supported payment flow, failure/replay handling, and a working merchant payout account. A free license does not mean free settlement or secure production deployment.
+
 ## Existing implementation
 
 - Public config: support/channels.json, schema esheen-labs.support.v1. All channels default to pending.
