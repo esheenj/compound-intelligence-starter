@@ -427,7 +427,9 @@ def run() -> dict:
         for kind in URLS:
             print(json.dumps({"phase":"opening-addon","id":kind,"url":URLS[kind]}), flush=True)
             open_page(driver, kind)
+            print(json.dumps({"phase":"loaded-addon","id":kind}), flush=True)
             interact(driver, kind)
+            print(json.dumps({"phase":"interacted-addon","id":kind}), flush=True)
             for width, height in ((320, 720), (1440, 900)):
                 driver.viewport(width, height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
