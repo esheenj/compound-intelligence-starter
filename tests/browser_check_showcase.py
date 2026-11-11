@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import socket
+import time
 import sys
 import tempfile
 from pathlib import Path
@@ -49,10 +50,11 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 12 and page["language"] == "en",
+                   and page["extraTools"] == 13 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 12 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 13 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
+                   and "agentproof.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -161,11 +163,64 @@ def run():
             driver.js("document.getElementById('reset').click(); return true;")
             verify(driver.js("return document.getElementById('status').textContent.startsWith('PASS:');") is True,
                    "AGENTOPS_RECOVERY_FROM_INVALID_INPUT")
+            driver.command("POST", "url", {"url": (path / "agentproof.html").resolve().as_uri()})
+            driver.js("document.getElementById('check').click(); return true;")
+            time.sleep(0.35)
+            proof = driver.js("""
+                return {status:document.getElementById('status').textContent,
+                        count:document.getElementById('count').textContent,
+                        digests:document.getElementById('digests').textContent,
+                        failures:document.getElementById('failures').textContent,
+                        csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                        remote:performance.getEntriesByType('resource')
+                            .filter(x=>x.name.startsWith('http')).length};
+            """)
+            verify(proof["status"].startswith("PASS:") and proof["count"] == "3"
+                   and proof["digests"] == "3" and proof["failures"] == "0"
+                   and proof["remote"] == 0 and "connect-src 'none'" in proof["csp"],
+                   "AGENTPROOF_GOOD_SAMPLE")
+            driver.js("document.getElementById('tamper').click(); return true;")
+            time.sleep(0.25)
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                  && document.getElementById('findings').textContent.includes('digest mismatch');
+            """) is True, "AGENTPROOF_TAMPER_DETECTED")
+            driver.js("document.getElementById('duplicate').click(); return true;")
+            time.sleep(0.25)
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                  && document.getElementById('findings').textContent.includes('duplicate event ID');
+            """) is True, "AGENTPROOF_DUPLICATE_DETECTED")
+            driver.js("document.getElementById('missing').click(); return true;")
+            time.sleep(0.25)
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                  && document.getElementById('findings').textContent.includes('missing or unexpected fields');
+            """) is True, "AGENTPROOF_MISSING_PRODUCER")
+            driver.js("""
+                document.getElementById('fixture').value =
+                  '{"schema":"agentproof.receipts.v1","schema":"agentproof.receipts.v1","events":[]}';
+                document.getElementById('check').click();return true;
+            """)
+            time.sleep(0.2)
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                    && document.getElementById('count').textContent==='—';
+            """) is True, "AGENTPROOF_DUPLICATE_JSON_KEY_FAIL_CLOSED")
+            driver.js("document.getElementById('reset').click();return true;")
+            time.sleep(0.25)
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('PASS:');
+            """) is True, "AGENTPROOF_RESET_RECOVERS")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth <= innerWidth;") is True,
+                       "AGENTPROOF_NO_OVERFLOW_" + str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":12,
+                "browser":version,"publicCards":7,"additionalToolsLinked":13,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":2,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":3,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
