@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 21 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 23 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -37,6 +37,8 @@ URLS = {
     "agentops": "https://esheenj.github.io/compound-intelligence-starter/agentops.html",
     "agentproof": "https://esheenj.github.io/compound-intelligence-starter/agentproof.html",
     "agentcredits": "https://esheenj.github.io/compound-intelligence-starter/agentcredits.html",
+    "model-cost": "https://esheenj.github.io/compound-intelligence-starter/model-cost.html",
+    "model-fit": "https://esheenj.github.io/compound-intelligence-starter/model-fit.html",
     "approval": "https://esheenj.github.io/flow-state-machine-oss/approval.html",
 }
 READY = {
@@ -49,6 +51,8 @@ READY = {
     "agentops": "#inspect",
     "agentproof": "#check",
     "agentcredits": "#inspect",
+    "model-cost": "#compare",
+    "model-fit": "#evaluate",
     "approval": "#state",
 }
 
@@ -306,6 +310,80 @@ def interact(driver: Driver, kind: str) -> None:
             return document.getElementById('status').textContent.startsWith('PASS:')
                 && document.getElementById('available').textContent==='80';
         """) is True, "LIVE_AGENTCREDITS_RESET")
+    elif kind == "model-cost":
+        result=driver.js("""
+            document.querySelector('#compare').click();
+            return{
+                status:document.querySelector('#status').textContent,
+                budget:document.querySelector('#budget-display').textContent,
+                applied:document.querySelector('#applied').textContent,
+                duplicates:document.querySelector('#duplicates').textContent,
+                rows:[...document.querySelectorAll('#rows tr')].map(x=>
+                    [...x.querySelectorAll('td')].map(td=>td.textContent))
+            };
+        """)
+        verify(result["status"].startswith("HOLD:") and
+               result["budget"]=="0.000400000000" and result["applied"]=="2"
+               and result["duplicates"]=="1" and len(result["rows"])==2
+               and result["rows"][0][3]=="0.000380000000"
+               and result["rows"][1][3]=="0.000460000000",
+               "LIVE_MODEL_COST_EXACT_DECIMAL")
+        verify(driver.js("""
+            document.querySelector('#budget').click();
+            return document.querySelector('#status').textContent.startsWith('PASS:')
+                && document.querySelector('#budget-display').textContent==='0.001000000000';
+        """) is True,"LIVE_MODEL_COST_BUDGET")
+        for button in ("conflict","missing"):
+            bad=driver.js("""
+                document.querySelector(arguments[0]).click();
+                return{
+                    status:document.querySelector('#status').textContent,
+                    rows:document.querySelectorAll('#rows tr').length,
+                    budget:document.querySelector('#budget-display').textContent
+                };
+            """,[button])
+            verify(bad["status"].startswith("REJECTED:") and bad["rows"]==0
+                   and bad["budget"]=="—","LIVE_MODEL_COST_FAIL_CLOSED_"+button.upper())
+        verify(driver.js("""
+            document.querySelector('#reset').click();
+            return document.querySelector('#status').textContent.startsWith('HOLD:')
+                && document.querySelectorAll('#rows tr').length===2;
+        """) is True,"LIVE_MODEL_COST_RESET")
+    elif kind == "model-fit":
+        result=driver.js("""
+            document.querySelector('#evaluate').click();
+            return{
+                status:document.querySelector('#status').textContent,
+                available:document.querySelector('#available').textContent,
+                fits:document.querySelector('#fits').textContent,
+                misses:document.querySelector('#misses').textContent,
+                rows:[...document.querySelectorAll('#rows tr')].map(x=>
+                    [...x.querySelectorAll('td')].map(td=>td.textContent))
+            };
+        """)
+        verify(result["status"].startswith("PASS:") and result["available"]=="2560"
+               and result["fits"]=="1" and result["misses"]=="1"
+               and len(result["rows"])==2
+               and result["rows"][0][0]=="fictional-small-q4"
+               and result["rows"][0][2]=="810",
+               "LIVE_MODEL_FIT_RESOURCE_HEADROOM")
+        for button in ("constrained","context"):
+            verify(driver.js("""
+                document.querySelector(arguments[0]).click();
+                return document.querySelector('#status').textContent.startsWith('HOLD:')
+                    && document.querySelector('#fits').textContent==='0';
+            """,[button]) is True,"LIVE_MODEL_FIT_HOLD_"+button.upper())
+        verify(driver.js("""
+            document.querySelector('#duplicate').click();
+            return document.querySelector('#status').textContent.startsWith('REJECTED:')
+                && document.querySelectorAll('#rows tr').length===0
+                && document.querySelector('#fits').textContent==='—';
+        """) is True,"LIVE_MODEL_FIT_DUPLICATE")
+        verify(driver.js("""
+            document.querySelector('#reset').click();
+            return document.querySelector('#status').textContent.startsWith('PASS:')
+                && document.querySelector('#fits').textContent==='1';
+        """) is True,"LIVE_MODEL_FIT_RESET")
     elif kind == "approval":
         verify(driver.js("""
             return document.querySelector('#state').textContent==='PENDING';
@@ -360,7 +438,7 @@ def run() -> dict:
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 14 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 7 public landing pages loaded and 16 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
