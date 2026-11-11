@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import socket
 import time
+import urllib.error
 from browser_check_issue_report import Driver, driver_executable
 
 ENTRY_SITES = {
@@ -454,6 +455,20 @@ if __name__ == "__main__":
     try:
         print(json.dumps(run(), sort_keys=True, indent=2))
     except (AssertionError, OSError, RuntimeError, TimeoutError) as exc:
-        print(json.dumps({"schema": "esheen-public-live-oss-acceptance-v1",
-                          "state": "FAILED", "error": str(exc)[:130]}, sort_keys=True))
+        diagnostic = {"schema": "esheen-public-live-oss-acceptance-v1",
+                      "state": "FAILED", "error": str(exc)[:130]}
+        cause = getattr(exc, "__cause__", None)
+        if isinstance(cause, urllib.error.HTTPError):
+            try:
+                response = json.loads(cause.read(4096))
+                value = response.get("value", {})
+                if isinstance(value, dict):
+                    category = str(value.get("error", ""))[:64]
+                    line = str(value.get("message", "")).splitlines()[0][:240]
+                    allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:_()[]-+/"
+                    diagnostic["webdriver_category"] = "".join(c for c in category if c in allowed)
+                    diagnostic["webdriver_hint"] = "".join(c for c in line if c in allowed)[:180]
+            except (ValueError, UnicodeError, TypeError, IndexError):
+                diagnostic["webdriver_hint"] = "UNREADABLE_RESPONSE"
+        print(json.dumps(diagnostic, sort_keys=True))
         raise SystemExit(1)
