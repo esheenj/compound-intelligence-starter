@@ -50,14 +50,15 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 16 and page["language"] == "en",
+                   and page["extraTools"] == 17 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 16 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 17 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
                    and "agentcredits.html" in page["extraLinks"]
                    and "model-cost.html" in page["extraLinks"]
                    and "model-fit.html" in page["extraLinks"]
+                   and "context-preservation.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -348,11 +349,67 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "MODEL_FIT_NO_OVERFLOW_"+str(width))
+            driver.command("POST", "url", {"url":(path/"context-preservation.html").resolve().as_uri()})
+            retention = driver.js("""
+                document.getElementById('evaluate').click();
+                return {
+                    status:document.getElementById('status').textContent,
+                    candidates:document.getElementById('candidates').textContent,
+                    lossless:document.getElementById('lossless').textContent,
+                    held:document.getElementById('held').textContent,
+                    rows:[...document.querySelectorAll('#rows tr')].map(row=>
+                      [...row.querySelectorAll('td')].map(x=>x.textContent)),
+                    remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length,
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content
+                };
+            """)
+            by_name={x[0]:x for x in retention["rows"]}
+            verify(retention["status"].startswith("RECORDED:")
+                   and retention["candidates"]=="3" and retention["lossless"]=="1"
+                   and retention["held"]=="2"
+                   and by_name["brief-chat"][1]=="HOLD" and by_name["brief-chat"][2]=="1/4"
+                   and by_name["evidence-checkpoint"][1]=="PASS_LOSSLESS"
+                   and by_name["evidence-checkpoint"][2]=="4/4"
+                   and by_name["unsafe-drift"][1]=="HOLD"
+                   and retention["remote"]==0
+                   and "connect-src 'none'" in retention["csp"],
+                   "CONTEXT_PRESERVATION_THREE_REFERENCE_CASES")
+            for button in ("drop","stale","promote"):
+                r=driver.js("""
+                    document.getElementById(arguments[0]).click();
+                    const rows=[...document.querySelectorAll('#rows tr')];
+                    const exact=rows.find(r=>r.querySelector('td')?.textContent==='evidence-checkpoint');
+                    return {lossless:document.getElementById('lossless').textContent,
+                            held:document.getElementById('held').textContent,
+                            gate:exact?.querySelectorAll('td')[1].textContent,
+                            findings:document.getElementById('findings').textContent};
+                """,[button])
+                verify(r["lossless"]=="0" and r["held"]=="3" and r["gate"]=="HOLD",
+                       "CONTEXT_PRESERVATION_FAIL_CLOSED_"+button.upper())
+            driver.js("""
+                document.getElementById('fixture').value=
+                  '{"schema":"context-preservation.v1","schema":"bad","source":{},"candidates":[]}';
+                document.getElementById('evaluate').click();return true;
+            """)
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('REJECTED:')
+                  && document.querySelectorAll('#rows tr').length===0
+                  && document.getElementById('lossless').textContent==='—';
+            """) is True,"CONTEXT_PRESERVATION_DUPLICATE_JSON_KEY_REJECTED")
+            driver.js("document.getElementById('reset').click();return true;")
+            verify(driver.js("""
+                return document.getElementById('status').textContent.startsWith('RECORDED:')
+                   && document.getElementById('lossless').textContent==='1';
+            """) is True,"CONTEXT_PRESERVATION_RESET")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "CONTEXT_PRESERVATION_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":16,
+                "browser":version,"publicCards":7,"additionalToolsLinked":17,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":6,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":7,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
