@@ -50,9 +50,9 @@ def run():
             """)
             verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 7
                    and page["projectLinks"] is True and page["githubPagesLinks"] == 7
-                   and page["extraTools"] == 20 and page["language"] == "en",
+                   and page["extraTools"] == 21 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
-            verify(len(page["extraLinks"]) == 20 and "mvp-wave.html" in page["extraLinks"]
+            verify(len(page["extraLinks"]) == 21 and "mvp-wave.html" in page["extraLinks"]
                    and "agentops.html" in page["extraLinks"]
                    and "agentproof.html" in page["extraLinks"]
                    and "agentcredits.html" in page["extraLinks"]
@@ -62,6 +62,7 @@ def run():
                    and "model-disagreement.html" in page["extraLinks"]
                    and "decision-review.html" in page["extraLinks"]
                    and "agent-trust.html" in page["extraLinks"]
+                   and "signed-agent.html" in page["extraLinks"]
                    and "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html" in page["extraLinks"]
                    and "https://esheenj.github.io/design-system-foundations-oss/audit.html" in page["extraLinks"]
                    and "https://esheenj.github.io/data-table-interactions-oss/experiment.html" in page["extraLinks"]
@@ -640,11 +641,74 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "TRUST_NO_OVERFLOW_"+str(width))
+            driver.command("POST","url",{"url":(path/"signed-agent.html").resolve().as_uri()})
+            initial=None
+            for _ in range(60):
+                initial=driver.js("""
+                    return {ready:document.getElementById('status').textContent.startsWith('READY:'),
+                            fail:document.getElementById('status').textContent.startsWith('REJECTED:'),
+                            status:document.getElementById('status').textContent};
+                """)
+                if initial["ready"] or initial["fail"]:break
+                time.sleep(.1)
+            verify(initial["ready"],"SIGNED_CHALLENGE_WEB_CRYPTO_AVAILABLE_"+initial["status"][:65])
+            def action(btn, expected_gate, sig_state):
+                driver.js("document.getElementById(arguments[0]).click();return true;",[btn])
+                report={}
+                for _ in range(60):
+                    report=driver.js("""
+                        return {done:document.getElementById('status').textContent.startsWith('RESULT:'),
+                                fail:document.getElementById('status').textContent.startsWith('REJECTED:'),
+                                gate:document.getElementById('gate').textContent,
+                                sig:document.getElementById('signature').textContent,
+                                nonce:document.getElementById('nonce-state').textContent,
+                                auth:document.getElementById('authorization').textContent,
+                                challenge:document.getElementById('challenge').textContent};
+                    """)
+                    if report["done"] or report["fail"]:break
+                    time.sleep(.1)
+                verify(report["done"] and report["gate"]==expected_gate
+                       and report["sig"]==sig_state and report["auth"]=="NONE"
+                       and '"nonce"' in report["challenge"],
+                       "SIGNED_CHALLENGE_"+btn.upper()+"_"+report.get("gate","missing"))
+                return report
+            good=action("valid","VERIFIED_NOT_AUTHORIZED","VALID")
+            verify(good["nonce"]=="YES","SIGNED_CHALLENGE_NONCE_CONSUMED")
+            action("wrong-key","INVALID_SIGNATURE","INVALID")
+            action("scope","UNAUTHORIZED_SCOPE","NOT CHECKED")
+            replay=action("replay","REPLAYED_CHALLENGE","VALID")
+            verify(replay["nonce"]=="ALREADY CONSUMED","SIGNED_CHALLENGE_REPLAY")
+            action("expired","EXPIRED_CHALLENGE","NOT CHECKED")
+            action("revoked","REVOKED_KEY","NOT CHECKED")
+            driver.js("document.getElementById('reset').click();return true;")
+            reset={}
+            for _ in range(60):
+                reset=driver.js("""
+                    return {status:document.getElementById('status').textContent,
+                            gate:document.getElementById('gate').textContent};
+                """)
+                if reset["status"].startswith("READY:") or reset["status"].startswith("REJECTED:"):break
+                time.sleep(.1)
+            verify(reset["status"].startswith("READY:") and reset["gate"]=="READY",
+                   "SIGNED_CHALLENGE_FRESH_EPHEMERAL_KEY_RESET")
+            details=driver.js("""
+                return {remote:performance.getEntriesByType('resource').filter(x=>
+                          x.name.startsWith('http')).length,
+                        csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                        script:document.querySelectorAll('script').length};
+            """)
+            verify(details["remote"]==0 and details["script"]==1
+                   and "connect-src 'none'" in details["csp"],
+                   "SIGNED_CHALLENGE_NO_REMOTE_ASSETS")
+            for width,height in ((320,720),(375,812),(812,375),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "SIGNED_CHALLENGE_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":7,"additionalToolsLinked":20,
+                "browser":version,"publicCards":7,"additionalToolsLinked":21,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":10,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":11,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
