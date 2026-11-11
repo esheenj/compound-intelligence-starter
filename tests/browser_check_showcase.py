@@ -704,11 +704,35 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "SIGNED_CHALLENGE_NO_OVERFLOW_"+str(width))
+            # Generated support page: no live checkout, wallet, script or outbound assets yet.
+            driver.command("POST", "url", {"url": (path / "support.html").resolve().as_uri()})
+            support_page=driver.js("""
+                return {
+                    main:document.querySelectorAll('main').length,
+                    headings:document.querySelectorAll('.panel h2').length,
+                    pending:document.querySelectorAll('.pending').length,
+                    scripts:document.querySelectorAll('script').length,
+                    address:document.querySelectorAll('.wallets code').length,
+                    links:[...document.querySelectorAll('a')].map(x=>x.href),
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
+                    remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
+                };
+            """)
+            verify(support_page["main"]==1 and support_page["headings"]==3
+                   and support_page["pending"]==3 and support_page["scripts"]==0
+                   and support_page["address"]==0 and support_page["remote"]==0
+                   and "connect-src 'none'" in support_page["csp"]
+                   and not any("pay.yoco.com" in x or "paystack.com/pay" in x or "/sponsors/esheenj" in x for x in support_page["links"]),
+                   "SUPPORT_PENDING_NO_CHECKOUT_OR_ADDRESSES")
+            for width,height in ((320,720),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
+                       "SUPPORT_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
                 "browser":version,"publicCards":7,"additionalToolsLinked":21,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":11,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":11,"supportPagePendingChecked":True,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()

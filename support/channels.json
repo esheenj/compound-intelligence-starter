@@ -1,0 +1,16 @@
+{
+  "schema": "esheen-labs.support.v1",
+  "github_sponsors": {
+    "state": "pending",
+    "url": ""
+  },
+  "fiat": {
+    "state": "pending",
+    "provider": "none",
+    "url": ""
+  },
+  "crypto": {
+    "state": "pending",
+    "wallets": []
+  }
+}
