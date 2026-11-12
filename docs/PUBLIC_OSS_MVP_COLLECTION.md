@@ -1,5 +1,9 @@
 # Esheen Labs — public open-source MVP collection
 
+## Current inventory update — 12 November 2026
+
+The original seven-project notes below are historical. The separately released [Agent Capability Policy Lab](https://esheenj.github.io/agent-capability-policy-lab/) adds an **eighth independent MIT-licensed public repository**, with 16 Node policy tests and five scenario browser checks in [CI](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234299219) and a [successful Pages publisher](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234352964). The combined gallery has eight repository entry pages and 21 hosted add-ons: **29 Pages URLs, not 29 separate repos**. The 11 November independent acceptance of the earlier 28 URLs remains historical evidence, not a new combined 29/29 claim. Offline only, fictional data, no identity or exchange execution authority.
+
 **Seven independent, source-first tools. No accounts, private backends or subscription required for their basic examples.** GitHub Actions successfully deployed all seven projects to their recorded GitHub Pages URLs on **9 November 2026**, using the previously tested exact source commits. **Independent external-browser HTTPS/UI acceptance remains pending**; deployment success is not that separate check. Each repository owns its own tests, license, limitations and release status. Public GitHub access is **not** a claim of a deployed website, published npm package, independent accessibility certification or real-world adoption.
 
 ## GitHub Pages deployments — 9 November 2026
