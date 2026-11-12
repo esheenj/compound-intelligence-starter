@@ -1,5 +1,9 @@
 # Esheen Labs — public open-source MVP collection
 
+## New independent retrieval quality MVP — 12 November 2026
+
+[RAG Retrieval Evaluation Lab](https://esheenj.github.io/rag-retrieval-eval-lab/) is the **eleventh standalone repository** represented in the Labs gallery. Original source and reproducible [Node/real Chrome tests](https://github.com/esheenj/rag-retrieval-eval-lab/actions/runs/43278981823) passed; [Pages publisher](https://github.com/esheenj/rag-retrieval-eval-lab/actions/runs/43279070629) succeeded, with live HTTPS readback of the HTML and JavaScript. Fictional document/relevance pairs only, no live model calls or real answer-quality claim. Collection now **11 standalone repos + 21 in-repository add-ons = 32 page entries**. Separate 32/32 independent browser-interaction acceptance remains unclaimed.
+
 ## New tenth independent public MVP — 12 November 2026
 
 [Evaluation Dataset Leakage Lab](https://esheenj.github.io/eval-dataset-leakage-lab/) was published from clean original source with 18 audit unit/negative tests and three real Chrome scenario tests ([CI 43276526361](https://github.com/esheenj/eval-dataset-leakage-lab/actions/runs/43276526361), PASS), followed by successful [Pages release 43276576767](https://github.com/esheenj/eval-dataset-leakage-lab/actions/runs/43276576767) and independent HTTPS HTML readback. It uses invented data only; successful heuristics do not verify actual data privacy, provenance or model accuracy. Collection total is **10 standalone repository entry pages and 21 add-ons = 31 hosted demo entry points**. No combined 31/31 independent browser-interaction check is claimed yet.

@@ -1,5 +1,13 @@
 # Public open-source MVP directory
 
+## Eleven-project public gallery — 12 November 2026
+
+The [RAG Retrieval Evaluation Lab](https://github.com/esheenj/rag-retrieval-eval-lab) is a separate original MIT-licensed public repository from clean initial source `5c8623a60fc67bc67d57d1b0dbb4973830e5d22d`. Its offline Node/browser engine compares fictional ranked document IDs using precision@k, recall@k, hit rate, mean reciprocal rank@k and nDCG@k, with strict source validation. These deterministic scores do not verify real relevance labels, actual model/search quality, source authenticity, generated answer correctness or business outcomes.
+
+**Proof separated by layer:** 20 unit/adversarial metrics tests, three site safety tests and three real headless Chrome scenarios passed across Node 20/22/24: [CI 43278981823](https://github.com/esheenj/rag-retrieval-eval-lab/actions/runs/43278981823). GitHub Pages [43279070629](https://github.com/esheenj/rag-retrieval-eval-lab/actions/runs/43279070629) succeeded. The published root HTML and app module were independently retrieved over HTTPS on 12 November 2026.
+
+The gallery adds the eleventh independent public repo page to the earlier 31-page collection, preserving all 21 add-on playgrounds: **11 repository entry pages + 21 hosted add-ons = 32 public demo pages**. Prior 28/28 Chrome and 30/30 and 31/31 HTTP reachability acceptance are historical and separately scoped. A combined 32/32 live-browser interaction test is not claimed by those historic receipts. R0 additional recurring infrastructure spend; no private control, trading or financial authority exposed.
+
 ## Ten-project public Labs gallery — 12 November 2026
 
 The [Evaluation Dataset Leakage Lab](https://github.com/esheenj/eval-dataset-leakage-lab) is a new original independently MIT-licensed repository with clean initial source `14076b41d2f48c0fbce1b8b620a32dd5ed0ad458` (no private incubator history). The browser and CLI share an offline deterministic audit module for fictional train/eval/test contamination, duplicate prompts/IDs, missing labels, small evaluation sets and label skew. It is not full data provenance, privacy certification, semantic near-duplicate detection or model accuracy testing.
