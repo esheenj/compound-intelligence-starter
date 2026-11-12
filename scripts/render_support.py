@@ -25,7 +25,16 @@ PAIRS = {
     ("USDC", "base-mainnet"),
     ("ETH", "base-mainnet"),
     ("SOL", "solana-mainnet"),
+    ("USDT", "solana-mainnet"),
     ("USDT", "tron-mainnet"),
+}
+
+
+PIONEX_MINIMUM_SNAPSHOT = {
+    ("BTC", "bitcoin-mainnet"): "0.00001 BTC",
+    ("USDT", "solana-mainnet"): "0.1 USDT",
+    ("USDT", "ethereum-mainnet"): "1 USDT",
+    ("USDT", "tron-mainnet"): "1 USDT",
 }
 
 
@@ -115,7 +124,15 @@ def validate_channels(value: object) -> dict:
             fail("CRYPTO_COUNT")
         seen = set()
         for row in wallets:
-            fields(row, {"asset", "network", "address", "verified_by_owner"}, "CRYPTO_WALLET")
+            base_fields = {"asset", "network", "address", "verified_by_owner"}
+            exchange_fields = base_fields | {"destination_type", "minimum_snapshot"}
+            if type(row) is not dict or set(row) not in (base_fields, exchange_fields):
+                fail("FIELDS_CRYPTO_WALLET")
+            if set(row) == exchange_fields:
+                if (row["destination_type"] != "pionex-exchange-deposit" or
+                        row["minimum_snapshot"] != PIONEX_MINIMUM_SNAPSHOT.get(
+                            (row["asset"], row["network"]))):
+                    fail("CRYPTO_EXCHANGE_METADATA")
             if row["verified_by_owner"] is not True or not _wallet_format(
                     row["asset"], row["network"], row["address"]):
                 fail("CRYPTO_UNVERIFIED_OR_FORMAT")
@@ -179,12 +196,21 @@ def render_support(value: object) -> bytes:
     if crypto["state"] == "active":
         wallets = []
         for row in crypto["wallets"]:
+            note = ""
+            if row.get("destination_type") == "pionex-exchange-deposit":
+                note = ('<small>Pionex custodial exchange deposit · minimum shown in owner screenshot '
+                        'on 12 November 2026: ' + _safe(row["minimum_snapshot"]) +
+                        '. Minimums and deposit addresses can change. Reconfirm the live Pionex '
+                        'deposit screen and same asset/network before sending.</small>')
             wallets.append('<li><strong>' + _safe(row["asset"]) + ' · ' + _safe(row["network"]) +
-                           '</strong><code>' + _safe(row["address"]) + '</code></li>')
+                           '</strong><code>' + _safe(row["address"]) + '</code>' + note + '</li>')
         c = '<ul class="wallets">' + "".join(wallets) + '</ul>'
-        c_info = ("Direct transfers to the displayed public addresses. Check the exact asset and network "
-                  "inside your own wallet; sending to the wrong chain may permanently lose funds. "
-                  "This page cannot detect or confirm payments. No automatic product access is granted.")
+        c_info = ("These receiving addresses were supplied by the maintainer. Pionex destinations "
+                  "are custodial exchange deposits, not independent self-custody or GitHub Sponsors. "
+                  "Before each transfer, verify the current Pionex deposit address, coin, network "
+                  "and live minimum: addresses may be replaced and mismatched networks can lose funds. "
+                  "Avoid tiny donations below deposit minimums. This static site cannot verify payment "
+                  "or grant product access.")
     else:
         c = '<p class="pending">No public wallet address has been enrolled or published.</p>'
         c_info = "Wallet-network pairing and ownership checks are required before any crypto address appears."
@@ -204,7 +230,7 @@ a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem}
 .panel{border:1px solid GrayText;border-radius:1rem;padding:1.2rem;min-width:0}
 .pending{font-weight:700}code{display:block;overflow-wrap:anywhere;margin:.45rem 0;padding:.5rem;border:1px solid GrayText;border-radius:.4rem}
-.wallets{padding-left:1.1rem}.wallets li{margin:1rem 0}
+.wallets{padding-left:1.1rem}.wallets li{margin:1rem 0}.wallets small{display:block;margin-top:.4rem;line-height:1.5}
 .note{border-left:4px solid currentColor;padding:.8rem 1rem;margin:1.2rem 0}
 </style></head><body><main>
 <p><a href="./">Back to Esheen Labs tools</a></p><p>Esheen Labs · public open-source support</p>
@@ -212,7 +238,7 @@ a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
 <p>All basic public experiments remain free. Financial support is voluntary, never required to try tools, and does not purchase access to private research, verified identity or execution authority.</p>
 <div class="grid">""" + make_card("GitHub Sponsors", s_info, s) + make_card("Card and rand payments", f_info, f) + make_card("Direct crypto support", c_info, c) + """</div>
 <section class="note"><h2>Before sending funds</h2><p>Use only destinations shown on this public page after the maintainer activates them. Independently confirm the receiver and selected network. Cryptocurrency transfers can be irreversible. No keys or wallet connections are requested. Avoid posting private payment proofs or personal data in public issues.</p>
-<p>Support is not an order or a tax-deductible charitable donation. No Section 18A certificate is issued. For commercial work, separately agree scope, pricing, invoicing, delivery and a verified payment channel. Screenshots and transaction IDs are not proof of settled payment.</p></section>
+<p>These deposits may be controlled by Pionex, may be replaced, and may require current exchange-specific minimums. An address shown here does not guarantee successful crediting. Never reuse an address after an exchange replacement notice.</p><p>Support is not an order or a tax-deductible charitable donation. No Section 18A certificate is issued. For commercial work, separately agree scope, pricing, invoicing, delivery and a verified payment channel. Screenshots and transaction IDs are not proof of settled payment.</p></section>
 <p><a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/CONTRIBUTING.md" rel="noopener noreferrer">You can also contribute without money</a>.</p>
 <p><a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/SUPPORT_AND_SUSTAINABILITY.md" rel="noopener noreferrer">Read the support policy and limitations</a>.</p>
 </main></body></html>"""
