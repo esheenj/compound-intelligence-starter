@@ -1,5 +1,7 @@
 # Compound Intelligence Starter
 
+**Explore all 28 public demos:** [Open the Esheen Labs interactive gallery](https://esheenj.github.io/compound-intelligence-starter/) to try agent trust, AI reasoning, UX journeys and developer tools. The collection contains **seven independent public repositories plus 21 browser add-ons**—not 28 separately published repos. Examples are educational and use fictional inputs.
+
 **Challenge assumptions. Verify outcomes. Reuse what works.**
 
 Turn an engineering problem into competing, falsifiable hypotheses and a reproducible test-first brief. Explore a small, offline reference implementation of evidence-backed AI experiments, durable memory and model comparisons.
