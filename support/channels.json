@@ -10,7 +10,40 @@
     "url": ""
   },
   "crypto": {
-    "state": "pending",
-    "wallets": []
+    "state": "active",
+    "wallets": [
+      {
+        "asset": "BTC",
+        "network": "bitcoin-mainnet",
+        "address": "bc1q8pjdvkgugs96xtm0uudlzvdtldr47yr892c0s3",
+        "destination_type": "pionex-exchange-deposit",
+        "minimum_snapshot": "0.00001 BTC",
+        "verified_by_owner": true
+      },
+      {
+        "asset": "USDT",
+        "network": "solana-mainnet",
+        "address": "8VDELHBkXdGpFaXKW6HLybVhiwY8WB4NDkmMuCWFbtru",
+        "destination_type": "pionex-exchange-deposit",
+        "minimum_snapshot": "0.1 USDT",
+        "verified_by_owner": true
+      },
+      {
+        "asset": "USDT",
+        "network": "ethereum-mainnet",
+        "address": "0x64Bd9f7496F3307Ecd683Ec8A0865Ac942C35069",
+        "destination_type": "pionex-exchange-deposit",
+        "minimum_snapshot": "1 USDT",
+        "verified_by_owner": true
+      },
+      {
+        "asset": "USDT",
+        "network": "tron-mainnet",
+        "address": "TK9sjUE4vgmTCWd2UELgA3Fr2KcsBA3hUP",
+        "destination_type": "pionex-exchange-deposit",
+        "minimum_snapshot": "1 USDT",
+        "verified_by_owner": true
+      }
+    ]
   }
 }
