@@ -1,0 +1,6 @@
+# GitHub's Sponsor button links to the public Esheen Labs funding page.
+# GitHub Sponsors 'github:' is intentionally absent until the recipient profile
+# has been independently approved and payout is active.
+# The linked public page shows owner-supplied Pionex exchange deposit addresses,
+# not a GitHub-managed payment processor or a self-custody wallet.
+custom: ["https://esheenj.github.io/compound-intelligence-starter/support.html"]
