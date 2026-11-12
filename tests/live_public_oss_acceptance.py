@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 28 existing public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 32 existing public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -20,6 +20,10 @@ ENTRY_SITES = {
     "flow-state-machine-oss": "https://esheenj.github.io/flow-state-machine-oss/",
     "form-experience-kit-oss": "https://esheenj.github.io/form-experience-kit-oss/",
     "visual-regression-starter-oss": "https://esheenj.github.io/visual-regression-starter-oss/",
+    "agent-capability-policy-lab": "https://esheenj.github.io/agent-capability-policy-lab/",
+    "prompt-evaluation-harness-oss": "https://esheenj.github.io/prompt-evaluation-harness-oss/",
+    "eval-dataset-leakage-lab": "https://esheenj.github.io/eval-dataset-leakage-lab/",
+    "rag-retrieval-eval-lab": "https://esheenj.github.io/rag-retrieval-eval-lab/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -759,13 +763,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
+        verify(len(checked)==32, "LIVE_GALLERY_EXPECTED_32_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 7 public landing pages loaded and 21 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 11 independent public repository landing pages loaded; 21 add-ons exercised in Chrome; four new repo-specific interaction tests are separate; not user-device acceptance",
         }
     finally:
         driver.close()

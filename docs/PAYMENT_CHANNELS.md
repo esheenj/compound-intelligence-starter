@@ -1,6 +1,6 @@
 # Esheen Labs — tested payment options and activation guide
 
-**Status as of 11 November 2026: No active payment destination.** The support route is generated entirely from a default-deny public config. The seven independent public repositories and 21 runnable add-ons (28 public tools) remain free. A support information page is not another MVP.
+**Status checked 12 November 2026: No active payment destination.** The support route is generated entirely from a default-deny public config. The eleven independent public repositories and 21 runnable add-ons (32 public demo pages) remain free. A support information page is not another MVP.
 
 ## Shortlist, South Africa
 
@@ -9,15 +9,15 @@ Provider fees below are published standard rates, NOT personalized quotes, and m
 | Channel | Published price | Practical use |
 | --- | --- | --- |
 | [GitHub Sponsors](https://docs.github.com/en/sponsors/receiving-sponsorships-through-github-sponsors/setting-up-github-sponsors-for-your-personal-account) | South Africa supported; 0% GitHub fee for personal sponsors; up to 6% for organizations | One-time and recurring support from open-source users after owner identity, tax and payout approval |
-| [Yoco hosted Payment Page](https://support.yoco.help/en/articles/109565-setting-up-an-online-payment-page) | R0 monthly; [2.55–2.95% online](https://www.yoco.com/za/online-payment/) ex VAT | Pay-what-you-want or invoiced card donations and services |
-| [Paystack Payment Pages](https://support.paystack.com/en/articles/2132546) | R0 monthly; [2.9% + R1 local cards or 2% supported EFT](https://paystack.com/za/pricing) ex VAT | One-off, variable contribution or subscription pages |
+| [Yoco hosted Payment Page](https://support.yoco.help/en/articles/109565-setting-up-an-online-payment-page) | **[Once-off R199 non-refundable fee](https://support.yoco.help/en/articles/884286-how-to-sign-up-with-yoco-online-only)** for online-only merchants without Yoco card machine; R0 monthly and [2.55–2.95% online](https://www.yoco.com/za/online-payment/) ex VAT | Hosted card links; verify whether an existing Yoco merchant account waives new onboarding |
+| [Paystack Payment Pages](https://support.paystack.com/en/articles/2132546) | [Free signup](https://support.paystack.com/en/articles/2125634), R0 monthly; [2.9% + R1 local cards or 2% supported EFT](https://paystack.com/za/pricing) ex VAT | **Preferred R0 setup path** for SA Starter/sole-proprietor or registered merchant, with [identity and bank KYC](https://support.paystack.com/en/articles/2124418) and an approved live Payment Page |
 | [Payfast requests](https://payfast.io/features/payment-request/) | [3.2% + R2 cards, 2% Instant EFT minimum R2](https://payfast.io/fees/), ex VAT; no subscription on standard aggregation | SA payment choice, often request by email |
 | [Ozow](https://ozow.com/pricing) | 1.5% or R1 minimum pay-by-bank; no monthly standard fee listed | Low-fee bank payments and compatible partner crypto checkout |
 | [MoneyBadger](https://www.moneybadger.co.za/pricing) | No extra MoneyBadger processor charge above participating payment-provider fee | Bitcoin/crypto customers with merchant paid in rand |
 | [BTCPay Server](https://btcpayserver.org/) | Free MIT code; hosting, storage, network and chain fees remain | Later non-custodial BTC invoices and automated on-chain settlement |
 | Direct wallet transfer | No web processor fee; blockchain network fees, custody and exchange costs may apply | Low-complexity crypto support with manually verified public addresses |
 
-First launch stack: GitHub Sponsors plus either Yoco or Paystack hosted payment page plus one or two owner-controlled wallet destinations. Maintain **R0 additional recurring infrastructure expenditure**. Do not run BTCPay alongside sensitive SIGMA/Oracle trading processes just to claim free hosting.
+First launch stack: **Paystack** hosted payment page (free account signup), one or two owner-controlled wallet destinations, and GitHub Sponsors when its actual sponsored account is approved. Yoco is an alternative if an existing account is available or its R199 one-time online-only onboarding fee is acceptable. Maintain **R0 additional recurring infrastructure expenditure**. Do not run BTCPay alongside sensitive SIGMA/Oracle trading processes just to claim free hosting.
 
 ## Public GitHub payment infrastructure worth knowing
 
