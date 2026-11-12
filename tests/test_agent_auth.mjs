@@ -110,3 +110,46 @@ test("reject invalid TTL, unknown fields, bool timestamps and bad nonce",async t
   }
   assert.ok(challengeMessage(challenge).toString().startsWith("ESHEEN_AGENT_CHALLENGE_V1\n"));
 });
+
+import {LocalEnrollmentRegistry, publicKeyFingerprint} from "../src/agent_auth/enrollment.mjs";
+function candidate(key, keyId, capabilities = ["summarize"]) {
+  return {...request, keyId, capabilities, publicJwk:key.publicJwk, validUntil:initial+600,
+    reviewer:"fictional-reviewer", evidenceRef:"offline-example/pin",
+    expectedFingerprint:publicKeyFingerprint(key.publicJwk)};
+}
+test("rotation rejects an outstanding old proof and accepts the new key without granting authority", async t=>{
+  const c = await setup(t), registry = new LocalEnrollmentRegistry();
+  registry.enroll(candidate(c.key, request.keyId, ["summarize", "search"]), initial);
+  const before = new AgentChallengeVerifier({ledgerDir:c.dir, enrollments:registry.challengeEnrollments(),
+    now:()=>initial});
+  const old = await before.issue(request);
+  const snapshot = registry.snapshot();
+  registry.rotate(request.keyId, candidate(c.other, "local-key-b"), initial+1);
+  assert.equal(snapshot[0].enrollment.status,"ACTIVE");
+  const after = new AgentChallengeVerifier({ledgerDir:c.dir, enrollments:registry.challengeEnrollments(),
+    now:()=>initial+1});
+  await assert.rejects(after.verify({challenge:old,
+    signatureBase64Url:signForLocalDemo(c.key.privateKey,old)}), /REVOKED_ENROLLMENT/);
+  await assert.rejects(after.issue({...request,keyId:"local-key-b",capability:"search"}),
+    /CAPABILITY_NOT_ENROLLED/);
+  const next = await after.issue({...request,keyId:"local-key-b"});
+  const proof = await after.verify({challenge:next,
+    signatureBase64Url:signForLocalDemo(c.other.privateKey,next)});
+  assert.equal(proof.executionAuthority,"NONE");
+  registry.revoke("local-key-b",initial+2);
+  assert.deepEqual(registry.snapshot().map(row=>row.enrollment.status),["REVOKED","REVOKED"]);
+});
+test("bad pins, key reuse and scope escalation leave enrollment unchanged",()=>{
+  const registry = new LocalEnrollmentRegistry(), a=localDemoKeyPair(), b=localDemoKeyPair();
+  const first=candidate(a,"a"), next=candidate(b,"b");
+  assert.throws(()=>registry.enroll({...first,expectedFingerprint:"wrong"},initial),
+    /FINGERPRINT_MISMATCH/);
+  assert.deepEqual(registry.snapshot(),[]);
+  registry.enroll(first,initial);
+  assert.throws(()=>registry.rotate("a",candidate(a,"renamed"),initial+1), /KEY_ALREADY_USED/);
+  assert.throws(()=>registry.rotate("a",{...next,capabilities:["summarize","delete"]},initial+1),
+    /ROTATION_SCOPE_CHANGED/);
+  assert.equal(registry.snapshot()[0].enrollment.status,"ACTIVE");
+  assert.equal(registry.snapshot().length,1);
+  assert.throws(()=>publicKeyFingerprint({...a.publicJwk,d:"private"}), /INVALID_PUBLIC_KEY/);
+});
