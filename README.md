@@ -1,6 +1,6 @@
 # Compound Intelligence Starter
 
-**Explore all 28 public demos:** [Open the Esheen Labs interactive gallery](https://esheenj.github.io/compound-intelligence-starter/) to try agent trust, AI reasoning, UX journeys and developer tools. The collection contains **seven independent public repositories plus 21 browser add-ons**—not 28 separately published repos. Examples are educational and use fictional inputs.
+**Explore all 29 public demos:** [Open the Esheen Labs interactive gallery](https://esheenj.github.io/compound-intelligence-starter/) to try agent trust, AI reasoning, UX journeys and developer tools. The collection contains **eight independent public repositories plus 21 browser add-ons**—not 29 separately published repos. Examples are educational and use fictional inputs.
 
 **Challenge assumptions. Verify outcomes. Reuse what works.**
 
@@ -36,13 +36,13 @@ Turn an engineering problem into competing, falsifiable hypotheses and a reprodu
 
 **Open Intelligence Wave 1 — original offline previews:** [AgentProof receipt verifier and AgentCredits synthetic ledger](docs/OPEN_INTELLIGENCE_WAVE1.md). Try `python -m src.compound_intelligence.agentproof --demo` and `python -m src.compound_intelligence.agentcredits --demo`. These are local educational tools, not factual-truth attestation, payment services or live autonomous execution. [Public roadmap](https://github.com/esheenj/compound-intelligence-starter/issues/40) · [Wave 1 issue](https://github.com/esheenj/compound-intelligence-starter/issues/41).
 
-**[Open the GitHub-deployed seven-MVP directory](https://esheenj.github.io/compound-intelligence-starter/)** — All seven public repository entry pages and twenty interactive add-ons passed independent real-HTTPS Chrome acceptance on 11 November 2026: [Actions 43036020756 (merged-main attempt 2)](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43036020756) **PASS**. See the [exact acceptance scope, preceding transient failure and limitations](docs/PUBLIC_DIRECTORY_DEPLOY.md#final-https-acceptance). This is 27 Pages URLs within seven repositories, not twenty-seven standalone repositories.
+**[Open the eight-project public Labs gallery](https://esheenj.github.io/compound-intelligence-starter/)** — Eight independent public repository entry pages and 21 hosted add-ons are now discoverable: **29 pages, not 29 separate repositories**. The earlier 28-page baseline passed independent live HTTPS Chrome checks on 11 November 2026 ([acceptance run](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815195)); the new [Agent Capability Policy Lab](https://esheenj.github.io/agent-capability-policy-lab/) separately passed Node and real Chrome ([tests](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234299219)) and GitHub Pages publication ([deployment](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234352964)) on 12 November. A combined independent 29-URL acceptance is not yet claimed. See [exact deployment and verification limits](docs/PUBLIC_DIRECTORY_DEPLOY.md).
 
 **[Support and sustainability](docs/SUPPORT_AND_SUSTAINABILITY.md)** · **[Public/private intelligence boundary](docs/PUBLIC_INTELLIGENCE_BOUNDARY.md)** — original, fictional open-source examples; no unverified payment links or private trading and finance disclosures.
 
-**Explore the wider [Esheen Labs public MVP collection](docs/PUBLIC_OSS_MVP_COLLECTION.md)** — seven independent, runnable tools spanning AI experiments, interface flows, form UX, design tokens, tables and synthetic visual comparisons.
+**Explore the wider [Esheen Labs public MVP collection](docs/PUBLIC_OSS_MVP_COLLECTION.md)** — eight independent, runnable tools spanning AI experiments, interface flows, form UX, design tokens, tables and synthetic visual comparisons.
 
-**New developer directory:** The [public OSS project directory source](site/index.html) offers a single browsable index of seven runnable tools and contribution paths. To preview the exact website bundle locally, run `mkdir -p dist && python scripts/stage_showcase.py --output dist/pages`, then serve `dist/pages` with Python's localhost server. [Pages deployment and live browser checks](docs/PUBLIC_DIRECTORY_DEPLOY.md) are recorded separately.
+**New developer directory:** The [public OSS project directory source](site/index.html) offers a single browsable index of eight runnable tools and contribution paths. To preview the exact website bundle locally, run `mkdir -p dist && python scripts/stage_showcase.py --output dist/pages`, then serve `dist/pages` with Python's localhost server. [Pages deployment and live browser checks](docs/PUBLIC_DIRECTORY_DEPLOY.md) are recorded separately.
 
 ## See it in two minutes
 
