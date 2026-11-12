@@ -40,7 +40,7 @@ def run():
                     projectLinks:[...document.querySelectorAll('article.card .links')]
                       .every(x=>x.querySelectorAll('a').length===3),
                     githubPagesLinks:[...document.querySelectorAll('article.card a')]
-                      .filter(x=>x.textContent==='Deployed demo').length,
+                      .filter(x=>x.textContent==='Try demo').length,
                     extraLinks:[...document.querySelectorAll("#additional-tools a")].map(x=>x.getAttribute("href")),
                     script:document.querySelectorAll('script').length,
                     externalAssets:performance.getEntriesByType('resource')
@@ -88,6 +88,24 @@ def run():
                    and 0 <= skip["top"] <= 50, "SKIP_LINK_FOCUS")
             driver.key("\ue007")  # Enter to main.
             verify(driver.js("return location.hash;") == "#main", "KEYBOARD_SKIP_TARGET")
+            filters = driver.js("""
+                const total = document.querySelectorAll("#additional-tools li").length;
+                document.getElementById("filter-ai").click();
+                const ai = [...document.querySelectorAll("#additional-tools li")]
+                    .filter(x => getComputedStyle(x).display !== "none");
+                document.getElementById("filter-ux").click();
+                const ux = [...document.querySelectorAll("#additional-tools li")]
+                    .filter(x => getComputedStyle(x).display !== "none");
+                document.getElementById("filter-all").click();
+                const restored = [...document.querySelectorAll("#additional-tools li")]
+                    .filter(x => getComputedStyle(x).display !== "none").length;
+                return {total, ai:ai.length, ux:ux.length,
+                        aiCorrect:ai.every(x=>x.classList.contains("ai")),
+                        uxCorrect:ux.every(x=>x.classList.contains("ux")), restored};
+            """)
+            verify(filters["total"] == 21 and filters["ai"] == 10 and filters["ux"] == 6
+                   and filters["aiCorrect"] and filters["uxCorrect"]
+                   and filters["restored"] == 21, "CATEGORY_FILTERS_RESTORE_ALL")
             for width, height in ((320, 720), (375, 812), (812, 375), (1440, 900)):
                 driver.viewport(width, height)
                 layout = driver.js("""

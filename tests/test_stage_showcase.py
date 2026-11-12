@@ -62,27 +62,27 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["agentOpsSha256"], hashlib.sha256(agentops).hexdigest())
         self.assertIn(b"connect-src 'none'", agentops)
         self.assertIn(b"agentops.html", content)
-        self.assertIn(b"Open AgentOps replay studio", content)
+        self.assertIn(b"AgentOps Replay Studio", content)
         agentproof = self.output.joinpath("agentproof.html").read_bytes()
         self.assertEqual(agentproof, AGENTPROOF_SOURCE.read_bytes())
         self.assertEqual(report["agentProofSha256"], hashlib.sha256(agentproof).hexdigest())
         self.assertIn(b"connect-src 'none'", agentproof)
         self.assertIn(b"agentproof.html", content)
-        self.assertIn(b"Open AgentProof verifier", content)
+        self.assertIn(b"AgentProof Receipt Verifier", content)
         agentcredits = self.output.joinpath("agentcredits.html").read_bytes()
         self.assertEqual(agentcredits, AGENTCREDITS_SOURCE.read_bytes())
         self.assertEqual(report["agentCreditsSha256"], hashlib.sha256(agentcredits).hexdigest())
         self.assertIn(b"connect-src 'none'", agentcredits)
         self.assertIn(b"agentcredits.html", content)
-        self.assertIn(b"Open AgentCredits ledger studio", content)
+        self.assertIn(b"AgentCredits Ledger Studio", content)
         for fname, original, digest_key, label in (
-            ("model-cost.html", MODEL_COST_SOURCE, "modelCostSha256", b"Open Model Cost Comparator"),
-            ("model-fit.html", MODEL_FIT_SOURCE, "modelFitSha256", b"Open Local Model Fit Planner"),
-            ("context-preservation.html", CONTEXT_SOURCE, "contextSha256", b"Open Context Preservation Lab"),
-            ("model-disagreement.html", DISAGREEMENT_SOURCE, "modelDisagreementSha256", b"Open Model Disagreement Lab"),
-            ("decision-review.html", DECISION_REVIEW_SOURCE, "decisionReviewSha256", b"Open Explainable Decision Review Lab"),
-            ("agent-trust.html", AGENT_TRUST_SOURCE, "agentTrustSha256", b"Open Agent Trust &amp; Identity Lab"),
-            ("signed-agent.html", SIGNED_AGENT_SOURCE, "signedAgentSha256", b"Open Signed Agent Challenge"),
+            ("model-cost.html", MODEL_COST_SOURCE, "modelCostSha256", b"Model Cost Comparator"),
+            ("model-fit.html", MODEL_FIT_SOURCE, "modelFitSha256", b"Local Model Fit Planner"),
+            ("context-preservation.html", CONTEXT_SOURCE, "contextSha256", b"Context Preservation Lab"),
+            ("model-disagreement.html", DISAGREEMENT_SOURCE, "modelDisagreementSha256", b"Model Disagreement Lab"),
+            ("decision-review.html", DECISION_REVIEW_SOURCE, "decisionReviewSha256", b"Explainable Decision Review"),
+            ("agent-trust.html", AGENT_TRUST_SOURCE, "agentTrustSha256", b"Agent Trust &amp; Identity Lab"),
+            ("signed-agent.html", SIGNED_AGENT_SOURCE, "signedAgentSha256", b"Signed Agent Challenge"),
         ):
             page = self.output.joinpath(fname).read_bytes()
             self.assertEqual(page, original.read_bytes())
@@ -94,11 +94,14 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(wave, MVP_WAVE_SOURCE.read_bytes())
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
         self.assertIn(b"connect-src 'none'", wave)
-        self.assertIn(b"offline interactive planning playground", content)
+        self.assertIn(b"MVP Wave Planner", content)
         self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
-        self.assertEqual(content.count(b">Deployed demo</a>"), 7)
+        self.assertEqual(content.count(b">Try demo</a>"), 7)
+        self.assertEqual(content.count(b'<li class="tool '), 21)
+        self.assertIn(b'id="filter-ai"', content)
+        self.assertIn(b"prefers-reduced-motion", content)
         self.assertIn(b"https://esheenj.github.io/visual-regression-starter-oss/", content)
 
     def test_repeated_stage_never_overwrites(self):
