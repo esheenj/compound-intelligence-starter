@@ -1,5 +1,13 @@
 # Public open-source MVP directory
 
+## Ten-project public Labs gallery — 12 November 2026
+
+The [Evaluation Dataset Leakage Lab](https://github.com/esheenj/eval-dataset-leakage-lab) is a new original independently MIT-licensed repository with clean initial source `14076b41d2f48c0fbce1b8b620a32dd5ed0ad458` (no private incubator history). The browser and CLI share an offline deterministic audit module for fictional train/eval/test contamination, duplicate prompts/IDs, missing labels, small evaluation sets and label skew. It is not full data provenance, privacy certification, semantic near-duplicate detection or model accuracy testing.
+
+**Evidence:** 18 policy/negative tests, three site-safety tests and three real Chrome sample scenarios passed in the Node 20/22/24 [GitHub CI run 43276526361](https://github.com/esheenj/eval-dataset-leakage-lab/actions/runs/43276526361). [Pages publisher 43276576767](https://github.com/esheenj/eval-dataset-leakage-lab/actions/runs/43276576767) succeeded; published HTML was independently fetched over HTTPS. Zero npm dependencies, no external data/model calls, no financial/trading authority, R0 additional recurring infrastructure spend.
+
+The gallery adds this new tenth standalone public project to the previously 30-entry directory: **10 independent repository pages + 21 existing add-on playgrounds = 31 public demo URLs**. The earlier 28/28 live Chrome baseline and later 30/30 live HTTPS HTML reachability are separately scoped historical evidence. Do not infer combined **31/31 real-browser interaction acceptance** from them.
+
 ## Nine-project public Labs gallery — 12 November 2026
 
 An independently released original [Prompt Evaluation Harness](https://github.com/esheenj/prompt-evaluation-harness-oss) adds a **ninth standalone public repository**. Initial source commit `7c679cf949baf91e05c730a888ae3289a58db903` contains no private incubator history. The browser and CLI share a pure deterministic prompt-output rubric module. It compares two fictional candidate responses against literal wording, forbidden claims, bounded length, JSON shape and example evidence-token syntax. A score measures rule coverage only; it never proves model truth, grounded citations or semantic quality.
