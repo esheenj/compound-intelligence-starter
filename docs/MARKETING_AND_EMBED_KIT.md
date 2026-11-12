@@ -1,6 +1,6 @@
 # Esheen Labs — launch and website embed kit
 
-Verified 11 November 2026: **7 public open-source repositories + 21 additional hosted browser tools = 28 public Pages**. These are not 28 independent GitHub repositories. Live HTTPS Chrome acceptance [run 43064815195](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815195) recorded 28/28 PASS on the tested interactions; merged release [PR #83](https://github.com/esheenj/compound-intelligence-starter/pull/83), source checks [43065431211](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43065431211) and publisher [43065506885](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43065506885) succeeded. That does not certify real-world agent identity, user-device coverage, accessibility, production safety or adoption.
+The historical **11 November 2026** baseline was **7 public repositories + 21 hosted add-ons = 28 demo pages**, with 28/28 public HTTPS Chrome acceptance. As of **12 November 2026**, the published collection has **11 independent open-source repositories + 21 additional browser add-ons = 32 demo pages**. This is not 32 separately published repositories. The four newer standalone repositories passed their own source/Chrome tests and successful GitHub Pages publication, while the older 28 deep-interaction browser sweep is a separate test. Live HTTPS Chrome acceptance [run 43064815195](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815195) recorded 28/28 PASS on the tested interactions; merged release [PR #83](https://github.com/esheenj/compound-intelligence-starter/pull/83), source checks [43065431211](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43065431211) and publisher [43065506885](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43065506885) succeeded. That does not certify real-world agent identity, user-device coverage, accessibility, production safety or adoption.
 
 **Directory:** https://esheenj.github.io/compound-intelligence-starter/
 
@@ -20,7 +20,7 @@ Copy-paste for a possible "From Esheen Labs" section on the separate Sigma Code 
 <section aria-labelledby="esheen-labs-title" style="padding:1.5rem;border:1px solid currentColor;border-radius:1rem;max-width:48rem">
   <p>From Esheen Labs · Open Source</p>
   <h2 id="esheen-labs-title">Useful tools. Open source. Real tests.</h2>
-  <p>Explore 28 public demo pages across agent experiments, UX journeys, design systems and testing. Run an example, inspect source, and help improve it—without signing in for the included examples.</p>
+  <p>Explore 32 public demo pages across agent experiments, UX journeys, design systems and testing. Run an example, inspect source, and help improve it—without signing in for the included examples.</p>
   <p><a href="https://esheenj.github.io/compound-intelligence-starter/" rel="noopener noreferrer">Explore the public tools</a>
   · <a href="https://github.com/esheenj/compound-intelligence-starter" rel="noopener noreferrer">Contribute on GitHub</a></p>
   <small>Educational examples, not certified services or real agent authorization.</small>
