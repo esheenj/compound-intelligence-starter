@@ -1,6 +1,6 @@
 # Support and sustainability — Esheen Labs OSS
 
-These seven public projects are independent, original educational tools. You can run, inspect, fork and contribute to their MIT-licensed source without payment. The live demo directory shows working software and links to reproducible tests.
+These eleven public repositories contain original educational tools and 21 additional browser add-ons, for 32 public demo pages as of 12 November 2026. You can run, inspect, fork and contribute to their MIT-licensed source without payment. The live demo directory shows working software and links to reproducible tests.
 
 ## Help without paying
 
