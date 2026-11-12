@@ -1,5 +1,9 @@
 # Esheen Labs — public open-source MVP collection
 
+## Latest independently released project — 12 November 2026
+
+[Prompt Evaluation Harness](https://esheenj.github.io/prompt-evaluation-harness-oss/) is the **ninth original standalone public project**. Its [CI](https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243013822) passes 17 deterministic evaluation tests and real Chrome scenario checks; the [Pages publisher](https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243086139) succeeded and a separate public HTTPS readback found the published page and app module. The collection is now nine independently published repositories and 21 hosted add-ons, **30 public demo pages in total**. A rule-based score is not a model-accuracy proof; no customer data or external model calls are present. No combined 30/30 independent browser acceptance is claimed yet.
+
 ## Current inventory update — 12 November 2026
 
 The original seven-project notes below are historical. The separately released [Agent Capability Policy Lab](https://esheenj.github.io/agent-capability-policy-lab/) adds an **eighth independent MIT-licensed public repository**, with 16 Node policy tests and five scenario browser checks in [CI](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234299219) and a [successful Pages publisher](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234352964). The combined gallery has eight repository entry pages and 21 hosted add-ons: **29 Pages URLs, not 29 separate repos**. The 11 November independent acceptance of the earlier 28 URLs remains historical evidence, not a new combined 29/29 claim. Offline only, fictional data, no identity or exchange execution authority.
