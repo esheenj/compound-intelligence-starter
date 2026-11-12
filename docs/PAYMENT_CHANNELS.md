@@ -1,6 +1,6 @@
 # Esheen Labs — tested payment options and activation guide
 
-**Status checked 12 November 2026: No active payment destination.** The support route is generated entirely from a default-deny public config. The eleven independent public repositories and 21 runnable add-ons (32 public demo pages) remain free. A support information page is not another MVP.
+**Status updated 12 November 2026: Owner-authorized crypto receiving details enrolled in reviewed source.** Four Pionex custodial exchange deposit addresses are configured for public voluntary support. GitHub Sponsors recipient onboarding and fiat checkout remain **pending**. Address formatting was checked against user-supplied screenshots, not against live Pionex account state or settled on-chain deposits. The eleven public repositories and 21 add-ons (32 demo pages) remain free.
 
 ## Shortlist, South Africa
 
@@ -17,7 +17,7 @@ Provider fees below are published standard rates, NOT personalized quotes, and m
 | [BTCPay Server](https://btcpayserver.org/) | Free MIT code; hosting, storage, network and chain fees remain | Later non-custodial BTC invoices and automated on-chain settlement |
 | Direct wallet transfer | No web processor fee; blockchain network fees, custody and exchange costs may apply | Low-complexity crypto support with manually verified public addresses |
 
-First launch stack: **Paystack** hosted payment page (free account signup), one or two owner-controlled wallet destinations, and GitHub Sponsors when its actual sponsored account is approved. Yoco is an alternative if an existing account is available or its R199 one-time online-only onboarding fee is acceptable. Maintain **R0 additional recurring infrastructure expenditure**. Do not run BTCPay alongside sensitive SIGMA/Oracle trading processes just to claim free hosting.
+First launch: the owner supplied four **Pionex-hosted custodial** receiving routes; these are not independent self-custody wallets and may rotate. Add **Paystack** hosted payment page once merchant KYC is complete and GitHub Sponsors only after profile approval. Yoco is a fiat alternative if an existing account is available or its R199 one-time online-only onboarding fee is acceptable. Maintain **R0 additional recurring infrastructure expenditure**. Do not run BTCPay alongside sensitive SIGMA/Oracle trading processes just to claim free hosting.
 
 ## Public GitHub payment infrastructure worth knowing
 
@@ -33,14 +33,14 @@ No external gateway code is vendored into the Labs repo. Before adopting a gatew
 
 ## Existing implementation
 
-- Public config: support/channels.json, schema esheen-labs.support.v1. All channels default to pending.
+- Public config: support/channels.json, schema esheen-labs.support.v1. Crypto is active with four owner-supplied, screenshot-reviewed Pionex deposit addresses; Sponsors and fiat remain pending.
 - Generator: scripts/render_support.py produces a no-JavaScript, no-network public support page only from strictly validated values.
 - Strict active GitHub Sponsor URL: https://github.com/sponsors/esheenj. Enroll only when the profile really exists and is approved.
 - Supported fiat links: exact provider HTTPS pages at pay.yoco.com/{page} or paystack.com/pay/{page}, rejecting fake hosts, password/userinfo, arbitrary query parameters and unknown redirects.
-- Allowed crypto address/network *formats* are Bitcoin mainnet BTC, Ethereum mainnet ETH/USDC/USDT, Base mainnet ETH/USDC, Solana mainnet SOL and Tron mainnet USDT. Syntax checks do NOT establish ownership, token contract, network reachability or on-chain address validity.
+- Allowed crypto address/network *formats* are Bitcoin mainnet BTC; Ethereum mainnet ETH/USDC/USDT; Base mainnet ETH/USDC; Solana mainnet SOL/USDT; and Tron mainnet USDT. Syntax checks do NOT prove exchange crediting, wallet custody, live address status, token contract or on-chain account ownership.
 - Active channels require an explicit owner-confirmed flag. The flag is a human review assertion, not cryptographic proof. Verify separately before approving the source diff.
-- No direct wallet, checkout URL, QR, API key or seed phrase has been added. No dynamic wallet connections, no payment confirmation service, no automatic unlocking.
-- Source, tests, Pages staging and browser checks separately validate that all pending channels show no links or wallet addresses.
+- Four **public Pionex deposit addresses** were provided by the maintainer and enrolled explicitly. No fiat checkout URL, native GitHub Sponsors payout, QR code, API key or seed phrase has been added. No dynamic wallet connections, direct chain transfers from the website, payment confirmation service or automatic unlocking.
+- Source, tests, Pages staging and browser checks compare exact active crypto addresses and Pionex minimum snapshots to the reviewed manifest; pending fiat/Sponsors must not produce checkout links.
 
 ## Activation: GitHub Sponsors
 
@@ -53,6 +53,19 @@ Create a permanent hosted payment page, not a one-off expiring invoice. Yoco sup
 Inspect the provider-generated live HTTPS URL, verify the payee and fees, and record an independently settled small test payment in the provider dashboard. Only then activate the matching pay-page URL in the reviewed public manifest. Do NOT post merchant API keys or webhook secrets. Customers enter card details only on the provider's hosted checkout, never on this static site.
 
 Commercial SaaS product payments are different: production entitlement requires a separate authenticated server-side payment notification, signature checks, durable idempotency, reconciled settlement, refund handling and invoicing. Do NOT unlock a product based on a redirect URL, screenshot or user-supplied transaction hash.
+
+## Current Pionex deposit destinations (owner screenshots, 12 November 2026)
+
+| Asset | Blockchain network | Minimum **shown in screenshot** | Important | 
+| --- | --- | --- | --- |
+| BTC | Bitcoin mainnet | 0.00001 BTC | App warns address was replaced; recheck the current Pionex deposit screen before sending |
+| USDT | Solana mainnet | 0.1 USDT | Solana SPL USDT route, **not** SOL token and not Tron/Ethereum USDT |
+| USDT | Ethereum mainnet (ERC-20) | 1 USDT | ERC-20 only; potentially higher gas fees for donors |
+| USDT | Tron mainnet (TRC-20) | 1 USDT | TRC-20 only; never send ERC-20 or Solana USDT here |
+
+The four exact addresses are maintained in `support/channels.json` and displayed on the static public support page; do not copy an address from a technical guide if Pionex has replaced it. User screenshots establish an explicit wish to publish these receiving details, **not** independent validation of current account status, third-party deposit eligibility, ownership of underlying Pionex custodial keys, or successful crediting. They may expose donation history publicly and may route income to an exchange account used for other funds; use a dedicated Labs self-custody wallet or dedicated merchant address for longer-term fundraising if practical. These screenshot minima are **not guarantees** and must be checked live before every transfer. Pionex's [deposit guidance](https://www.pionex.com/blog/how-to-deposit-on-pionex-%E3%80%90app%E3%80%91/) stresses exact coin/network matching and memo/tag requirements.
+
+GitHub repo funding uses `.github/FUNDING.yml` with a `custom:` URL pointing to this support page. This can show GitHub's repository **Sponsor button**, but **does not create or connect a native GitHub Sponsors recipient**. GitHub [supports custom funding URLs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository); a native `github: esheenj` entry remains prohibited until real GitHub Sponsors approval.
 
 ## Activation: direct crypto
 
@@ -74,8 +87,8 @@ Open-source contributions remain voluntary and do not purchase code-review privi
 
 - Source prepared: only after reviewed PR merges.
 - Publisher success: only after actual GitHub Pages workflow passes on merged source.
-- Live wallet/Sponsors/fiat recipient: **NOT VERIFIED OR ACTIVATED**.
+- Public crypto receiving addresses: **OWNER-SUPPLIED AND CONFIGURED** (Pionex custodial deposits; current live acceptance by exchange and crediting unverified). Native GitHub Sponsors and fiat checkout: **NOT ACTIVATED**.
 - Money received: **NONE VERIFIED**.
 - Product billing/entitlements: **NOT IMPLEMENTED**.
 
-Owner inputs that unlock real support: actual approved Sponsors status, one verified Yoco/Paystack public payment-page URL, and up to two PUBLIC wallet receiving addresses with explicit asset and network. Never provide private payment secrets or card credentials.
+Remaining owner inputs: confirm that all four displayed deposits still appear as current in Pionex and can credit a transfer above the live minimum; provide an approved Paystack/Yoco hosted live payment-page URL and the independently approved GitHub Sponsors recipient state when available. No passwords, seed phrases, private keys, card credentials or trading API details are needed.
