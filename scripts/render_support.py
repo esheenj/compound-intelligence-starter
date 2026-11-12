@@ -210,7 +210,7 @@ def render_support(value: object) -> bytes:
                   "Before each transfer, verify the current Pionex deposit address, coin, network "
                   "and live minimum: addresses may be replaced and mismatched networks can lose funds. "
                   "Avoid tiny donations below deposit minimums. This static site cannot verify payment "
-                  "or grant product access.")
+                  "or grant product access. No automatic product access is granted.")
     else:
         c = '<p class="pending">No public wallet address has been enrolled or published.</p>'
         c_info = "Wallet-network pairing and ownership checks are required before any crypto address appears."
