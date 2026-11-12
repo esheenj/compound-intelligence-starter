@@ -1,5 +1,9 @@
 # Esheen Labs — public open-source MVP collection
 
+## New tenth independent public MVP — 12 November 2026
+
+[Evaluation Dataset Leakage Lab](https://esheenj.github.io/eval-dataset-leakage-lab/) was published from clean original source with 18 audit unit/negative tests and three real Chrome scenario tests ([CI 43276526361](https://github.com/esheenj/eval-dataset-leakage-lab/actions/runs/43276526361), PASS), followed by successful [Pages release 43276576767](https://github.com/esheenj/eval-dataset-leakage-lab/actions/runs/43276576767) and independent HTTPS HTML readback. It uses invented data only; successful heuristics do not verify actual data privacy, provenance or model accuracy. Collection total is **10 standalone repository entry pages and 21 add-ons = 31 hosted demo entry points**. No combined 31/31 independent browser-interaction check is claimed yet.
+
 ## Latest independently released project — 12 November 2026
 
 [Prompt Evaluation Harness](https://esheenj.github.io/prompt-evaluation-harness-oss/) is the **ninth original standalone public project**. Its [CI](https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243013822) passes 17 deterministic evaluation tests and real Chrome scenario checks; the [Pages publisher](https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243086139) succeeded and a separate public HTTPS readback found the published page and app module. The collection is now nine independently published repositories and 21 hosted add-ons, **30 public demo pages in total**. A rule-based score is not a model-accuracy proof; no customer data or external model calls are present. No combined 30/30 independent browser acceptance is claimed yet.
