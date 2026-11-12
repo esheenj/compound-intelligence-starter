@@ -102,7 +102,7 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertIn(b"https://esheenj.github.io/prompt-evaluation-harness-oss/", content)
         self.assertIn(b"30</strong><span>public demo pages", content)
         self.assertIn(b"https://esheenj.github.io/agent-capability-policy-lab/", content)
-        self.assertIn(b"29</strong><span>public demo pages", content)
+        self.assertEqual(content.count(b"30</strong><span>public demo pages"), 1)
         self.assertEqual(content.count(b'<li class="tool '), 21)
         self.assertIn(b'id="filter-ai"', content)
         self.assertIn(b"prefers-reduced-motion", content)
