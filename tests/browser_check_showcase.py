@@ -9,7 +9,8 @@ from pathlib import Path
 from browser_check_issue_report import Driver, driver_executable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from scripts.stage_showcase import stage_catalog
+from scripts.stage_showcase import stage_catalog, SUPPORT_CONFIG_SOURCE
+from scripts.render_support import load_channels
 
 
 def verify(ok, name):
@@ -722,7 +723,9 @@ def run():
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
                        "SIGNED_CHALLENGE_NO_OVERFLOW_"+str(width))
-            # Generated support page: no live checkout, wallet, script or outbound assets yet.
+            # No browser-controlled payment activation: compare the exact destinations
+            # rendered from the owner-reviewed manifest, whether pending or active.
+            approved_support=load_channels(SUPPORT_CONFIG_SOURCE)
             driver.command("POST", "url", {"url": (path / "support.html").resolve().as_uri()})
             support_page=driver.js("""
                 return {
@@ -730,18 +733,27 @@ def run():
                     headings:document.querySelectorAll('.panel h2').length,
                     pending:document.querySelectorAll('.pending').length,
                     scripts:document.querySelectorAll('script').length,
-                    address:document.querySelectorAll('.wallets code').length,
+                    addresses:[...document.querySelectorAll('.wallets code')].map(x=>x.textContent),
                     links:[...document.querySelectorAll('a')].map(x=>x.href),
                     csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
                     remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
                 };
             """)
+            states=[approved_support["github_sponsors"]["state"],
+                    approved_support["fiat"]["state"],approved_support["crypto"]["state"]]
+            expected_pay_urls=[]
+            if states[0]=="active":expected_pay_urls.append(approved_support["github_sponsors"]["url"])
+            if states[1]=="active":expected_pay_urls.append(approved_support["fiat"]["url"])
+            actual_pay_urls=[url for url in support_page["links"] if
+                any(host in url for host in ("github.com/sponsors/","pay.yoco.com/","paystack.com/pay/"))]
+            expected_wallets=[x["address"] for x in approved_support["crypto"]["wallets"]]
             verify(support_page["main"]==1 and support_page["headings"]==3
-                   and support_page["pending"]==3 and support_page["scripts"]==0
-                   and support_page["address"]==0 and support_page["remote"]==0
+                   and support_page["pending"]==states.count("pending")
+                   and support_page["scripts"]==0 and support_page["remote"]==0
                    and "connect-src 'none'" in support_page["csp"]
-                   and not any("pay.yoco.com" in x or "paystack.com/pay" in x or "/sponsors/esheenj" in x for x in support_page["links"]),
-                   "SUPPORT_PENDING_NO_CHECKOUT_OR_ADDRESSES")
+                   and sorted(actual_pay_urls)==sorted(expected_pay_urls)
+                   and sorted(support_page["addresses"])==sorted(expected_wallets),
+                   "SUPPORT_CONFIG_MATCHES_RENDERED_DESTINATIONS")
             for width,height in ((320,720),(1440,900)):
                 driver.viewport(width,height)
                 verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
@@ -750,7 +762,7 @@ def run():
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
                 "browser":version,"publicCards":11,"additionalToolsLinked":21,
                 "responsiveWidths":[320,375,812,1440],
-                "networkAssets":0,"interactiveToolsChecked":11,"supportPagePendingChecked":True,"screenReaderTested":False
+                "networkAssets":0,"interactiveToolsChecked":11,"supportPageDestinationsChecked":True,"screenReaderTested":False
             },sort_keys=True))
         finally:
             driver.close()
