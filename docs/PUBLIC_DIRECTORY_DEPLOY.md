@@ -1,5 +1,13 @@
 # Public open-source MVP directory
 
+## Nine-project public Labs gallery — 12 November 2026
+
+An independently released original [Prompt Evaluation Harness](https://github.com/esheenj/prompt-evaluation-harness-oss) adds a **ninth standalone public repository**. Initial source commit `7c679cf949baf91e05c730a888ae3289a58db903` contains no private incubator history. The browser and CLI share a pure deterministic prompt-output rubric module. It compares two fictional candidate responses against literal wording, forbidden claims, bounded length, JSON shape and example evidence-token syntax. A score measures rule coverage only; it never proves model truth, grounded citations or semantic quality.
+
+**Separate evidence:** 17 adversarial/engine tests, three static site-safety tests and three browser comparison scenarios across Node 20/22/24 and real headless Chrome: [CI 43243013822](https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243013822) **SUCCESS**. [GitHub Pages publisher 43243086139](https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243086139) **SUCCESS**. Public `index.html` and `app.mjs` were independently retrieved over HTTPS. No model call, external data, paid subscription, private infrastructure, trading or finance actions exist. Additional recurring spend R0.
+
+The updated directory has **nine independent public repository cards plus 21 embedded add-ons = 30 public demo URLs**. The existing 28/28 independent live HTTPS Chrome acceptance from 11 November is a historical baseline; the eighth and ninth MVPs were tested and published separately. Combined 30/30 independent browser acceptance is **not yet claimed** by these separate records.
+
 ## Eight-project Labs gallery — 12 November 2026
 
 A new independently owned and original public repository, [Agent Capability Policy Lab](https://github.com/esheenj/agent-capability-policy-lab), was created with a clean initial history (source `8d85c550933c918b76a8cf208799a6d57dbb3235`). It is an offline educational permissions and risk sandbox, with a browser playground, shared pure Node policy module, 16 negative/policy tests, three site-safety tests, six fixture cases, Node 20/22/24 CI and five real Chrome scenario checks. [Exact-head tests 43234299219](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234299219) **PASS**; [GitHub Pages publish 43234352964](https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234352964) **SUCCESS**. Independently fetched live `index.html` and `app.mjs` confirmed the published page and module on 12 November 2026. This check is not an independent browser interaction test after production deployment.

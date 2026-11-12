@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; connect-src 'none'; style-src 'unsafe-inline'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
-<meta name="description" content="Try 29 public Esheen Labs demo pages across eight independent open-source repositories spanning agent safety, AI, UX and developer tools.">
+<meta name="description" content="Try 30 open-source Esheen Labs demo pages across nine independently published repositories, including AI evaluation, agent policy, UX and developer tools.">
 <title>Esheen Labs — Open Intelligence & Developer Playground</title>
 <style>
 :root{font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;--bg:#08100e;--ink:#f2f8f3;--muted:#acc0b2;--subtle:#81988c;--line:#2b4035;--surface:#101d17;--surface2:#15241d;--glow:#b5f78d;--glow2:#73e2b0}
@@ -59,7 +59,7 @@ h2{font-size:clamp(1.75rem,3.7vw,3rem);letter-spacing:-.047em;line-height:1.1;ma
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
 .card{--accent:#a9f58c;display:flex;flex-direction:column;min-width:0;border:1px solid #ffffff21;background:linear-gradient(145deg,#15241df0,#0f1b16);border-radius:1.25rem;overflow:hidden;transition:border-color .2s,transform .2s}
 .card:hover{border-color:#b5f78d80;transform:translateY(-3px)}
-.card.mint{--accent:#86f1c4}.card.blue{--accent:#89d2f4}.card.lavender{--accent:#c8b6ff}.card.amber{--accent:#fed28f}.card.teal{--accent:#75d7ce}.card.rose{--accent:#ffb6b6}.card.policy{--accent:#95f8b1}
+.card.mint{--accent:#86f1c4}.card.blue{--accent:#89d2f4}.card.lavender{--accent:#c8b6ff}.card.amber{--accent:#fed28f}.card.teal{--accent:#75d7ce}.card.rose{--accent:#ffb6b6}.card.policy{--accent:#95f8b1}.card.prompt{--accent:#92dcff}
 .card-art{height:8rem;position:relative;overflow:hidden;background:radial-gradient(circle at 79% 43%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 38%),linear-gradient(122deg,#20392c,#10201b 62%,#142a20);border-bottom:1px solid #ffffff12}
 .card-art:before,.card-art:after{content:"";position:absolute;border:1px solid color-mix(in srgb,var(--accent) 43%,transparent);border-radius:50%;aspect-ratio:1;width:13rem;top:-6rem;right:1rem}
 .card-art:after{top:-3.9rem;right:3.1rem;width:9rem;opacity:.5}
@@ -126,13 +126,13 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 <header class="wrap hero">
 <div class="hero-copy"><p class="kicker">Made for builders · Shared openly</p><h1>Useful ideas.<br><em>Working tools.</em></h1><p class="lead">Explore open-source experiments that help you question AI, design better journeys and build more dependable software. Start with a playground, inspect the source, make something your own.</p>
 <div class="buttonrow"><a class="linkchip primary" href="#projects">Explore projects ↗</a><a class="linkchip" href="#additional-tools">Try the playgrounds</a><a class="linkchip" href="#contribute">Build with us</a></div>
-<div class="stats"><div class="stat"><strong>08</strong><span>public project repos</span></div><div class="stat"><strong>21</strong><span>more browser tools</span></div><div class="stat"><strong>29</strong><span>public demo pages</span></div></div></div>
+<div class="stats"><div class="stat"><strong>09</strong><span>public project repos</span></div><div class="stat"><strong>21</strong><span>more browser tools</span></div><div class="stat"><strong>30</strong><span>public demo pages</span></div></div></div>
 <div class="hero-art" aria-hidden="true"><span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="particle a"></span><span class="particle b"></span><span class="particle c"></span><span class="core">Σ</span></div>
 </header>
 <main class="wrap" id="main">
-<aside class="notice" aria-label="Verification and hosting limitations"><strong>28 of 28 public demo pages passed independent live HTTPS Chrome acceptance on 11 November 2026.</strong> That November 11 baseline covered seven repositories. A separately published eighth project, the Agent Capability Policy Lab, passed Node and real Chrome checks on 12 November 2026 (<a href="https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234299219">test evidence</a>) and is now hosted. The current gallery has 29 pages, not 29 separate repositories. <a href="https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815195">Inspect the test evidence</a>. This historic result is not a guarantee of current uptime. These use fictional data; no screen-reader or WCAG certification, trusted agent identity, real execution or customer adoption is claimed.</aside>
+<aside class="notice" aria-label="Verification and hosting limitations"><strong>28 of 28 public demo pages passed independent live HTTPS Chrome acceptance on 11 November 2026.</strong> That November 11 baseline covered seven repositories. A separately published eighth project, the Agent Capability Policy Lab, passed Node and real Chrome checks on 12 November 2026 (<a href="https://github.com/esheenj/agent-capability-policy-lab/actions/runs/43234299219">test evidence</a>) and is now hosted. The ninth standalone project, Prompt Evaluation Harness, separately passed Node 20/22/24 and real Chrome scenarios on 12 November 2026 (<a href="https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243013822">test evidence</a>) and was published to GitHub Pages (<a href="https://github.com/esheenj/prompt-evaluation-harness-oss/actions/runs/43243086139">deployment receipt</a>). The current gallery contains 30 pages across nine independent repositories, not 30 standalone repos. A combined independent 30/30 browser acceptance has not yet been claimed. <a href="https://github.com/esheenj/compound-intelligence-starter/actions/runs/43064815195">Inspect the test evidence</a>. This historic result is not a guarantee of current uptime. These use fictional data; no screen-reader or WCAG certification, trusted agent identity, real execution or customer adoption is claimed.</aside>
 <section id="projects" aria-labelledby="projects-heading">
-<div class="section-heading"><div><p class="kicker">01 / Open source foundations</p><h2 id="projects-heading">Pick a project. <span style="color:var(--glow)">Make it yours.</span></h2><p>Eight original, independent developer foundations you can explore, run and improve. AI and agent intelligence first, then design, experience and testing tools.</p></div></div>
+<div class="section-heading"><div><p class="kicker">01 / Open source foundations</p><h2 id="projects-heading">Pick a project. <span style="color:var(--glow)">Make it yours.</span></h2><p>Nine original, independent developer foundations you can explore, run and improve. AI and agent intelligence first, then design, experience and testing tools.</p></div></div>
 <div class="cards">
 <article class="card lime">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">◎</span><span class="art-grid"></span><span class="art-label">AI engineering</span></div>
@@ -143,49 +143,56 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 </article>
 <article class="card policy">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">⛨</span><span class="art-grid"></span><span class="art-label">AI agent permissions</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">03 / Agent policy</span><span class="micro">New · Interactive AI tool</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">02 / Agent policy</span><span class="micro">New · Interactive AI tool</span></div>
 <h3>Agent Capability Policy Lab</h3><p class="promise">Check what an AI agent may request.</p><p class="description">Explore scoped permissions, expired or revoked enrollments, self-declared access and consequential actions. Watch why an agent is denied or routed to review—all with safe fictional inputs.</p>
 <div class="card-bottom"><p class="tech">JavaScript · Offline policy simulator</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run demo</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/agent-capability-policy-lab">Source</a><a class="contribute" href="https://github.com/esheenj/agent-capability-policy-lab/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/agent-capability-policy-lab/">Try demo</a></div></div></div>
 </article>
+<article class="card prompt">
+<div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">✓</span><span class="art-grid"></span><span class="art-label">Prompt evaluation</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">03 / Prompt quality</span><span class="micro">New · AI developer tooling</span></div>
+<h3>Prompt Evaluation Harness</h3><p class="promise">Compare outputs with repeatable checks.</p><p class="description">Test two fictional AI responses against transparent rubrics for required wording, supported example citations, JSON structure and brevity. See why a candidate fails, edit it and compare again—no model API needed.</p>
+<div class="card-bottom"><p class="tech">JavaScript · Offline evaluation toolkit</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run demo</code><span>Run inside the cloned repository; see its README for setup.</span></details>
+<div class="links"><a class="source" href="https://github.com/esheenj/prompt-evaluation-harness-oss">Source</a><a class="contribute" href="https://github.com/esheenj/prompt-evaluation-harness-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/prompt-evaluation-harness-oss/">Try demo</a></div></div></div>
+</article>
 <article class="card mint">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">◇</span><span class="art-grid"></span><span class="art-label">Design systems</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">03 / Design systems</span><span class="micro">Developer foundation</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">04 / Design systems</span><span class="micro">Developer foundation</span></div>
 <h3>Design System Foundations</h3><p class="promise">Make every interface feel like it belongs.</p><p class="description">Shape your design tokens, see colours and spacing come alive, inspect contrast and export CSS directly from the playground.</p>
 <div class="card-bottom"><p class="tech">JavaScript · CSS tokens</p><details class="developer"><summary>Developer quick start</summary><code class="command">node bin/compile.mjs examples/theme.json</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/design-system-foundations-oss">Source</a><a class="contribute" href="https://github.com/esheenj/design-system-foundations-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/design-system-foundations-oss/">Try demo</a></div></div></div>
 </article>
 <article class="card blue">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">↗</span><span class="art-grid"></span><span class="art-label">Product experience</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">04 / Product experience</span><span class="micro">UX building block</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">05 / Product experience</span><span class="micro">UX building block</span></div>
 <h3>Mobile-First Flow Kit</h3><p class="promise">Create journeys that work on real screens.</p><p class="description">Explore guided mobile journeys with clear next steps, friendly validation, back navigation and recovery paths.</p>
 <div class="card-bottom"><p class="tech">JavaScript · Responsive UX</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run demo</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/mobile-first-flow-kit-oss">Source</a><a class="contribute" href="https://github.com/esheenj/mobile-first-flow-kit-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/mobile-first-flow-kit-oss/">Try demo</a></div></div></div>
 </article>
 <article class="card lavender">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">⥁</span><span class="art-grid"></span><span class="art-label">Workflow design</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">05 / Workflow design</span><span class="micro">Developer foundation</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">06 / Workflow design</span><span class="micro">Developer foundation</span></div>
 <h3>Flow State Machine</h3><p class="promise">Design predictable journeys, even when things go wrong.</p><p class="description">Prototype guarded transitions, record actions and replay sample workflows to understand where users get stuck.</p>
 <div class="card-bottom"><p class="tech">JavaScript · State models</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run record</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/flow-state-machine-oss">Source</a><a class="contribute" href="https://github.com/esheenj/flow-state-machine-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/flow-state-machine-oss/">Try demo</a></div></div></div>
 </article>
 <article class="card amber">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">▤</span><span class="art-grid"></span><span class="art-label">Forms &amp; onboarding</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">06 / Forms &amp; onboarding</span><span class="micro">UX building block</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">07 / Forms &amp; onboarding</span><span class="micro">UX building block</span></div>
 <h3>Form Experience Kit</h3><p class="promise">Make complex forms feel effortless.</p><p class="description">Test approachable multi-step forms with clear feedback, progress and draft recovery without creating an account.</p>
 <div class="card-bottom"><p class="tech">JavaScript · Accessible patterns</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run demo</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/form-experience-kit-oss">Source</a><a class="contribute" href="https://github.com/esheenj/form-experience-kit-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/form-experience-kit-oss/">Try demo</a></div></div></div>
 </article>
 <article class="card teal">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">▦</span><span class="art-grid"></span><span class="art-label">Data experience</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">07 / Data experience</span><span class="micro">Developer foundation</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">08 / Data experience</span><span class="micro">Developer foundation</span></div>
 <h3>Data Table Interactions</h3><p class="promise">Help people find meaning in messy tables.</p><p class="description">Try fast filtering, stable sorting, pagination and downloadable CSV on safe example datasets.</p>
 <div class="card-bottom"><p class="tech">JavaScript · Interactive data</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run demo</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/data-table-interactions-oss">Source</a><a class="contribute" href="https://github.com/esheenj/data-table-interactions-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/data-table-interactions-oss/">Try demo</a></div></div></div>
 </article>
 <article class="card rose">
 <div class="card-art" aria-hidden="true"><span class="orbit"></span><span class="glyph">◈</span><span class="art-grid"></span><span class="art-label">Visual quality</span></div>
-<div class="card-body"><div class="card-meta"><span class="eyebrow">08 / Visual quality</span><span class="micro">Quality toolkit</span></div>
+<div class="card-body"><div class="card-meta"><span class="eyebrow">09 / Visual quality</span><span class="micro">Quality toolkit</span></div>
 <h3>Visual Regression Starter</h3><p class="promise">Catch visual changes before your users do.</p><p class="description">Experiment with image differences and adjustable tolerances, then inspect exactly what changed in a local playground.</p>
 <div class="card-bottom"><p class="tech">JavaScript · Visual testing</p><details class="developer"><summary>Developer quick start</summary><code class="command">npm test &amp;&amp; npm run demo</code><span>Run inside the cloned repository; see its README for setup.</span></details>
 <div class="links"><a class="source" href="https://github.com/esheenj/visual-regression-starter-oss">Source</a><a class="contribute" href="https://github.com/esheenj/visual-regression-starter-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/visual-regression-starter-oss/">Try demo</a></div></div></div>
@@ -193,7 +200,7 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 </div>
 </section>
 <section id="additional-tools" class="catalog" aria-labelledby="tools-heading">
-<div class="section-heading"><div><p class="kicker">02 / Browser playgrounds</p><h2 id="tools-heading">21 more ways to experiment.</h2><p>No install needed for the hosted demos. Try a tool, inspect how it works and bring the lessons into your own projects. These 21 add-ons live within the earlier seven repositories above; the new Agent Capability Policy Lab is an independent eighth repository.</p></div></div>
+<div class="section-heading"><div><p class="kicker">02 / Browser playgrounds</p><h2 id="tools-heading">21 more ways to experiment.</h2><p>No install needed for the hosted demos. Try a tool, inspect how it works and bring the lessons into your own projects. These 21 add-ons still live within the original seven repositories; Agent Capability Policy Lab and Prompt Evaluation Harness are independent eighth and ninth repositories.</p></div></div>
 <div class="filter-box" role="group" aria-label="Filter playgrounds by topic"><input type="radio" name="tool-filter" id="filter-all" checked><label for="filter-all">All 21</label><input type="radio" name="tool-filter" id="filter-ai"><label for="filter-ai">AI &amp; agents</label><input type="radio" name="tool-filter" id="filter-ux"><label for="filter-ux">UX &amp; journeys</label><input type="radio" name="tool-filter" id="filter-dev"><label for="filter-dev">Developer tools</label></div>
 <ul class="tool-grid">
 <li class="tool ai"><div class="tool-top"><span class="tool-num">01</span><span class="tool-badge">AI / Trust</span></div><h3>Signed Agent Challenge</h3><p>Test digital signatures, invalid keys and replay attempts in your browser. This proves key possession in a local example, not real-world identity.</p><a href="signed-agent.html">Launch playground <span aria-hidden="true">↗</span></a></li>
@@ -225,6 +232,6 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 <section id="contribute" class="steps" aria-labelledby="contribute-heading"><p class="kicker">04 / For developers</p><h2 id="contribute-heading">Your first contribution starts small.</h2><p>Choose a project that interests you, reproduce its behaviour and make one measured improvement.</p><ol><li><strong>Pick one idea</strong>Browse the <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/GOOD_FIRST_ISSUES.md">starter tasks</a> and check whether the issue is already being worked on.</li><li><strong>Run an example</strong>Clone the project, follow its README and test with original fictional data.</li><li><strong>Make it measurable</strong>Show expected versus actual behaviour and include a negative test.</li><li><strong>Share the result</strong>Submit a focused pull request and explain both the evidence and remaining limitations.</li></ol>
 <div class="buttonrow"><a class="linkchip primary" href="https://github.com/esheenj/compound-intelligence-starter">Explore source on GitHub ↗</a><a class="linkchip" href="support.html">Support Esheen Labs</a><a class="linkchip" href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/MARKETING_AND_EMBED_KIT.md">Feature our projects</a></div></section>
 </main>
-<footer class="wrap footer"><strong>SIGMA / LABS</strong> · Original open-source experiments from Esheen Labs. Eight public repos, 21 browser add-ons. Historic HTTPS checks: 11 November 2026. Additional recurring infrastructure spend: R0.</footer>
+<footer class="wrap footer"><strong>SIGMA / LABS</strong> · Original open-source experiments from Esheen Labs. Nine public repos, 21 browser add-ons. Historic HTTPS checks: 11 November 2026. Additional recurring infrastructure spend: R0.</footer>
 </body>
 </html>
