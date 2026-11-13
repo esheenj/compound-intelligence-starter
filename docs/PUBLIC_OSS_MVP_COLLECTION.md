@@ -1,5 +1,11 @@
 # Esheen Labs — public open-source MVP collection
 
+## Twelfth independently published repository — 13 November 2026
+
+[Agent Tool Schema Diff Lab](https://github.com/esheenj/agent-tool-schema-diff-lab) was built from original isolated source and published at [its GitHub Pages address](https://esheenj.github.io/agent-tool-schema-diff-lab/). It compares fictional or owner-supplied MCP/OpenAI/Anthropic-style tool JSON input contracts, flagging removed tools, newly required parameters, narrower types/enums and tightened schema bounds. The Node test suite passed **21/21**, built bundle passed, and [GitHub Actions tests and deployment](https://github.com/esheenj/agent-tool-schema-diff-lab/actions/runs/43472899489) both succeeded. Its HTML, app module, engine and CSS returned HTTP 200 from live HTTPS on 13 November. Semantic behavior and unsupported JSON Schema constructs still need human review. No model inference, credentials, private trading controls or recurring services are included.
+
+**Totals:** 12 standalone public repos + 21 add-on browser demos = 33 public entry pages. The earlier 32/32 Chrome proof remains historical, not an assertion of 33/33 acceptance.
+
 ## New independent retrieval quality MVP — 12 November 2026
 
 [RAG Retrieval Evaluation Lab](https://esheenj.github.io/rag-retrieval-eval-lab/) is the **eleventh standalone repository** represented in the Labs gallery. Original source and reproducible [Node/real Chrome tests](https://github.com/esheenj/rag-retrieval-eval-lab/actions/runs/43278981823) passed; [Pages publisher](https://github.com/esheenj/rag-retrieval-eval-lab/actions/runs/43279070629) succeeded, with live HTTPS readback of the HTML and JavaScript. Fictional document/relevance pairs only, no live model calls or real answer-quality claim. Collection now **11 standalone repos + 21 in-repository add-ons = 32 page entries**. Separate 32/32 independent browser-interaction acceptance remains unclaimed.

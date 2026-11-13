@@ -22,7 +22,7 @@ def run():
     with tempfile.TemporaryDirectory(prefix="oss-public-directory-") as folder:
         path = Path(folder) / "stage"
         receipt = stage_catalog(path)
-        verify(receipt["repoCount"] == 11, "SOURCE_ALLOWLIST")
+        verify(receipt["repoCount"] == 12, "SOURCE_ALLOWLIST")
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
