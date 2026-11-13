@@ -1,5 +1,9 @@
 # Public open-source MVP directory
 
+## Twelve-project gallery — 13 November 2026
+
+Added original [Agent Tool Schema Diff Lab](https://github.com/esheenj/agent-tool-schema-diff-lab) with verified [GitHub Actions test and Pages deployment](https://github.com/esheenj/agent-tool-schema-diff-lab/actions/runs/43472899489) and four live HTTPS HTTP-200 readbacks. The gallery now lists 12 independent repos and 21 add-ons = 33 public pages. The existing 32/32 Chrome acceptance was for the preceding state and is not retroactively extended. Browser interaction acceptance for the full 33-page set is a separate check.
+
 ## Eleven-project public gallery — 12 November 2026
 
 The [RAG Retrieval Evaluation Lab](https://github.com/esheenj/rag-retrieval-eval-lab) is a separate original MIT-licensed public repository from clean initial source `5c8623a60fc67bc67d57d1b0dbb4973830e5d22d`. Its offline Node/browser engine compares fictional ranked document IDs using precision@k, recall@k, hit rate, mean reciprocal rank@k and nDCG@k, with strict source validation. These deterministic scores do not verify real relevance labels, actual model/search quality, source authenticity, generated answer correctness or business outcomes.

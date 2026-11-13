@@ -22,7 +22,7 @@ def run():
     with tempfile.TemporaryDirectory(prefix="oss-public-directory-") as folder:
         path = Path(folder) / "stage"
         receipt = stage_catalog(path)
-        verify(receipt["repoCount"] == 11, "SOURCE_ALLOWLIST")
+        verify(receipt["repoCount"] == 12, "SOURCE_ALLOWLIST")
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
@@ -49,8 +49,8 @@ def run():
                     csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content
                 };
             """)
-            verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 11
-                   and page["projectLinks"] is True and page["githubPagesLinks"] == 11
+            verify(page["h1"] == 1 and page["main"] == 1 and page["cards"] == 12
+                   and page["projectLinks"] is True and page["githubPagesLinks"] == 12
                    and page["extraTools"] == 21 and page["language"] == "en",
                    "SEMANTIC_PUBLIC_DIRECTORY")
             verify(len(page["extraLinks"]) == 21 and "mvp-wave.html" in page["extraLinks"]
@@ -116,7 +116,7 @@ def run():
                       cards:document.querySelectorAll('article.card').length
                     };
                 """)
-                verify(layout["page"] <= layout["viewport"] and layout["cards"] == 11,
+                verify(layout["page"] <= layout["viewport"] and layout["cards"] == 12,
                        "NO_PAGE_OVERFLOW_" + str(width))
             driver.command("POST", "url", {"url": (path / "mvp-wave.html").resolve().as_uri()})
             wave = driver.js("""
@@ -769,7 +769,7 @@ def run():
                        "SUPPORT_NO_OVERFLOW_"+str(width))
             print(json.dumps({
                 "schema":"oss-directory-browser-qa-v1","status":"PASS",
-                "browser":version,"publicCards":11,"additionalToolsLinked":21,
+                "browser":version,"publicCards":12,"additionalToolsLinked":21,
                 "responsiveWidths":[320,375,812,1440],
                 "networkAssets":0,"interactiveToolsChecked":11,"supportPageDestinationsChecked":True,"screenReaderTested":False
             },sort_keys=True))
