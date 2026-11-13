@@ -1,5 +1,6 @@
 /** Local demonstration registry. Trust in the reviewer and pin is out of band. */
 import {createHash, createPublicKey} from "node:crypto";
+import {AgentChallengeVerifier} from "./challenge.mjs";
 
 const id = value => typeof value === "string" &&
   /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$/.test(value);
@@ -23,6 +24,8 @@ export class LocalEnrollmentRegistry {
   #rows = new Map();
   #fingerprints = new Set();
   #lastChange = 0;
+  #generation = 0;
+  #snapshots = new WeakSet();
 
   #prepare(input, at) {
     if (!input || !time(at) || at < this.#lastChange) error("INVALID_CHANGE_TIME");
@@ -55,7 +58,9 @@ export class LocalEnrollmentRegistry {
     if ([...this.#rows.values()].some(({enrollment: e}) => e.status === "ACTIVE" &&
         e.agentId === row.enrollment.agentId && e.audience === row.enrollment.audience))
       error("ACTIVE_KEY_EXISTS");
-    return this.#insert(row, at);
+    const result = this.#insert(row, at);
+    this.#generation++;
+    return result;
   }
 
   #active(keyId) {
@@ -77,12 +82,42 @@ export class LocalEnrollmentRegistry {
     if (a.agentId !== b.agentId || a.audience !== b.audience ||
         b.capabilities.some(value => !a.capabilities.includes(value))) error("ROTATION_SCOPE_CHANGED");
     this.#retire(old, at);
-    return this.#insert(next, at);
+    const result = this.#insert(next, at);
+    this.#generation++;
+    return result;
   }
 
   revoke(keyId, at) {
     if (!time(at) || at < this.#lastChange) error("INVALID_CHANGE_TIME");
     this.#retire(this.#active(keyId), at);
+    this.#generation++;
+  }
+
+  versionedSnapshot() {
+    const snapshot = Object.freeze({generation: this.#generation,
+      enrollments: this.challengeEnrollments()});
+    this.#snapshots.add(snapshot);
+    return snapshot;
+  }
+
+  // Both checks matter: a registry update can occur while disk I/O is pending.
+  verifierFor(snapshot, {ledgerDir, now}) {
+    const assertCurrent = () => {
+      if (!this.#snapshots.has(snapshot)) error("UNKNOWN_ENROLLMENT_SNAPSHOT");
+      if (snapshot.generation !== this.#generation) error("STALE_ENROLLMENT_SNAPSHOT");
+    };
+    assertCurrent();
+    const verifier = new AgentChallengeVerifier({ledgerDir, now, enrollments: snapshot.enrollments});
+    const guarded = async operation => {
+      assertCurrent();
+      const result = await operation();
+      assertCurrent();
+      return result;
+    };
+    return Object.freeze({
+      issue: request => guarded(() => verifier.issue(request)),
+      verify: proof => guarded(() => verifier.verify(proof))
+    });
   }
 
   snapshot() { return Object.freeze([...this.#rows.values()]); }

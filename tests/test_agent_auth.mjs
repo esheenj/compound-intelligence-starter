@@ -153,3 +153,27 @@ test("bad pins, key reuse and scope escalation leave enrollment unchanged",()=>{
   assert.equal(registry.snapshot().length,1);
   assert.throws(()=>publicKeyFingerprint({...a.publicJwk,d:"private"}), /INVALID_PUBLIC_KEY/);
 });
+
+test("versioned verifier rejects stale and foreign snapshots and accepts the replacement", async t=>{
+  const c=await setup(t), registry=new LocalEnrollmentRegistry();
+  const opts={ledgerDir:c.dir, now:()=>initial+1};
+  registry.enroll(candidate(c.key, request.keyId),initial);
+  const first=registry.versionedSnapshot(), old=registry.verifierFor(first,opts);
+  const challenge=await old.issue(request);
+  assert.throws(()=>registry.rotate(request.keyId,{...candidate(c.other,"b"),
+    expectedFingerprint:"wrong"},initial+1), /FINGERPRINT_MISMATCH/);
+  assert.equal(registry.versionedSnapshot().generation,first.generation);
+  registry.rotate(request.keyId,candidate(c.other,"b"),initial+1);
+  const current=registry.versionedSnapshot();
+  assert.equal(current.generation,first.generation+1);
+  assert.throws(()=>registry.verifierFor(first,opts),/STALE_ENROLLMENT_SNAPSHOT/);
+  assert.throws(()=>registry.verifierFor({...current},opts),/UNKNOWN_ENROLLMENT_SNAPSHOT/);
+  await assert.rejects(old.verify({challenge,
+    signatureBase64Url:signForLocalDemo(c.key.privateKey,challenge)}),/STALE_ENROLLMENT_SNAPSHOT/);
+  const fresh=registry.verifierFor(current,opts), next=await fresh.issue({...request,keyId:"b"});
+  assert.equal((await fresh.verify({challenge:next,
+    signatureBase64Url:signForLocalDemo(c.other.privateKey,next)})).executionAuthority,"NONE");
+  const pending=fresh.issue({...request,keyId:"b"});
+  registry.revoke("b",initial+2);
+  await assert.rejects(pending,/STALE_ENROLLMENT_SNAPSHOT/);
+});

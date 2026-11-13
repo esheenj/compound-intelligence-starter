@@ -22,3 +22,14 @@ service authorization. Its revocation applies only to consumers of the new snaps
 Keep production identity and authorization outside this teaching example.
 
 Run `node --test tests/test_agent_auth.mjs` for positive and negative examples.
+
+## Reject stale snapshots in one process
+
+Call `registry.verifierFor(registry.versionedSnapshot(), {ledgerDir, now})` instead
+of constructing a verifier directly. Each successful change advances the generation
+once. A guarded verifier refuses to return results if its snapshot has become stale,
+including a change during an awaited operation. Rebuild it from a fresh snapshot.
+An interrupted operation may have already written a nonce receipt; request a fresh
+challenge rather than retrying that nonce. Snapshots are local objects tied to one
+registry instance; this does not protect other processes, restarts, persisted state,
+or callers that use the original unguarded verifier directly.
