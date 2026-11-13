@@ -30,6 +30,14 @@ PAIRS = {
 }
 
 
+NETWORK_LABEL = {
+    "bitcoin-mainnet": "Bitcoin",
+    "ethereum-mainnet": "Ethereum (ERC-20)",
+    "base-mainnet": "Base",
+    "solana-mainnet": "Solana",
+    "tron-mainnet": "Tron (TRC-20)",
+}
+
 PIONEX_MINIMUM_SNAPSHOT = {
     ("BTC", "bitcoin-mainnet"): "0.00001 BTC",
     ("USDT", "solana-mainnet"): "0.1 USDT",
@@ -202,9 +210,18 @@ def render_support(value: object) -> bytes:
                         'on 12 November 2026: ' + _safe(row["minimum_snapshot"]) +
                         '. Minimums and deposit addresses can change. Reconfirm the live Pionex '
                         'deposit screen and same asset/network before sending.</small>')
-            wallets.append('<li><strong>' + _safe(row["asset"]) + ' · ' + _safe(row["network"]) +
-                           '</strong><code>' + _safe(row["address"]) + '</code>' + note + '</li>')
-        c = '<ul class="wallets">' + "".join(wallets) + '</ul>'
+            chain_name = NETWORK_LABEL[row["network"]]
+            wallets.append('<li><strong>' + _safe(row["asset"]) + ' · ' +
+                           _safe(chain_name) + '</strong>' +
+                           '<span class="network-id">Network: ' + _safe(row["network"]) + '</span>' +
+                           '<code tabindex="0" aria-label="' + _safe(row["asset"]) +
+                           ' receiving address on ' + _safe(chain_name) + '">' +
+                           _safe(row["address"]) + '</code>' + note + '</li>')
+        c = ('<p class="copy-instructions"><strong>Choose the exact blockchain network first.</strong> '
+             'To copy an address, long-press it on your phone or select the text on a computer. '
+             'Verify the full address on the receiving exchange screen and in your sending wallet '
+             'before sending; a cached address may be retired.</p>' +
+             '<ul class="wallets">' + "".join(wallets) + '</ul>')
         c_info = ("These receiving addresses were supplied by the maintainer. Pionex destinations "
                   "are custodial exchange deposits, not independent self-custody or GitHub Sponsors. "
                   "Before each transfer, verify the current Pionex deposit address, coin, network "
@@ -230,13 +247,13 @@ a:focus-visible{outline:3px solid Highlight;outline-offset:3px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem}
 .panel{border:1px solid GrayText;border-radius:1rem;padding:1.2rem;min-width:0}
 .pending{font-weight:700}code{display:block;overflow-wrap:anywhere;margin:.45rem 0;padding:.5rem;border:1px solid GrayText;border-radius:.4rem}
-.wallets{padding-left:1.1rem}.wallets li{margin:1rem 0}.wallets small{display:block;margin-top:.4rem;line-height:1.5}
+.wallets{padding-left:0;list-style:none;display:grid;gap:.75rem}.wallets li{min-width:0;margin:0;padding:1rem;border:1px solid GrayText;border-radius:.75rem}.wallets li strong{display:block}.wallets small,.network-id{display:block;margin-top:.35rem;line-height:1.5}.network-id{font-size:.78rem;opacity:.8}.wallets code{display:block;user-select:all;-webkit-user-select:all;cursor:text;overflow-wrap:anywhere;word-break:break-word;font-size:clamp(.85rem,3.4vw,1rem);font-weight:680}.wallets code:focus-visible{outline:3px solid Highlight;outline-offset:3px}.copy-instructions{padding:.7rem .85rem;border-left:3px solid currentColor;line-height:1.6}
 .note{border-left:4px solid currentColor;padding:.8rem 1rem;margin:1.2rem 0}
 </style></head><body><main>
 <p><a href="./">Back to Esheen Labs tools</a></p><p>Esheen Labs · public open-source support</p>
 <h1>Keep useful tools open and improving.</h1>
 <p>All basic public experiments remain free. Financial support is voluntary, never required to try tools, and does not purchase access to private research, verified identity or execution authority.</p>
-<div class="grid">""" + make_card("GitHub Sponsors", s_info, s) + make_card("Card and rand payments", f_info, f) + make_card("Direct crypto support", c_info, c) + """</div>
+<div class="grid">""" + make_card("Direct crypto support", c_info, c) + make_card("GitHub Sponsors", s_info, s) + make_card("Card and rand payments", f_info, f) + """</div>
 <section class="note"><h2>Before sending funds</h2><p>Use only destinations shown on this public page after the maintainer activates them. Independently confirm the receiver and selected network. Cryptocurrency transfers can be irreversible. No keys or wallet connections are requested. Avoid posting private payment proofs or personal data in public issues.</p>
 <p>These deposits may be controlled by Pionex, may be replaced, and may require current exchange-specific minimums. An address shown here does not guarantee successful crediting. Never reuse an address after an exchange replacement notice.</p><p>Support is not an order or a tax-deductible charitable donation. No Section 18A certificate is issued. For commercial work, separately agree scope, pricing, invoicing, delivery and a verified payment channel. Screenshots and transaction IDs are not proof of settled payment.</p></section>
 <p><a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/CONTRIBUTING.md" rel="noopener noreferrer">You can also contribute without money</a>.</p>
