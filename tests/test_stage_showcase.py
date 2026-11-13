@@ -37,6 +37,8 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertIn(b"actions/runs/43292437923", content)
         self.assertIn(b"docs/MARKETING_AND_EMBED_KIT.md", content)
         self.assertIn(b'href="support.html"', content)
+        self.assertIn(b'Support Esheen Labs with BTC or USDT', content)
+        self.assertGreaterEqual(content.count(b'href="support.html"'), 2)
         self.assertNotIn(b"independent external HTTPS checks for those six are pending", content)
         self.assertEqual(report["htmlSha256"], hashlib.sha256(content).hexdigest())
         self.assertEqual(report["additionalHostedToolCount"], 11)

@@ -10,7 +10,7 @@ from browser_check_issue_report import Driver, driver_executable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.stage_showcase import stage_catalog, SUPPORT_CONFIG_SOURCE
-from scripts.render_support import load_channels
+from scripts.render_support import load_channels, NETWORK_LABEL
 
 
 def verify(ok, name):
@@ -734,6 +734,9 @@ def run():
                     pending:document.querySelectorAll('.pending').length,
                     scripts:document.querySelectorAll('script').length,
                     addresses:[...document.querySelectorAll('.wallets code')].map(x=>x.textContent),
+                    chainTitles:[...document.querySelectorAll('.wallets li strong')].map(x=>x.textContent),
+                    selectable:[...document.querySelectorAll('.wallets code')].every(x=>getComputedStyle(x).userSelect==='all' && x.tabIndex===0),
+                    cryptoFirst:document.querySelector('section.panel h2')?.textContent==='Direct crypto support',
                     links:[...document.querySelectorAll('a')].map(x=>x.href),
                     csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content,
                     remote:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length
@@ -752,7 +755,13 @@ def run():
                    and support_page["scripts"]==0 and support_page["remote"]==0
                    and "connect-src 'none'" in support_page["csp"]
                    and sorted(actual_pay_urls)==sorted(expected_pay_urls)
-                   and sorted(support_page["addresses"])==sorted(expected_wallets),
+                   and sorted(support_page["addresses"])==sorted(expected_wallets)
+                   and support_page["cryptoFirst"]
+                   and (not expected_wallets or (
+                       support_page["selectable"] and
+                       support_page["chainTitles"]==
+                           [x["asset"]+" · "+NETWORK_LABEL[x["network"]]
+                            for x in approved_support["crypto"]["wallets"]])),
                    "SUPPORT_CONFIG_MATCHES_RENDERED_DESTINATIONS")
             for width,height in ((320,720),(1440,900)):
                 driver.viewport(width,height)

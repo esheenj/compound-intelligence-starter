@@ -16,7 +16,7 @@ from browser_check_issue_report import Driver, driver_executable
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from scripts.render_support import load_channels
+from scripts.render_support import load_channels, NETWORK_LABEL
 
 URL = "https://esheenj.github.io/compound-intelligence-starter/support.html"
 
@@ -58,6 +58,9 @@ def run() -> dict:
                 csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content||'',
                 links:[...document.querySelectorAll('a')].map(x=>x.href),
                 addresses:[...document.querySelectorAll('.wallets code')].map(x=>x.textContent),
+                titles:[...document.querySelectorAll('.wallets li strong')].map(x=>x.textContent),
+                selectable:[...document.querySelectorAll('.wallets code')].every(x=>getComputedStyle(x).userSelect==='all' && x.tabIndex===0),
+                cryptoFirst:document.querySelector('section.panel h2')?.textContent==='Direct crypto support',
                 walletCount:document.querySelectorAll('.wallets li').length,
                 remoteAssets:performance.getEntriesByType('resource').filter(
                     x=>!x.name.startsWith(location.origin+'/')).length
@@ -86,6 +89,11 @@ def run() -> dict:
         verify(page["walletCount"] == len(wallets) and
                sorted(page["addresses"]) == sorted(x["address"] for x in wallets),
                "SUPPORT_WALLET_ADDRESS_MISMATCH_OR_SUBSTITUTION")
+        verify(page["cryptoFirst"] and
+               (not wallets or (page["selectable"] and
+                page["titles"] == [x["asset"]+" · "+NETWORK_LABEL[x["network"]]
+                                   for x in wallets])),
+               "SUPPORT_DONATION_USABILITY_OR_CHAIN_LABEL_MISMATCH")
         for width, height in ((320, 720), (1440, 900)):
             driver.viewport(width, height)
             verify(driver.js("return document.documentElement.scrollWidth<=innerWidth;") is True,
