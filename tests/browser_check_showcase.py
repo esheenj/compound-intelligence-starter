@@ -10,7 +10,7 @@ from browser_check_issue_report import Driver, driver_executable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.stage_showcase import stage_catalog, SUPPORT_CONFIG_SOURCE
-from scripts.render_support import load_channels
+from scripts.render_support import load_channels, NETWORK_LABEL
 
 
 def verify(ok, name):
@@ -760,8 +760,8 @@ def run():
                    and (not expected_wallets or (
                        support_page["selectable"] and
                        support_page["chainTitles"]==
-                           ["BTC · Bitcoin", "USDT · Solana",
-                            "USDT · Ethereum (ERC-20)", "USDT · Tron (TRC-20)"])),
+                           [x["asset"]+" · "+NETWORK_LABEL[x["network"]]
+                            for x in approved_support["crypto"]["wallets"]])),
                    "SUPPORT_CONFIG_MATCHES_RENDERED_DESTINATIONS")
             for width,height in ((320,720),(1440,900)):
                 driver.viewport(width,height)
