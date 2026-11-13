@@ -38,6 +38,16 @@ class OwnerFundingRoutesTests(unittest.TestCase):
             self.assertIn(row["minimum_snapshot"], html)
         self.assertEqual(html.count("<li><strong>"), 4)
         self.assertEqual(html.count("Pionex custodial exchange deposit"), 4)
+        for label in ("BTC · Bitcoin", "USDT · Solana",
+                      "USDT · Ethereum (ERC-20)", "USDT · Tron (TRC-20)"):
+            self.assertIn(label, html)
+        self.assertIn('user-select:all', html)
+        self.assertIn('tabindex="0" aria-label="BTC receiving address on Bitcoin"', html)
+        self.assertIn("long-press it on your phone", html)
+        self.assertLess(html.index("<h2>Direct crypto support</h2>"),
+                        html.index("<h2>GitHub Sponsors</h2>"))
+        self.assertLess(html.index("<h2>GitHub Sponsors</h2>"),
+                        html.index("<h2>Card and rand payments</h2>"))
         self.assertIn("Before each transfer, verify the current Pionex deposit address", html)
         self.assertIn("Never reuse an address after an exchange replacement notice", html)
         self.assertIn("No Section 18A certificate", html)
