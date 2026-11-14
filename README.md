@@ -170,7 +170,11 @@ cd experiments/runner_preflight/rust
 cargo run --locked -- inspect --input ../fixtures/ready-x64.json --format json
 ```
 
-The [x64/ARM64 Rust qualification](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43634607020) and [existing project tests](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43634607074) passed on the merged main source. Additional recurring infrastructure spend: R0.
+**Tested Linux downloads:** [x86-64 build artifact](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988352/artifacts/14131604656) · [ARM64 build artifact](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988352/artifacts/14131988969). Each GitHub Actions artifact contains the Linux executable, SHA-256 checksum, clean standalone Rust source ZIP, its checksum, and build information. GitHub Actions artifacts are temporary (these runs expire **21 November 2026**); view the [source-export workflow](https://github.com/esheenj/compound-intelligence-starter/actions/workflows/runner-preflight-export.yml) for newer runs.
+
+The clean source ZIP is **byte-identical** across x64 and ARM64 on merged commit `67fdf118c71bb90baef6b40d9eb74b0365877169` (SHA-256 `d283fc6b465d06235b6fff611efb93fb6c0623f86fe1956b3044249fa79a39b4`). Its provenance contains exact source file digests and an independent GitHub CI workflow. The artifact is *not* a signed production release, a separately created repository, or evidence of live CI-host repair. Run only on a machine you authorize.
+
+[Standalone export / extracted-build verification](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988352) and [Rust x64/ARM64 plus dependency audit](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988310) passed on merged main; [existing Python and Chrome tests](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988318) also passed. Additional recurring infrastructure spend: R0.
 
 ## New: offline public MVP wave planner
 
