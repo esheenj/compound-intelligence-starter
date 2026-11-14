@@ -1,5 +1,11 @@
 # Public open-source MVP directory
 
+## Twenty-one-repository gallery — 14 November 2026
+
+The new [Event Replay Rust Parity Lab](https://esheenj.github.io/event-replay-rust-parity-lab/) joins the four customer-facing integration reliability tools as an advanced developer option: convert accepted synthetic delivery evidence into a byte-for-byte Rust/Node parity check. GitHub Actions independently built actual Rust and verified 134 differential cases with successful Pages release; Node reference tests total 65. It is a self-service browser exploration of JavaScript output, not browser Rust, real event ingestion, live customer verification or an automatically qualified production binary. Its public code shares no private infrastructure/trading authority.
+
+Inventory **21 independently published public repositories + 21 original hosted browser add-ons = 42 demo URLs**. Prior 41/41 acceptance remains historical; publish 42/42 only after a new independent live Chrome gate. Added recurring cost R0.
+
 ## Twenty-repository gallery — 14 November 2026
 
 New [Deterministic Replay Fixture Generator](https://esheenj.github.io/deterministic-replay-fixture-generator/) is listed directly after the Integration Reliability Assessment, Workflow Failure Test Builder and Delivery Trace Inspector. Together they provide a real self-service workflow: assess a control, inspect synthetic evidence, draft acceptance criteria, and export runnable synthetic replay tests. The new product passed 66 original source and spawned-test checks and independently deployed to Pages. No real integration is connected or tested, and synthetic aliasing does not guarantee anonymization.
