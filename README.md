@@ -159,6 +159,17 @@ Please don't publish employer or customer data, proprietary strategies, credenti
 
 See the [cross-language validator pilot](docs/CROSS_LANGUAGE_VALIDATOR_PILOT.md): original synthetic records, dependency-free Python and Rust implementations, invalid-input fixtures and a CI parity check. It is a **format demonstration**, not signature checking, operational authorization or a performance claim.
 
+### Rust CLI: Runner Preflight
+
+[Runner Preflight](experiments/runner_preflight/README.md) checks a **supplied**, synthetic CI runner inventory against declared job requirements. It reports deterministic READY, WARN or HOLD findings for OS, architecture, runner labels, disk/memory headroom, missing tools and Rust targets. It is an offline, read-only command—not a live runner inspection, installer or separate repository.
+
+```sh
+cd experiments/runner_preflight/rust
+cargo run --locked -- inspect --input ../fixtures/ready-x64.json --format json
+```
+
+The [x64/ARM64 Rust qualification](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43634607020) and [existing project tests](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43634607074) passed on the merged main source. Additional recurring infrastructure spend: R0.
+
 ## New: offline public MVP wave planner
 
 A small, independently runnable reference tool helps prioritize at most three fictional open-source MVP review candidates, with explainable scoring, invalid-input tests and explicit no-execution/no-publication boundaries. It uses a completely synthetic fixture; it does **not** verify GitHub, rights or deployed applications.
