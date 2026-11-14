@@ -18,10 +18,10 @@ class ShowcaseStageTests(unittest.TestCase):
     def test_exact_public_collection_stage_and_receipt(self):
         report = stage_catalog(self.output)
         self.assertEqual(report["state"], "STAGED_ONLY")
-        self.assertEqual(report["repoCount"], 12)
+        self.assertEqual(report["repoCount"], 14)
         self.assertIn(b"SUPPORT_AND_SUSTAINABILITY.md", SOURCE.read_bytes())
         self.assertIn(b"PUBLIC_INTELLIGENCE_BOUNDARY.md", SOURCE.read_bytes())
-        self.assertEqual(report["githubDeployedUrlCount"], 12)
+        self.assertEqual(report["githubDeployedUrlCount"], 14)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
         self.assertEqual(report["files"], [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"])
@@ -100,15 +100,17 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
-        self.assertEqual(content.count(b">Try demo</a>"), 12)
+        self.assertEqual(content.count(b">Try demo</a>"), 14)
         self.assertIn(b"https://esheenj.github.io/rag-retrieval-eval-lab/", content)
         self.assertIn(b"https://esheenj.github.io/agent-tool-schema-diff-lab/", content)
+        self.assertIn(b"https://esheenj.github.io/agent-invocation-replay-lab/", content)
+        self.assertIn(b"https://esheenj.github.io/agent-skills-manifest-validator/", content)
         self.assertIn(b"https://esheenj.github.io/eval-dataset-leakage-lab/", content)
-        self.assertIn(b"33</strong><span>public demo pages", content)
+        self.assertIn(b"35</strong><span>public demo pages", content)
         self.assertIn(b"https://esheenj.github.io/prompt-evaluation-harness-oss/", content)
-        self.assertIn(b"33</strong><span>public demo pages", content)
+        self.assertIn(b"35</strong><span>public demo pages", content)
         self.assertIn(b"https://esheenj.github.io/agent-capability-policy-lab/", content)
-        self.assertEqual(content.count(b"33</strong><span>public demo pages"), 1)
+        self.assertEqual(content.count(b"35</strong><span>public demo pages"), 1)
         self.assertEqual(content.count(b'<li class="tool '), 21)
         self.assertIn(b'id="filter-ai"', content)
         self.assertIn(b"prefers-reduced-motion", content)
@@ -121,9 +123,9 @@ class ShowcaseStageTests(unittest.TestCase):
             stage_catalog(self.output)
         self.assertEqual((self.output / "index.html").read_bytes(), first)
 
-    def test_source_html_needs_all_twelve_public_repo_links(self):
+    def test_source_html_needs_all_fourteen_public_repo_links(self):
         source = SOURCE.read_bytes()
-        self.assertEqual(verify_catalog(source)["repoCount"], 12)
+        self.assertEqual(verify_catalog(source)["repoCount"], 14)
         with self.assertRaisesRegex(ValueError, "PUBLIC_REPOSITORY_LINK_MISSING"):
             verify_catalog(source.replace(b"visual-regression-starter-oss", b"broken-repo-name"))
         for new_tool in (b"model-cost.html", b"model-fit.html", b"context-preservation.html", b"model-disagreement.html", b"decision-review.html", b"agent-trust.html", b"signed-agent.html"):

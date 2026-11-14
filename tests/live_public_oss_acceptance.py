@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 33 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 35 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -25,6 +25,8 @@ ENTRY_SITES = {
     "eval-dataset-leakage-lab": "https://esheenj.github.io/eval-dataset-leakage-lab/",
     "rag-retrieval-eval-lab": "https://esheenj.github.io/rag-retrieval-eval-lab/",
     "agent-tool-schema-diff-lab": "https://esheenj.github.io/agent-tool-schema-diff-lab/",
+    "agent-invocation-replay-lab": "https://esheenj.github.io/agent-invocation-replay-lab/",
+    "agent-skills-manifest-validator": "https://esheenj.github.io/agent-skills-manifest-validator/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -94,6 +96,60 @@ def open_static(driver: Driver, label: str, url: str) -> None:
         raise AssertionError("LIVE_" + label.upper() + "_SITE_NOT_READY")
     origin = driver.js("return location.protocol==='https:' && location.host==='esheenj.github.io';")
     verify(origin is True, "LIVE_" + label.upper() + "_HTTPS_ORIGIN")
+
+
+def inspect_new_agent_tools(driver: Driver, repo: str) -> None:
+    """Exercise the two newest independent published browser tools, not just HTML."""
+    if repo not in {"agent-invocation-replay-lab", "agent-skills-manifest-validator"}:
+        return
+    selector = "#scenario" if repo == "agent-invocation-replay-lab" else "#source"
+    for _ in range(45):
+        ready = driver.js("""
+          const input=document.querySelector(arguments[0]);
+          return !!input && input.value.length>80;
+        """, [selector])
+        if ready is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_" + repo.upper().replace("-", "_") + "_MODULE_NOT_READY")
+    if repo == "agent-invocation-replay-lab":
+        verify(driver.js("""
+          document.querySelector('#run').click();
+          return document.querySelector('#state').textContent==='SIMULATION COMPLETE' &&
+            document.querySelector('#events').textContent==='9' &&
+            document.querySelector('#admitted').textContent==='2' &&
+            document.querySelector('#rejected').textContent==='5' &&
+            document.querySelectorAll('#decisions li').length===9 &&
+            !document.querySelector('#export').disabled;
+        """) is True, "LIVE_REPLAY_9_EVENTS_AND_EVIDENCE")
+        verify(driver.js("""
+          document.querySelector('#scenario').value='{"bad":true}';
+          document.querySelector('#run').click();
+          return document.querySelector('#state').textContent==='INPUT REJECTED' &&
+            document.querySelectorAll('#decisions li').length===0 &&
+            document.querySelector('#export').disabled;
+        """) is True, "LIVE_REPLAY_INVALID_INPUT_REJECTED")
+    else:
+        verify(driver.js("""
+          document.querySelector('#inspect').click();
+          return document.querySelector('#status').textContent==='SUBSET CHECKED' &&
+            document.querySelector('#errors').textContent==='0' &&
+            document.querySelector('#reviews').textContent==='0' &&
+            document.querySelector('#notes').textContent==='1' &&
+            !document.querySelector('#export').disabled;
+        """) is True, "LIVE_SKILLS_VALID_SUBSET_RESULT")
+        verify(driver.js("""
+          document.querySelector('#folder').value='mismatched-folder';
+          document.querySelector('#inspect').click();
+          return document.querySelector('#status').textContent==='NEEDS FIX' &&
+            Number(document.querySelector('#errors').textContent)>0 &&
+            document.querySelector('#findings').textContent.includes('FOLDER_MISMATCH');
+        """) is True, "LIVE_SKILLS_FOLDER_MISMATCH_REJECTED")
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+               "LIVE_NEW_AGENT_TOOL_RESPONSIVE_"+repo+"_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -737,8 +793,12 @@ def run() -> dict:
         for repo, url in ENTRY_SITES.items():
             print(json.dumps({"phase":"opening-home","id":repo,"url":url}), flush=True)
             open_static(driver, repo, url)
+            inspect_new_agent_tools(driver, repo)
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
-                            "result": "PASS", "interaction_scope": "HTTPS load and semantic landmarks"})
+                            "result": "PASS", "interaction_scope":
+                                "HTTPS interactive and responsive checks" if repo in {
+                                    "agent-invocation-replay-lab", "agent-skills-manifest-validator"
+                                } else "HTTPS load and semantic landmarks"})
         for kind, url in EARLY_URLS.items():
             print(json.dumps({"phase":"opening-early","id":kind,"url":url}), flush=True)
             open_static(driver, kind, url)
@@ -764,14 +824,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==33, "LIVE_GALLERY_EXPECTED_33_PAGES")
+        verify(len(checked)==35, "LIVE_GALLERY_EXPECTED_35_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 12 independent public repository landing pages loaded; 21 add-ons exercised in Chrome; newest tool has separate Node and release verification; not user-device acceptance",
+            "proof_type": "remote HTTPS: 14 independent public repository landing pages loaded; 21 add-ons exercised in Chrome; newest tools have separate Node and release verification; not user-device acceptance",
         }
     finally:
         driver.close()

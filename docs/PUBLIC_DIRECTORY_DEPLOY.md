@@ -1,5 +1,9 @@
 # Public open-source MVP directory
 
+## Fourteen-repository gallery — 14 November 2026
+
+Added the independent [Agent Invocation Replay Lab](https://esheenj.github.io/agent-invocation-replay-lab/) and [Agent Skills Manifest Inspector](https://esheenj.github.io/agent-skills-manifest-validator/), retaining 21 existing hosted add-ons. The collection now contains 14 standalone repositories and 35 demos. Both new projects have separate original source and self-contained Node tests (26 and 31), Pages workflows and explicit no-execution disclaimers. Historic 33/33 live Chrome results are not claimed as a combined 35/35 acceptance; that requires the expanded live Chrome workflow.
+
 ## Twelve-project gallery — 13 November 2026
 
 Added original [Agent Tool Schema Diff Lab](https://github.com/esheenj/agent-tool-schema-diff-lab) with verified [GitHub Actions test and Pages deployment](https://github.com/esheenj/agent-tool-schema-diff-lab/actions/runs/43472899489) and four live HTTPS HTTP-200 readbacks. The gallery now lists 12 independent repos and 21 add-ons = 33 public pages. The existing 32/32 Chrome acceptance was for the preceding state and is not retroactively extended. Browser interaction acceptance for the full 33-page set is a separate check.
