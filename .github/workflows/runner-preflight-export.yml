@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'experiments/runner_preflight/**'
+      - 'experiments/runner_preflight/RELEASE_NOTES.md'
       - 'scripts/export_runner_preflight.py'
       - 'tests/test_runner_preflight_export.py'
       - '.github/workflows/runner-preflight-export.yml'
@@ -10,6 +11,7 @@ on:
     branches: [main]
     paths:
       - 'experiments/runner_preflight/**'
+      - 'experiments/runner_preflight/RELEASE_NOTES.md'
       - 'scripts/export_runner_preflight.py'
       - 'tests/test_runner_preflight_export.py'
       - '.github/workflows/runner-preflight-export.yml'
@@ -81,3 +83,114 @@ jobs:
           path: dist/publish/
           if-no-files-found: error
           retention-days: 7
+
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify RustSec advisories, dependency licenses and sources
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          manifest-path: experiments/runner_preflight/rust/Cargo.toml
+          arguments: --all-features
+          command: check
+
+  publish-preview:
+    needs: [clean-export, dependency-audit]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'esheenj/compound-intelligence-starter' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    concurrency:
+      group: runner-preflight-v0.1.0-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Download verified Linux x86-64 build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: runner-preflight-ubuntu-24.04-${{ github.run_id }}
+          path: dist/download/x86_64
+      - name: Download verified Linux ARM64 build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: runner-preflight-ubuntu-24.04-arm-${{ github.run_id }}
+          path: dist/download/aarch64
+      - name: Confirm exact-commit provenance, cross-arch source parity, checksums and executables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          for arch in x86_64 aarch64; do
+            ( cd "dist/download/$arch" && sha256sum --check runner-preflight-source.zip.sha256 && sha256sum --check runner-preflight.sha256 )
+            test -s "dist/download/$arch/BUILD_INFO.txt"
+            grep -F -- "$GITHUB_SHA" "dist/download/$arch/BUILD_INFO.txt" >/dev/null
+          done
+          cmp dist/download/x86_64/runner-preflight-source.zip dist/download/aarch64/runner-preflight-source.zip
+          python3 - <<'PY'
+          import json, os, zipfile
+          p = 'dist/download/x86_64/runner-preflight-source.zip'
+          with zipfile.ZipFile(p) as z:
+              names = set(z.namelist())
+              assert 'runner-preflight/SOURCE_PROVENANCE.json' in names
+              provenance = json.loads(z.read('runner-preflight/SOURCE_PROVENANCE.json'))
+              assert provenance['source_commit'] == os.environ['GITHUB_SHA']
+              assert provenance['schema'] == 'runner-preflight-clean-export-v1'
+              assert not any(n.startswith('runner-preflight/.git/') for n in names)
+          PY
+          mkdir -p dist/release
+          install -m 0755 dist/download/x86_64/runner-preflight dist/release/runner-preflight-linux-x86_64
+          install -m 0755 dist/download/aarch64/runner-preflight dist/release/runner-preflight-linux-aarch64
+          cp dist/download/x86_64/runner-preflight-source.zip dist/release/runner-preflight-source.zip
+          ( cd dist/release && sha256sum runner-preflight-source.zip runner-preflight-linux-x86_64 runner-preflight-linux-aarch64 > SHA256SUMS )
+          {
+            echo "Source commit: $GITHUB_SHA"
+            echo "Linux x86-64 build:"
+            cat dist/download/x86_64/BUILD_INFO.txt
+            echo "Linux ARM64 build:"
+            cat dist/download/aarch64/BUILD_INFO.txt
+          } > dist/release/BUILD_INFO.txt
+          ( cd dist/release && sha256sum --check SHA256SUMS )
+      - name: Publish component-prefixed versioned preview without replacing the starter release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=runner-preflight-v0.1.0
+          if gh release view "$tag" >/dev/null 2>&1; then
+            actual="$(gh release view "$tag" --json assets --jq '.assets[].name' | sort)"
+            for needed in BUILD_INFO.txt SHA256SUMS runner-preflight-source.zip runner-preflight-linux-x86_64 runner-preflight-linux-aarch64; do
+              if ! grep -Fxq "$needed" <<< "$actual"; then
+                echo "::error::Existing release lacks $needed; HOLD for original-release reconciliation."
+                exit 1
+              fi
+            done
+            echo 'Existing complete Runner Preflight preview retained; no mutation performed.'
+            exit 0
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo '::error::The target tag exists without a release. HOLD; do not recreate or move it.'
+            exit 1
+          fi
+          gh release create "$tag" \
+            dist/release/runner-preflight-source.zip \
+            dist/release/runner-preflight-linux-x86_64 \
+            dist/release/runner-preflight-linux-aarch64 \
+            dist/release/SHA256SUMS \
+            dist/release/BUILD_INFO.txt \
+            --target "$GITHUB_SHA" \
+            --title 'Runner Preflight v0.1.0 — Linux preview' \
+            --notes-file experiments/runner_preflight/RELEASE_NOTES.md \
+            --latest=false --prerelease
+          gh release view "$tag" --json url,isDraft,isPrerelease,tagName,assets
