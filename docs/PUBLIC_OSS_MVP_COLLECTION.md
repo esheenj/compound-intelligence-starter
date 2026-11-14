@@ -1,5 +1,11 @@
 # Esheen Labs — public open-source MVP collection
 
+## Eighteenth public MVP — 14 November 2026
+
+**[Workflow Failure Test Builder](https://github.com/esheenj/workflow-failure-test-builder)** generates deterministic draft acceptance cases for recurring CRM, webhook, API and AI workflow failure patterns: duplicate requests, concurrency, post-commit timeouts, rate limits, persistent 5xx, contract drift, ordering, crashes, untrusted senders and missing AI evidence. Exports structured JSON, Markdown and Gherkin, using original source and illustrative fixtures. Local unit tests: **47 passing**. [Independent test and Pages CI](https://github.com/esheenj/workflow-failure-test-builder/actions/runs/43627376717) is the release authority. The tool generates a draft: **no real integration tests are executed** and provider-specific step definitions must be supplied by a developer. An optional nonbinding Sigma Code business-email or GitHub pilot enquiry enables customer conversations without exposing sensitive credentials.
+
+Portfolio target update: **18 public standalone repositories and 21 add-on playgrounds = 39 demo entries**, with new source/CI/public-browser evidence kept separate. Additional recurring infrastructure spend R0. Private control-plane/trading authority not involved.
+
 ## Seventeenth public MVP — 14 November 2026
 
 **[Integration Reliability Assessment](https://github.com/esheenj/integration-reliability-assessment)** is an independently published free, local-first assessment for CRM, webhook, API and AI-enabled business integrations. It combines eight transparent self-report controls covering sender identity, idempotency, retries, schemas, secrets, observability, reconciliation and evidence provenance, generating prioritized test actions and downloadable JSON/Markdown briefs. It offers a [GitHub pilot enquiry template](https://github.com/esheenj/integration-reliability-assessment/issues/new?template=pilot.yml) for bounded customer discussions without soliciting secrets. Its [30 deterministic Node tests and Pages deployment succeeded](https://github.com/esheenj/integration-reliability-assessment/actions/runs/43617647467). Live HTML, JS and CSS returned HTTPS 200. **No paying customer, commercial acceptance, external audit, production integration or independent risk certification is evidenced.**
