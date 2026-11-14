@@ -106,8 +106,8 @@ fn evaluate(input: &Inventory) -> Result<Report, &'static str> {
     if r.arch != j.arch {
         add(&mut findings, "ARCH_MISMATCH", Status::Hold, "Runner architecture differs from job.");
     }
-    let labels: BTreeSet<_> = r.labels.iter().collect();
-    let required: BTreeSet<_> = j.required_labels.iter().collect();
+    let labels: BTreeSet<&str> = r.labels.iter().map(String::as_str).collect();
+    let required: BTreeSet<&str> = j.required_labels.iter().map(String::as_str).collect();
     for label in required {
         if !labels.contains(label) {
             add(&mut findings, "LABEL_MISSING", Status::Hold, "Required label is absent.");
@@ -123,8 +123,8 @@ fn evaluate(input: &Inventory) -> Result<Report, &'static str> {
     } else if j.min_memory_mb > 0 && r.memory_free_mb < j.min_memory_mb * 5 / 4 {
         add(&mut findings, "MEMORY_HEADROOM_LOW", Status::Warn, "Free memory headroom below 25%.");
     }
-    let tools: BTreeSet<_> = r.tools.iter().collect();
-    for tool in j.required_tools.iter().collect::<BTreeSet<_>>() {
+    let tools: BTreeSet<&str> = r.tools.iter().map(String::as_str).collect();
+    for tool in j.required_tools.iter().map(String::as_str).collect::<BTreeSet<_>>() {
         if !tools.contains(tool) {
             add(&mut findings, "TOOL_MISSING", Status::Hold, "Required tool was not declared.");
         }
