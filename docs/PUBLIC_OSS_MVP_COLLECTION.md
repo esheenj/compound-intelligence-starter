@@ -1,5 +1,11 @@
 # Esheen Labs — public open-source MVP collection
 
+## Seventeenth public MVP — 14 November 2026
+
+**[Integration Reliability Assessment](https://github.com/esheenj/integration-reliability-assessment)** is an independently published free, local-first assessment for CRM, webhook, API and AI-enabled business integrations. It combines eight transparent self-report controls covering sender identity, idempotency, retries, schemas, secrets, observability, reconciliation and evidence provenance, generating prioritized test actions and downloadable JSON/Markdown briefs. It offers a [GitHub pilot enquiry template](https://github.com/esheenj/integration-reliability-assessment/issues/new?template=pilot.yml) for bounded customer discussions without soliciting secrets. Its [30 deterministic Node tests and Pages deployment succeeded](https://github.com/esheenj/integration-reliability-assessment/actions/runs/43617647467). Live HTML, JS and CSS returned HTTPS 200. **No paying customer, commercial acceptance, external audit, production integration or independent risk certification is evidenced.**
+
+Portfolio total: **17 independent public repositories plus 21 browser add-ons = 38 hosted demo entries**. Previous [37-page merged-main Chrome acceptance](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43611109408) is historical; the expanded 38-page acceptance and updated merged-main publication require independent evidence. Additional recurring cost R0; no trading/Commander/Cortex secrets or authority exposed.
+
 ## Fifteenth and sixteenth original public MVPs — 14 November 2026
 
 [Webhook Idempotency Lab](https://github.com/esheenj/webhook-idempotency-lab) simulates request-key scoped duplication, pending conflicts, completed response replay, payload mismatch, TTL expiry and missing keys. **30 original unit tests** passed and [GitHub Actions Pages CI succeeded](https://github.com/esheenj/webhook-idempotency-lab/actions/runs/43610012768). The first Pages run failed because the artifact was not visible, and the workflow was fixed before the successful deployment. No real webhook delivery, endpoint, payment or transactional guarantee exists.

@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 37 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 38 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -29,6 +29,7 @@ ENTRY_SITES = {
     "agent-skills-manifest-validator": "https://esheenj.github.io/agent-skills-manifest-validator/",
     "webhook-idempotency-lab": "https://esheenj.github.io/webhook-idempotency-lab/",
     "citation-provenance-inspector": "https://esheenj.github.io/citation-provenance-inspector/",
+    "integration-reliability-assessment": "https://esheenj.github.io/integration-reliability-assessment/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -211,6 +212,63 @@ def inspect_wave_16(driver: Driver, repo: str) -> None:
         driver.viewport(width,height)
         verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
                "LIVE_WAVE_16_RESPONSIVE_"+repo+"_"+str(width))
+
+
+def inspect_wave_17(driver: Driver, repo: str) -> None:
+    """Exercise the commercial entry point with real Chrome, never submit pilot leads."""
+    if repo != "integration-reliability-assessment":
+        return
+    for _ in range(50):
+        if driver.js("""
+            return document.querySelectorAll('.control-card').length === 8
+              && document.querySelector('#answered').textContent.startsWith('0 / 8')
+              && !!document.querySelector('#sample')
+              && !!document.querySelector('#generate');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_INTEGRATION_ASSESSMENT_MODULE_NOT_READY")
+
+    verify(driver.js("""
+        document.querySelector('#sample').click();
+        document.querySelector('#generate').click();
+        return !document.querySelector('#results').hidden
+          && document.querySelector('#risk').textContent==='44/100'
+          && document.querySelector('#coverage').textContent==='76%'
+          && document.querySelector('#gaps').textContent==='1'
+          && document.querySelector('#reviewCount').textContent==='5'
+          && document.querySelectorAll('#actions li').length===6
+          && document.querySelector('#reportStatus').textContent==='SELF-REPORTED ONLY'
+          && document.querySelector('#actions li').textContent.includes('Prevent duplicate effects')
+          && document.querySelector('a[href*="issues/new?template=pilot.yml"]')!==null;
+    """) is True, "LIVE_CUSTOMER_ASSESSMENT_SAMPLE_AND_PILOT_PATH")
+
+    verify(driver.js("""
+        document.querySelector('#clear').click();
+        const invalidated=document.querySelector('#results').hidden;
+        document.querySelector('#generate').click();
+        return invalidated
+          && !document.querySelector('#results').hidden
+          && document.querySelector('#risk').textContent==='—'
+          && document.querySelector('#coverage').textContent==='0%'
+          && document.querySelector('#reportStatus').textContent==='NEEDS MORE EVIDENCE'
+          && document.querySelectorAll('#actions li').length===8;
+    """) is True, "LIVE_ASSESSMENT_UNKNOWN_WITHHOLDS_RISK_INDEX")
+
+    verify(driver.js("""
+        document.querySelector('#sample').click();
+        document.querySelector('#generate').click();
+        const name=document.querySelector('#project');
+        name.value='Changed fictional integration';
+        name.dispatchEvent(new Event('input',{bubbles:true}));
+        return document.querySelector('#results').hidden;
+    """) is True, "LIVE_ASSESSMENT_EDIT_INVALIDATES_STALE_REPORT")
+
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+            "LIVE_CUSTOMER_ASSESSMENT_RESPONSIVE_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -856,9 +914,11 @@ def run() -> dict:
             open_static(driver, repo, url)
             inspect_new_agent_tools(driver, repo)
             inspect_wave_16(driver, repo)
+            inspect_wave_17(driver, repo)
             interactive_repos = {
                 "agent-invocation-replay-lab", "agent-skills-manifest-validator",
                 "webhook-idempotency-lab", "citation-provenance-inspector",
+                "integration-reliability-assessment",
             }
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope":
@@ -889,14 +949,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==37, "LIVE_GALLERY_EXPECTED_37_PAGES")
+        verify(len(checked)==38, "LIVE_GALLERY_EXPECTED_38_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 16 independent repository landing pages loaded, four newest repos exercised with positive/negative browser interactions, and 21 add-ons exercised in Chrome; not user-device acceptance",
+            "proof_type": "remote HTTPS: 17 independent repository pages loaded; latest five independent labs exercised with positive/negative browser interactions, 21 original add-ons exercised in Chrome; user-device and commercial acceptance unverified",
         }
     finally:
         driver.close()
