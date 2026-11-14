@@ -163,18 +163,20 @@ See the [cross-language validator pilot](docs/CROSS_LANGUAGE_VALIDATOR_PILOT.md)
 
 ### Rust CLI: Runner Preflight
 
-[Runner Preflight](experiments/runner_preflight/README.md) checks a **supplied**, synthetic CI runner inventory against declared job requirements. It reports deterministic READY, WARN or HOLD findings for OS, architecture, runner labels, disk/memory headroom, missing tools and Rust targets. It is an offline, read-only command—not a live runner inspection, installer or separate repository.
+[Runner Preflight](experiments/runner_preflight/README.md) is an offline, read-only Rust CLI that compares a **supplied** runner inventory to declared job requirements. It reports deterministic READY, WARN, and HOLD outcomes for OS/architecture, labels, disk/memory, tools, and Rust targets. It is not a live host inspector, installer, GitHub scheduling fix or standalone repository.
+
+**Download the versioned [Runner Preflight v0.1.0 Linux preview](https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.1.0):** [x86-64 executable](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/runner-preflight-linux-x86_64) · [ARM64 executable](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/runner-preflight-linux-aarch64) · [portable standalone source ZIP](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/runner-preflight-source.zip) · [SHA256SUMS](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/SHA256SUMS). Unlike short-lived Actions artifacts, these files are attached to the versioned GitHub Release.
+
+Build or test from source with Rust 1.100.0:
 
 ```sh
-cd experiments/runner_preflight/rust
+unzip runner-preflight-source.zip
+cd runner-preflight/rust
+cargo test --locked
 cargo run --locked -- inspect --input ../fixtures/ready-x64.json --format json
 ```
 
-**Tested Linux downloads:** [x86-64 build artifact](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988352/artifacts/14131604656) · [ARM64 build artifact](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988352/artifacts/14131988969). Each GitHub Actions artifact contains the Linux executable, SHA-256 checksum, clean standalone Rust source ZIP, its checksum, and build information. GitHub Actions artifacts are temporary (these runs expire **21 November 2026**); view the [source-export workflow](https://github.com/esheenj/compound-intelligence-starter/actions/workflows/runner-preflight-export.yml) for newer runs.
-
-The clean source ZIP is **byte-identical** across x64 and ARM64 on merged commit `67fdf118c71bb90baef6b40d9eb74b0365877169` (SHA-256 `d283fc6b465d06235b6fff611efb93fb6c0623f86fe1956b3044249fa79a39b4`). Its provenance contains exact source file digests and an independent GitHub CI workflow. The artifact is *not* a signed production release, a separately created repository, or evidence of live CI-host repair. Run only on a machine you authorize.
-
-[Standalone export / extracted-build verification](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988352) and [Rust x64/ARM64 plus dependency audit](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988310) passed on merged main; [existing Python and Chrome tests](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43641988318) also passed. Additional recurring infrastructure spend: R0.
+The release tag targets `22352ce23dea5d156395eb91b4527e3e1d1f4e89`. [Release CI](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43645628365) passed the extracted-source x86-64 and ARM64 build/tests, deterministic artifact provenance checks, RustSec/licence/source audit and publication. The source ZIP SHA-256 is `13f9f4528bb9d935c97865de7f0715feb35150aed3c98a6d4eb9e63ac66b5e7c` (check against the release's SHA256SUMS). These are **unsigned preview binaries** for Linux, not proof of verified live runner state or production suitability. No additional recurring infrastructure spend.
 
 ## New: offline public MVP wave planner
 
