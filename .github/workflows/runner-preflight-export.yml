@@ -1,0 +1,83 @@
+name: Runner Preflight standalone source export
+on:
+  pull_request:
+    paths:
+      - 'experiments/runner_preflight/**'
+      - 'scripts/export_runner_preflight.py'
+      - 'tests/test_runner_preflight_export.py'
+      - '.github/workflows/runner-preflight-export.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/runner_preflight/**'
+      - 'scripts/export_runner_preflight.py'
+      - 'tests/test_runner_preflight_export.py'
+      - '.github/workflows/runner-preflight-export.yml'
+permissions:
+  contents: read
+jobs:
+  clean-export:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate deterministic allowlisted export
+        run: python3 -m unittest tests.test_runner_preflight_export -v
+      - name: Produce public standalone source package
+        run: python3 scripts/export_runner_preflight.py --output dist/export --source-revision "$GITHUB_SHA"
+      - name: Verify archive digest and extract
+        run: |
+          cd dist/export
+          sha256sum --check runner-preflight-source.zip.sha256
+          mkdir -p ../extracted
+          unzip -q runner-preflight-source.zip -d ../extracted
+      - name: Validate the extracted standalone Rust project
+        working-directory: dist/extracted/runner-preflight/rust
+        run: |
+          rustc --version
+          cargo --version
+          uname -m
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --locked -- -D warnings
+          cargo test --locked
+          cargo build --release --locked
+      - name: Smoke test extracted CLI and exit codes
+        working-directory: dist/extracted/runner-preflight/rust
+        run: |
+          ./target/release/runner-preflight inspect --input ../fixtures/ready-x64.json --format json | grep -q '"status":"READY"'
+          set +e
+          ./target/release/runner-preflight inspect --input ../fixtures/warn-disk.json --format json > /tmp/rp-warning.json
+          warned=$?
+          ./target/release/runner-preflight inspect --input ../fixtures/hold-arch.json --format json > /tmp/rp-holding.json
+          held=$?
+          set -e
+          test "$warned" -eq 1
+          test "$held" -eq 2
+          grep -q '"status":"WARN"' /tmp/rp-warning.json
+          grep -q '"status":"HOLD"' /tmp/rp-holding.json
+      - name: Assemble binary and source build receipts
+        run: |
+          mkdir -p dist/publish
+          cp dist/export/runner-preflight-source.zip dist/publish/
+          cp dist/export/runner-preflight-source.zip.sha256 dist/publish/
+          cp dist/extracted/runner-preflight/rust/target/release/runner-preflight dist/publish/runner-preflight
+          (cd dist/publish && sha256sum runner-preflight > runner-preflight.sha256)
+          {
+            echo "Build source: $GITHUB_SHA"
+            echo "GitHub runner: $RUNNER_OS/$RUNNER_ARCH"
+            rustc --version
+            cargo --version
+          } > dist/publish/BUILD_INFO.txt
+      - name: Upload architecture-specific tested distribution
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-preflight-${{ matrix.runner }}-${{ github.run_id }}
+          path: dist/publish/
+          if-no-files-found: error
+          retention-days: 7
