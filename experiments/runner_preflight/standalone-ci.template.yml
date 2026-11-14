@@ -1,0 +1,58 @@
+name: Rust CLI qualification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  rust:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Record runner identity
+        run: |
+          rustc --version
+          cargo --version
+          uname -m
+      - name: Validate pinned source
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --locked -- -D warnings
+          cargo test --locked
+          cargo build --release --locked
+      - name: Verify READY, WARN and HOLD
+        run: |
+          ./target/release/runner-preflight inspect --input ../fixtures/ready-x64.json --format json | grep -q '"status":"READY"'
+          set +e
+          ./target/release/runner-preflight inspect --input ../fixtures/warn-disk.json --format json > /tmp/runner-warn.json
+          warned=$?
+          ./target/release/runner-preflight inspect --input ../fixtures/hold-arch.json --format json > /tmp/runner-hold.json
+          holding=$?
+          set -e
+          test "$warned" -eq 1
+          test "$holding" -eq 2
+          grep -q '"status":"WARN"' /tmp/runner-warn.json
+          grep -q '"status":"HOLD"' /tmp/runner-hold.json
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check advisories, licenses and sources
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25
+        with:
+          manifest-path: rust/Cargo.toml
+          arguments: --all-features
+          command: check
