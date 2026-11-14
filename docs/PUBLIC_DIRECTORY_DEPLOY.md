@@ -1,5 +1,11 @@
 # Public open-source MVP directory
 
+## Twenty-two-repository gallery — 14 November 2026
+
+New [Event Contract Evolution Lab](https://esheenj.github.io/event-contract-evolution-lab/) extends the customer-facing integration reliability toolkit with directional producer/consumer upgrade evidence. Unlike the existing MCP/function tool schema diff inspector, it compares **synthetic versioned event-message declarations**. Both independent implementations matched on 138 Rust/Node differential comparisons with eight passing Rust native tests and 78 Node/source tests; the standalone Pages release succeeded. This is not live schema-registry integration, full nested schema validation, browser-native Rust, paid audit or customer rollout evidence.
+
+Inventory **22 independently published public repos + 21 original hosted browser add-ons = 43 URLs**. Separate live 43/43 Chrome acceptance required; prior 42/42 proof is historical. No added recurring spend.
+
 ## Twenty-one-repository gallery — 14 November 2026
 
 The new [Event Replay Rust Parity Lab](https://esheenj.github.io/event-replay-rust-parity-lab/) joins the four customer-facing integration reliability tools as an advanced developer option: convert accepted synthetic delivery evidence into a byte-for-byte Rust/Node parity check. GitHub Actions independently built actual Rust and verified 134 differential cases with successful Pages release; Node reference tests total 65. It is a self-service browser exploration of JavaScript output, not browser Rust, real event ingestion, live customer verification or an automatically qualified production binary. Its public code shares no private infrastructure/trading authority.
