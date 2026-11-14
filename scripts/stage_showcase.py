@@ -44,6 +44,7 @@ REPOS = {
     "citation-provenance-inspector",
     "integration-reliability-assessment",
     "workflow-failure-test-builder",
+    "integration-delivery-trace-inspector",
     "design-system-foundations-oss",
     "mobile-first-flow-kit-oss",
     "data-table-interactions-oss",
@@ -110,7 +111,7 @@ def verify_catalog(data: bytes) -> dict:
     parser = SourceCatalog()
     parser.feed(html)
     parser.close()
-    if parser.script or parser.remote_assets or parser.articles != 18 or parser.main != 1 or parser.heading != 1:
+    if parser.script or parser.remote_assets or parser.articles != 19 or parser.main != 1 or parser.heading != 1:
         raise ValueError("INVALID_CATALOG_STRUCTURE")
     if "connect-src 'none'" not in html or "script-src 'none'" not in html:
         raise ValueError("CATALOG_CSP_REQUIRED")
@@ -134,11 +135,11 @@ def verify_catalog(data: bytes) -> dict:
          "https://esheenj.github.io/" + repo + "/")
         for repo in REPOS
     }
-    if {tuple(card) for card in parser.card_links} != expected_cards or len(parser.card_links) != 18:
+    if {tuple(card) for card in parser.card_links} != expected_cards or len(parser.card_links) != 19:
         raise ValueError("PUBLIC_CARD_LINK_MISMATCH")
     if "WCAG certified" in html or "commercially adopted" in html:
         raise ValueError("UNSUPPORTED_CATALOG_CLAIM")
-    return {"repoCount": 18, "githubDeployedUrlCount": 18,
+    return {"repoCount": 19, "githubDeployedUrlCount": 19,
             "independentBrowserVerified": False,
             "htmlSha256": hashlib.sha256(data).hexdigest()}
 

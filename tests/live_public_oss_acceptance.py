@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 39 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 40 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -31,6 +31,7 @@ ENTRY_SITES = {
     "citation-provenance-inspector": "https://esheenj.github.io/citation-provenance-inspector/",
     "integration-reliability-assessment": "https://esheenj.github.io/integration-reliability-assessment/",
     "workflow-failure-test-builder": "https://esheenj.github.io/workflow-failure-test-builder/",
+    "integration-delivery-trace-inspector": "https://esheenj.github.io/integration-delivery-trace-inspector/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -327,6 +328,68 @@ def inspect_wave_18(driver: Driver, repo: str) -> None:
         driver.viewport(width,height)
         verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
             "LIVE_WORKFLOW_FAILURE_RESPONSIVE_"+str(width))
+
+
+def inspect_wave_19(driver: Driver, repo: str) -> None:
+    """Run true hosted Chrome interactions against the synthetic trace tool."""
+    if repo != "integration-delivery-trace-inspector":
+        return
+    for _ in range(50):
+        if driver.js("""
+            return !!document.querySelector('#source')
+                && document.querySelector('#source').value.length>1000
+                && !!document.querySelector('#inspect');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_DELIVERY_TRACE_MODULE_NOT_READY")
+
+    verify(driver.js("""
+        document.querySelector('#inspect').click();
+        return !document.querySelector('#results').hidden
+            && document.querySelector('#events').textContent==='22'
+            && document.querySelector('#operations').textContent==='7'
+            && document.querySelector('#high').textContent==='2'
+            && document.querySelector('#reviews').textContent==='3'
+            && document.querySelector('#notes').textContent==='2'
+            && document.querySelectorAll('#operationRows tr').length===7
+            && document.querySelectorAll('#findings li.finding').length===7
+            && document.querySelector('#status').textContent==='HIGH-PRIORITY FLAGS'
+            && document.querySelector('#findings').textContent.includes('DUPLICATE_EFFECTS')
+            && document.querySelector('#findings').textContent.includes('COMMIT_NOT_ACKNOWLEDGED')
+            && document.querySelector('#resultNote').textContent.includes('No ingestion, live monitoring');
+    """) is True, "LIVE_DELIVERY_TRACE_SYNTHETIC_EVIDENCE")
+
+    verify(driver.js("""
+        const input=document.querySelector('#source');
+        const obj=JSON.parse(input.value);
+        obj.events[0].payload={customer:'do-not-ingest'};
+        input.value=JSON.stringify(obj);
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        const staleHidden=document.querySelector('#results').hidden;
+        document.querySelector('#inspect').click();
+        return staleHidden && document.querySelector('#results').hidden
+            && !document.querySelector('#inputError').hidden
+            && document.querySelector('#inputError').textContent.includes('Unexpected field event.payload');
+    """) is True, "LIVE_DELIVERY_TRACE_REJECT_PRIVATE_FIELDS")
+
+    verify(driver.js("""
+        document.querySelector('#restore').click();
+        const restored=document.querySelector('#source').value.length>1000
+            && document.querySelector('#inputError').hidden;
+        document.querySelector('#inspect').click();
+        const passed=!document.querySelector('#results').hidden &&
+            document.querySelector('#events').textContent==='22';
+        document.querySelector('#source').value='{}';
+        document.querySelector('#source').dispatchEvent(new Event('input',{bubbles:true}));
+        return restored && passed && document.querySelector('#results').hidden;
+    """) is True, "LIVE_DELIVERY_TRACE_RESTORE_AND_INVALIDATE")
+
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+            "LIVE_DELIVERY_TRACE_RESPONSIVE_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -974,11 +1037,13 @@ def run() -> dict:
             inspect_wave_16(driver, repo)
             inspect_wave_17(driver, repo)
             inspect_wave_18(driver, repo)
+            inspect_wave_19(driver, repo)
             interactive_repos = {
                 "agent-invocation-replay-lab", "agent-skills-manifest-validator",
                 "webhook-idempotency-lab", "citation-provenance-inspector",
                 "integration-reliability-assessment",
                 "workflow-failure-test-builder",
+                "integration-delivery-trace-inspector",
             }
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope":
@@ -1009,14 +1074,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==39, "LIVE_GALLERY_EXPECTED_39_PAGES")
+        verify(len(checked)==40, "LIVE_GALLERY_EXPECTED_40_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 18 independent repository pages loaded; latest six labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
+            "proof_type": "remote HTTPS: 19 independent repository pages loaded; latest seven labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
         }
     finally:
         driver.close()

@@ -1,5 +1,9 @@
 # Public open-source MVP directory
 
+## Nineteen-repository gallery — 14 November 2026
+
+New [Integration Delivery Trace Inspector](https://esheenj.github.io/integration-delivery-trace-inspector/) appears with the existing customer-facing [Integration Reliability Assessment](https://esheenj.github.io/integration-reliability-assessment/) and [Workflow Failure Test Builder](https://esheenj.github.io/workflow-failure-test-builder/) as a cohesive integration improvement toolkit: assess the control, inspect supplied evidence and design acceptance tests. The new independent source has 62 passing tests and successful Pages CI; its findings are not independently verified production incidents. The gallery inventory is 19 public repositories plus 21 hosted add-on tools = 40 demo pages. Live 40/40 Chrome acceptance is a separate release gate; previous 39/39 evidence cannot be reused for that claim.
+
 ## Eighteen-repository gallery — 14 November 2026
 
 The [Workflow Failure Test Builder](https://esheenj.github.io/workflow-failure-test-builder/) joins the customer-facing [Integration Reliability Assessment](https://esheenj.github.io/integration-reliability-assessment/) at the top of the directory. These complementary free tools let people find integration gaps and design reproducible tests before discussing a small engineering pilot. The new repository is independently published and tested; generated acceptance plans have no execution authority. The collection now lists 18 standalone repositories plus 21 hosted add-ons (39 demo pages). The previous 38/38 Chrome acceptance remains historical; a separate 39/39 result is required for this wave.
