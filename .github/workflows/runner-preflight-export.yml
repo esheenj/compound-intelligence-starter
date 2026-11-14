@@ -100,16 +100,12 @@ jobs:
           arguments: --all-features
           command: check
 
-  publish-preview:
+  package-preview:
     needs: [clean-export, dependency-audit]
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'esheenj/compound-intelligence-starter' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 12
-    concurrency:
-      group: runner-preflight-v0.1.0-release
-      cancel-in-progress: false
     permissions:
-      contents: write
+      contents: read
       actions: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -160,6 +156,41 @@ jobs:
             cat dist/download/aarch64/BUILD_INFO.txt
           } > dist/release/BUILD_INFO.txt
           ( cd dist/release && sha256sum --check SHA256SUMS )
+      - name: Upload validated versioned release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-preflight-release-candidate-${{ github.run_id }}
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-preview:
+    needs: [package-preview]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'esheenj/compound-intelligence-starter' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    concurrency:
+      group: runner-preflight-v0.1.0-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Download only the validated release-candidate artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: runner-preflight-release-candidate-${{ github.run_id }}
+          path: dist/release
+      - name: Verify checksum manifest before publishing
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          ( cd dist/release && sha256sum --check SHA256SUMS )
+          test -s dist/release/BUILD_INFO.txt
+          grep -F -- "$GITHUB_SHA" dist/release/BUILD_INFO.txt >/dev/null
       - name: Publish component-prefixed versioned preview without replacing the starter release
         env:
           GH_TOKEN: ${{ github.token }}
