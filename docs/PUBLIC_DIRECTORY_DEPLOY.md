@@ -1,5 +1,9 @@
 # Public open-source MVP directory
 
+## Seventeen-repository gallery — 14 November 2026
+
+Featured [Integration Reliability Assessment](https://esheenj.github.io/integration-reliability-assessment/) first in the portfolio to make the free customer-facing entry point clear. The new repo is independently published, tested (30 Node tests), deployed by GitHub Actions and offers a nonbinding pilot enquiry. The gallery inventory is 17 independently hosted repositories and the existing 21 add-on playgrounds, totaling 38. No payment checkout or customer adoption is represented. The last 37/37 Chrome run is historical; a new independent 38/38 acceptance is part of this release.
+
 ## Sixteen-repository gallery — 14 November 2026
 
 The original [Webhook Idempotency Lab](https://esheenj.github.io/webhook-idempotency-lab/) and [Citation Provenance Inspector](https://esheenj.github.io/citation-provenance-inspector/) are independently built and publicly hosted. Each has its own tests, CI release evidence, source code, fictional fixtures and browser playground. The gallery lists 16 standalone public repositories and the 21 previous add-ons, totaling 37 public entry pages. A source gate or the historical 35/35 live Chrome result does not substitute for a fresh 37-page acceptance.
