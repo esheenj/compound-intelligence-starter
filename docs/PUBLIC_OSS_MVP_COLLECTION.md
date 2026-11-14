@@ -1,5 +1,11 @@
 # Esheen Labs — public open-source MVP collection
 
+## Nineteenth public MVP — 14 November 2026
+
+**[Integration Delivery Trace Inspector](https://github.com/esheenj/integration-delivery-trace-inspector)** is an original no-backend, offline inspector for a strict synthetic integration lifecycle format. It distinguishes repeated receipt of the same delivery from multiple distinct recorded effect IDs, flags overdue acknowledgements, stale unresolved work, retry budget overruns, missing chain evidence and dead-letter follow-ups, with event-ID references and deterministic Markdown/JSON reports. The fictional example covers 22 events and seven operations. **62 source and unit tests passed**, with [independent GitHub Actions and Pages publication](https://github.com/esheenj/integration-delivery-trace-inspector/actions/runs/43630233731). No live webhook ingestion, real provider logs, sensitive payloads, operational remediation, customer audit or financial trading functionality is included.
+
+Portfolio target: **19 independently published public repositories + 21 hosted add-ons = 40 demo entries**. The [previous 39/39 merged-main Chrome acceptance](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43627826352) remains historical until the expanded 40/40 gate passes. Added recurring infrastructure spend R0; private control-plane and trading authority remain separate.
+
 ## Eighteenth public MVP — 14 November 2026
 
 **[Workflow Failure Test Builder](https://github.com/esheenj/workflow-failure-test-builder)** generates deterministic draft acceptance cases for recurring CRM, webhook, API and AI workflow failure patterns: duplicate requests, concurrency, post-commit timeouts, rate limits, persistent 5xx, contract drift, ordering, crashes, untrusted senders and missing AI evidence. Exports structured JSON, Markdown and Gherkin, using original source and illustrative fixtures. Local unit tests: **47 passing**. [Independent test and Pages CI](https://github.com/esheenj/workflow-failure-test-builder/actions/runs/43627376717) is the release authority. The tool generates a draft: **no real integration tests are executed** and provider-specific step definitions must be supplied by a developer. An optional nonbinding Sigma Code business-email or GitHub pilot enquiry enables customer conversations without exposing sensitive credentials.
