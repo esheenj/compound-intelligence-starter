@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 41 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 42 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -33,6 +33,7 @@ ENTRY_SITES = {
     "workflow-failure-test-builder": "https://esheenj.github.io/workflow-failure-test-builder/",
     "integration-delivery-trace-inspector": "https://esheenj.github.io/integration-delivery-trace-inspector/",
     "deterministic-replay-fixture-generator": "https://esheenj.github.io/deterministic-replay-fixture-generator/",
+    "event-replay-rust-parity-lab": "https://esheenj.github.io/event-replay-rust-parity-lab/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -487,6 +488,79 @@ def inspect_wave_20(driver: Driver, repo: str) -> None:
         driver.viewport(width,height)
         verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
             "LIVE_REPLAY_FIXTURE_RESPONSIVE_"+str(width))
+
+
+def inspect_wave_21(driver: Driver, repo: str) -> None:
+    """Only JavaScript executes in the browser; separate CI proves actual Rust parity."""
+    if repo != "event-replay-rust-parity-lab":
+        return
+    for _ in range(50):
+        if driver.js("""
+            return !!document.querySelector('#fixture')
+                && document.querySelector('#fixture').value.includes('event_id')
+                && document.querySelector('#presetBaseline')
+                && document.querySelector('#presetReordered')
+                && document.querySelector('#evaluate');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_RUST_NODE_LAB_MODULE_NOT_READY")
+
+    verify(driver.js("""
+        document.querySelector('#evaluate').click();
+        return !document.querySelector('#results').hidden
+            && document.querySelector('#numEvents').textContent==='10'
+            && document.querySelector('#numOperations').textContent==='3'
+            && document.querySelector('#multiEffects').textContent==='1'
+            && document.querySelector('#unacknowledged').textContent==='2'
+            && document.querySelector('#reordered').textContent==='0'
+            && document.querySelectorAll('#operations tr').length===3
+            && document.querySelector('#protocolOutput').textContent.includes('SUMMARY');
+    """) is True, "LIVE_RUST_NODE_BASELINE_REFERENCE")
+
+    verify(driver.js("""
+        document.querySelector('#presetOrdered').click();
+        const invalidated=document.querySelector('#results').hidden;
+        document.querySelector('#evaluate').click();
+        return invalidated && !document.querySelector('#results').hidden
+            && document.querySelector('#numEvents').textContent==='3'
+            && document.querySelector('#numOperations').textContent==='1'
+            && document.querySelector('#multiEffects').textContent==='0'
+            && document.querySelector('#unacknowledged').textContent==='0';
+    """) is True, "LIVE_RUST_NODE_ORDERED_REFERENCE")
+
+    verify(driver.js("""
+        document.querySelector('#presetReordered').click();
+        document.querySelector('#evaluate').click();
+        return !document.querySelector('#results').hidden
+            && document.querySelector('#numEvents').textContent==='4'
+            && document.querySelector('#numOperations').textContent==='1'
+            && document.querySelector('#reordered').textContent==='1'
+            && document.querySelector('#unacknowledged').textContent==='1';
+    """) is True, "LIVE_RUST_NODE_ORDERED_FAILURE_REFERENCE")
+
+    verify(driver.js("""
+        document.querySelector('#reset').click();
+        const area=document.querySelector('#fixture');
+        area.value=area.value.replace('event_id', 'source_private_event_id');
+        area.dispatchEvent(new Event('input',{bubbles:true}));
+        const invalidated=document.querySelector('#results').hidden;
+        document.querySelector('#evaluate').click();
+        return invalidated&&document.querySelector('#results').hidden
+            && !document.querySelector('#error').hidden
+            && document.querySelector('#error').textContent.includes('header must contain');
+    """) is True, "LIVE_RUST_NODE_REJECT_EXTRA_FIELDS")
+
+    verify(driver.js("""
+        return document.querySelector('.note').textContent.includes('not execute in this browser')
+            && document.querySelector('a[href*="test-pages.yml"]')!==null;
+    """) is True, "LIVE_RUST_NODE_BROWSER_RUST_BOUNDARY")
+
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+               "LIVE_RUST_NODE_RESPONSIVE_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -1136,6 +1210,7 @@ def run() -> dict:
             inspect_wave_18(driver, repo)
             inspect_wave_19(driver, repo)
             inspect_wave_20(driver, repo)
+            inspect_wave_21(driver, repo)
             interactive_repos = {
                 "agent-invocation-replay-lab", "agent-skills-manifest-validator",
                 "webhook-idempotency-lab", "citation-provenance-inspector",
@@ -1143,6 +1218,7 @@ def run() -> dict:
                 "workflow-failure-test-builder",
                 "integration-delivery-trace-inspector",
                 "deterministic-replay-fixture-generator",
+                "event-replay-rust-parity-lab",
             }
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope":
@@ -1173,14 +1249,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==41, "LIVE_GALLERY_EXPECTED_41_PAGES")
+        verify(len(checked)==42, "LIVE_GALLERY_EXPECTED_42_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 20 independent repository pages loaded; latest eight labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
+            "proof_type": "remote HTTPS: 21 independent repository pages loaded; latest nine labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
         }
     finally:
         driver.close()
