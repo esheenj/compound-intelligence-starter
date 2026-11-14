@@ -31,16 +31,11 @@ jobs:
           rustc --version
           cargo --version
           uname -m
-      - name: Generate candidate lockfile and validate code
+      - name: Validate committed locked source
         run: |
-          cargo generate-lockfile
-          cargo fmt --all
-          cargo clippy --all-targets -- -D warnings
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --locked -- -D warnings
           cargo test --locked
-      - name: Capture candidate lock and formatted source for source pinning
-        run: |
-          echo "RUNNER_PREFLIGHT_LOCK=$(base64 -w0 Cargo.lock)"
-          echo "RUNNER_PREFLIGHT_FORMATTED=$(base64 -w0 src/main.rs)"
       - name: Binary and deterministic smoke cases
         run: |
           cargo build --release --locked
