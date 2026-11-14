@@ -1,0 +1,53 @@
+name: Runner Preflight Rust qualification
+on:
+  pull_request:
+    paths:
+      - 'experiments/runner_preflight/**'
+      - '.github/workflows/runner-preflight-rust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/runner_preflight/**'
+      - '.github/workflows/runner-preflight-rust.yml'
+permissions:
+  contents: read
+jobs:
+  rust:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: experiments/runner_preflight/rust
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Rust version and runner identity
+        run: |
+          rustc --version
+          cargo --version
+          uname -m
+      - name: Generate candidate lockfile and validate code
+        run: |
+          cargo generate-lockfile
+          cargo fmt --all
+          cargo clippy --all-targets -- -D warnings
+          cargo test --locked
+      - name: Binary and deterministic smoke cases
+        run: |
+          cargo build --release --locked
+          ./target/release/runner-preflight inspect --input ../fixtures/ready-x64.json --format json | grep -q '"status":"READY"'
+          set +e
+          ./target/release/runner-preflight inspect --input ../fixtures/warn-disk.json --format json > /tmp/runner-preflight-warn.json
+          warning=$?
+          ./target/release/runner-preflight inspect --input ../fixtures/hold-arch.json --format json > /tmp/runner-preflight-hold.json
+          holding=$?
+          set -e
+          test "$warning" -eq 1
+          test "$holding" -eq 2
+          grep -q '"status":"WARN"' /tmp/runner-preflight-warn.json
+          grep -q '"status":"HOLD"' /tmp/runner-preflight-hold.json
