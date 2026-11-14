@@ -1,0 +1,30 @@
+{
+  "schema": "runner-preflight-input-v1",
+  "runner": {
+    "os": "linux",
+    "arch": "aarch64",
+    "labels": [
+      "ubuntu-24.04-arm"
+    ],
+    "disk_free_mb": 12000,
+    "memory_free_mb": 8000,
+    "tools": [
+      "cargo",
+      "rustc"
+    ],
+    "rust_targets": [
+      "aarch64-unknown-linux-gnu"
+    ]
+  },
+  "job": {
+    "os": "linux",
+    "arch": "x86_64",
+    "required_labels": [],
+    "min_disk_mb": 4000,
+    "min_memory_mb": 2000,
+    "required_tools": [
+      "cargo",
+      "rustc"
+    ]
+  }
+}
