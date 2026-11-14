@@ -1,5 +1,13 @@
 # Esheen Labs — public open-source MVP collection
 
+## Thirteenth and fourteenth original public MVPs — 14 November 2026
+
+**[Agent Invocation Replay Lab](https://github.com/esheenj/agent-invocation-replay-lab)** is an offline fictional agent event replay tool. It exposes held approvals, deduplicated requests, expiry, denial and hypothetical budget admissions. [26 deterministic unit and adversarial tests and GitHub Pages publication](https://github.com/esheenj/agent-invocation-replay-lab/actions/runs/43573045184) passed. The browser and CLI never run any real agent tools or grant authority.
+
+**[Agent Skills Manifest Inspector](https://github.com/esheenj/agent-skills-manifest-validator)** checks a simple YAML frontmatter subset of Agent Skills SKILL.md and flags nonstandard/complex YAML, incorrect names and suspicious instructions for human review. [31 deterministic tests and GitHub Pages publication](https://github.com/esheenj/agent-skills-manifest-validator/actions/runs/43573557344) passed. The authoritative upstream skills-ref validator and manual security review remain separate.
+
+Totals: **14 independent public repositories plus 21 hosted add-ons = 35 public demo pages**. Earlier 33-page live Chrome acceptance was performed on the previous collection and is not the same as 35/35 browser acceptance. No subscription, private Cortex/SIGMA source, trading authority or financial integration was published.
+
 ## Twelfth independently published repository — 13 November 2026
 
 [Agent Tool Schema Diff Lab](https://github.com/esheenj/agent-tool-schema-diff-lab) was built from original isolated source and published at [its GitHub Pages address](https://esheenj.github.io/agent-tool-schema-diff-lab/). It compares fictional or owner-supplied MCP/OpenAI/Anthropic-style tool JSON input contracts, flagging removed tools, newly required parameters, narrower types/enums and tightened schema bounds. The Node test suite passed **21/21**, built bundle passed, and [GitHub Actions tests and deployment](https://github.com/esheenj/agent-tool-schema-diff-lab/actions/runs/43472899489) both succeeded. Its HTML, app module, engine and CSS returned HTTP 200 from live HTTPS on 13 November. Semantic behavior and unsupported JSON Schema constructs still need human review. No model inference, credentials, private trading controls or recurring services are included.
