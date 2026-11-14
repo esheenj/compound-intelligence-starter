@@ -29,6 +29,7 @@ DISAGREEMENT_SOURCE = ROOT / "site" / "model-disagreement.html"
 DECISION_REVIEW_SOURCE = ROOT / "site" / "decision-review.html"
 AGENT_TRUST_SOURCE = ROOT / "site" / "agent-trust.html"
 SIGNED_AGENT_SOURCE = ROOT / "site" / "signed-agent.html"
+RUNNER_PREFLIGHT_SOURCE = ROOT / "site" / "runner-preflight.html"
 SUPPORT_CONFIG_SOURCE = ROOT / "support" / "channels.json"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
@@ -196,7 +197,7 @@ def stage_catalog(output: Path) -> dict:
             agentcredits.count(b"<script>") != 1 or b"<script src" in agentcredits or
             b"innerHTML" in agentcredits or b"XMLHttpRequest" in agentcredits or b"fetch(" in agentcredits):
         raise ValueError("AGENTCREDITS_SAFETY_CONTRACT")
-    for name, source in (("MODEL_COST", MODEL_COST_SOURCE), ("MODEL_FIT", MODEL_FIT_SOURCE), ("CONTEXT", CONTEXT_SOURCE), ("DISAGREEMENT", DISAGREEMENT_SOURCE), ("DECISION_REVIEW", DECISION_REVIEW_SOURCE), ("AGENT_TRUST", AGENT_TRUST_SOURCE), ("SIGNED_AGENT", SIGNED_AGENT_SOURCE)):
+    for name, source in (("MODEL_COST", MODEL_COST_SOURCE), ("MODEL_FIT", MODEL_FIT_SOURCE), ("CONTEXT", CONTEXT_SOURCE), ("DISAGREEMENT", DISAGREEMENT_SOURCE), ("DECISION_REVIEW", DECISION_REVIEW_SOURCE), ("AGENT_TRUST", AGENT_TRUST_SOURCE), ("SIGNED_AGENT", SIGNED_AGENT_SOURCE), ("RUNNER_PREFLIGHT", RUNNER_PREFLIGHT_SOURCE)):
         if source.is_symlink() or source.parent.is_symlink() or not source.is_file():
             raise ValueError(name + "_SOURCE_INVALID")
         page_bytes = source.read_bytes()
@@ -212,6 +213,7 @@ def stage_catalog(output: Path) -> dict:
     decision_review = DECISION_REVIEW_SOURCE.read_bytes()
     agent_trust = AGENT_TRUST_SOURCE.read_bytes()
     signed_agent = SIGNED_AGENT_SOURCE.read_bytes()
+    runner_preflight = RUNNER_PREFLIGHT_SOURCE.read_bytes()
     support = render_support(load_channels(SUPPORT_CONFIG_SOURCE))
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
@@ -231,9 +233,10 @@ def stage_catalog(output: Path) -> dict:
         (output / "decision-review.html").write_bytes(decision_review)
         (output / "agent-trust.html").write_bytes(agent_trust)
         (output / "signed-agent.html").write_bytes(signed_agent)
+        (output / "runner-preflight.html").write_bytes(runner_preflight)
         (output / "support.html").write_bytes(support)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -241,7 +244,7 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "signed-agent.html", "support.html"],
+        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"],
         "additionalHostedToolCount": 11,
         "supportPageSha256": hashlib.sha256(support).hexdigest(),
         "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
@@ -255,7 +258,8 @@ def stage_catalog(output: Path) -> dict:
         "modelDisagreementSha256": hashlib.sha256(disagreement).hexdigest(),
         "decisionReviewSha256": hashlib.sha256(decision_review).hexdigest(),
         "agentTrustSha256": hashlib.sha256(agent_trust).hexdigest(),
-        "signedAgentSha256": hashlib.sha256(signed_agent).hexdigest(), **summary
+        "signedAgentSha256": hashlib.sha256(signed_agent).hexdigest(),
+        "runnerPreflightSha256": hashlib.sha256(runner_preflight).hexdigest(), **summary
     }
 
 
