@@ -1,5 +1,9 @@
 # Public open-source MVP directory
 
+## Eighteen-repository gallery — 14 November 2026
+
+The [Workflow Failure Test Builder](https://esheenj.github.io/workflow-failure-test-builder/) joins the customer-facing [Integration Reliability Assessment](https://esheenj.github.io/integration-reliability-assessment/) at the top of the directory. These complementary free tools let people find integration gaps and design reproducible tests before discussing a small engineering pilot. The new repository is independently published and tested; generated acceptance plans have no execution authority. The collection now lists 18 standalone repositories plus 21 hosted add-ons (39 demo pages). The previous 38/38 Chrome acceptance remains historical; a separate 39/39 result is required for this wave.
+
 ## Seventeen-repository gallery — 14 November 2026
 
 Featured [Integration Reliability Assessment](https://esheenj.github.io/integration-reliability-assessment/) first in the portfolio to make the free customer-facing entry point clear. The new repo is independently published, tested (30 Node tests), deployed by GitHub Actions and offers a nonbinding pilot enquiry. The gallery inventory is 17 independently hosted repositories and the existing 21 add-on playgrounds, totaling 38. No payment checkout or customer adoption is represented. The last 37/37 Chrome run is historical; a new independent 38/38 acceptance is part of this release.

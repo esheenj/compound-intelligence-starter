@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 38 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 39 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -30,6 +30,7 @@ ENTRY_SITES = {
     "webhook-idempotency-lab": "https://esheenj.github.io/webhook-idempotency-lab/",
     "citation-provenance-inspector": "https://esheenj.github.io/citation-provenance-inspector/",
     "integration-reliability-assessment": "https://esheenj.github.io/integration-reliability-assessment/",
+    "workflow-failure-test-builder": "https://esheenj.github.io/workflow-failure-test-builder/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -269,6 +270,63 @@ def inspect_wave_17(driver: Driver, repo: str) -> None:
         driver.viewport(width,height)
         verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
             "LIVE_CUSTOMER_ASSESSMENT_RESPONSIVE_"+str(width))
+
+
+def inspect_wave_18(driver: Driver, repo: str) -> None:
+    """Exercise newly published synthetic test-plan generator without live integrations."""
+    if repo != "workflow-failure-test-builder":
+        return
+    for _ in range(50):
+        if driver.js("""
+            return document.querySelectorAll('.scenario').length===10
+                && document.querySelector('#selectedCount').textContent==='5 of 10 selected'
+                && !!document.querySelector('#generate');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_WORKFLOW_FAILURE_TEST_MODULE_NOT_READY")
+
+    verify(driver.js("""
+        document.querySelector('#generate').click();
+        return !document.querySelector('#result').hidden
+            && document.querySelector('#caseCount').textContent==='5'
+            && document.querySelector('#highCount').textContent==='5'
+            && document.querySelector('#checkCount').textContent==='15'
+            && document.querySelectorAll('#testCases li.test-case').length===5
+            && document.querySelector('#testCases').textContent.includes('Timeout after commit')
+            && document.querySelector('#notice').textContent.includes('No tests were executed')
+            && !!document.querySelector('a[href^="mailto:info@sigmacode.co.za"]');
+    """) is True, "LIVE_WORKFLOW_FAILURE_FIVE_CASE_PLAN")
+
+    verify(driver.js("""
+        for(const input of document.querySelectorAll('#scenarioGrid input[type=checkbox]')){
+            input.checked=false;
+            input.dispatchEvent(new Event('change',{bubbles:true}));
+        }
+        const staleCleared=document.querySelector('#result').hidden;
+        document.querySelector('#generate').click();
+        return staleCleared
+            && document.querySelector('#result').hidden
+            && !document.querySelector('#error').hidden
+            && document.querySelector('#error').textContent.includes('Select between');
+    """) is True, "LIVE_WORKFLOW_FAILURE_EMPTY_SELECTION_REJECTED")
+
+    verify(driver.js("""
+        document.querySelector('#restore').click();
+        document.querySelector('#generate').click();
+        const restored=!document.querySelector('#result').hidden &&
+            document.querySelector('#caseCount').textContent==='5';
+        const input=document.querySelector('#project');
+        input.value='Different fictional integration';
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        return restored&&document.querySelector('#result').hidden;
+    """) is True, "LIVE_WORKFLOW_FAILURE_RESTORE_AND_INVALIDATE")
+
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+            "LIVE_WORKFLOW_FAILURE_RESPONSIVE_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -915,10 +973,12 @@ def run() -> dict:
             inspect_new_agent_tools(driver, repo)
             inspect_wave_16(driver, repo)
             inspect_wave_17(driver, repo)
+            inspect_wave_18(driver, repo)
             interactive_repos = {
                 "agent-invocation-replay-lab", "agent-skills-manifest-validator",
                 "webhook-idempotency-lab", "citation-provenance-inspector",
                 "integration-reliability-assessment",
+                "workflow-failure-test-builder",
             }
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope":
@@ -949,14 +1009,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==38, "LIVE_GALLERY_EXPECTED_38_PAGES")
+        verify(len(checked)==39, "LIVE_GALLERY_EXPECTED_39_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 17 independent repository pages loaded; latest five independent labs exercised with positive/negative browser interactions, 21 original add-ons exercised in Chrome; user-device and commercial acceptance unverified",
+            "proof_type": "remote HTTPS: 18 independent repository pages loaded; latest six labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
         }
     finally:
         driver.close()
