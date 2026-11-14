@@ -1,5 +1,11 @@
 # Public open-source MVP directory
 
+## Twenty-repository gallery — 14 November 2026
+
+New [Deterministic Replay Fixture Generator](https://esheenj.github.io/deterministic-replay-fixture-generator/) is listed directly after the Integration Reliability Assessment, Workflow Failure Test Builder and Delivery Trace Inspector. Together they provide a real self-service workflow: assess a control, inspect synthetic evidence, draft acceptance criteria, and export runnable synthetic replay tests. The new product passed 66 original source and spawned-test checks and independently deployed to Pages. No real integration is connected or tested, and synthetic aliasing does not guarantee anonymization.
+
+Inventory: **20 standalone public repositories and 21 hosted browser add-ons = 41 demo entries**. The previous 40/40 independent Chrome result remains historical; 41/41 requires new acceptance. No added recurring spend.
+
 ## Nineteen-repository gallery — 14 November 2026
 
 New [Integration Delivery Trace Inspector](https://esheenj.github.io/integration-delivery-trace-inspector/) appears with the existing customer-facing [Integration Reliability Assessment](https://esheenj.github.io/integration-reliability-assessment/) and [Workflow Failure Test Builder](https://esheenj.github.io/workflow-failure-test-builder/) as a cohesive integration improvement toolkit: assess the control, inspect supplied evidence and design acceptance tests. The new independent source has 62 passing tests and successful Pages CI; its findings are not independently verified production incidents. The gallery inventory is 19 public repositories plus 21 hosted add-on tools = 40 demo pages. Live 40/40 Chrome acceptance is a separate release gate; previous 39/39 evidence cannot be reused for that claim.
