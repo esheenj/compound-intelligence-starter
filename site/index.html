@@ -118,11 +118,29 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 @media(max-width:760px){.top-inner{min-height:4.3rem}.nav{gap:.55rem}.nav a{font-size:.77rem}.hero{grid-template-columns:1fr;min-height:auto;padding-block:3.6rem}.hero-art{display:none}.cards{grid-template-columns:1fr}.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.steps ol{grid-template-columns:repeat(2,minmax(0,1fr))}.value-grid{grid-template-columns:1fr}}
 @media(max-width:460px){.wrap{width:min(100% - 1.35rem,76rem)}.brand{gap:.4rem;font-size:.83rem}.brand-icon{width:1.9rem;height:1.9rem}.nav a{font-size:.69rem}.nav a:last-child{display:none}h1{font-size:clamp(2.5rem,11vw,3.6rem)}.hero{padding-block:2.7rem}.stats{gap:1rem}.stat strong{font-size:1.5rem}.card-body{padding:1.1rem}.card-art{height:7rem}.catalog{padding:1.35rem .8rem;margin-top:2.6rem}.tool-grid{grid-template-columns:1fr}.steps ol{grid-template-columns:1fr}.links{gap:.65rem}.links a{font-size:.77rem}.links a.demo{padding:0 .7rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* SIGMA CODE UX Engineering collection: static, link-only; no new scripts or services. */
+.ux-offer{margin:3.25rem 0 0;padding:clamp(1.1rem,3.2vw,2.25rem);border:1px solid #7ec69743;border-radius:1.35rem;background:linear-gradient(135deg,#152920ee,#0a1712);box-shadow:0 22px 80px #00000018}
+.ux-offer .ux-intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.75fr);gap:1.8rem;align-items:end}
+.ux-offer .ux-intro p{color:var(--muted);max-width:70ch}
+.ux-offer .ux-intro .ux-note{border-left:2px solid var(--glow2);padding:.2rem 0 .2rem 1rem;font-size:.92rem}
+.ux-examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1.6rem 0}
+.ux-example{min-width:0;background:#ffffff08;border:1px solid #ffffff20;border-radius:1rem;padding:1.1rem;display:flex;flex-direction:column;gap:.55rem}
+.ux-example .ux-id{font-size:.75rem;color:var(--glow2);font-weight:750;letter-spacing:.055em;text-transform:uppercase}
+.ux-example h3{font-size:1.05rem;letter-spacing:-.02em;margin:.15rem 0}
+.ux-example p{font-size:.84rem;color:var(--muted);line-height:1.5;margin:0;flex:1}
+.ux-example a{color:var(--glow);font-size:.84rem;font-weight:700;text-underline-offset:.2em}
+.ux-enquiry{display:flex;gap:1.2rem;justify-content:space-between;align-items:center;flex-wrap:wrap;border-top:1px solid #ffffff28;padding-top:1.25rem}
+.ux-enquiry h3{font-size:1.35rem;margin:.2rem 0}
+.ux-enquiry p{color:var(--muted);max-width:68ch;margin:.45rem 0}
+.ux-enquiry strong{color:var(--ink)}
+@media(max-width:720px){.ux-offer .ux-intro{grid-template-columns:1fr}.ux-examples{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}}
+
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to public projects</a>
-<div class="topbar"><div class="wrap top-inner"><a class="brand" href="#main"><span class="brand-icon" aria-hidden="true">Σ</span><span>SIGMA <span style="color:var(--glow)">/ LABS</span><small>OPEN INTELLIGENCE</small></span></a><nav class="nav" aria-label="Primary navigation"><a href="#projects">Projects</a><a href="#additional-tools">Playgrounds</a><a href="#contribute">Contribute</a></nav></div></div>
+<div class="topbar"><div class="wrap top-inner"><a class="brand" href="#main"><span class="brand-icon" aria-hidden="true">Σ</span><span>SIGMA <span style="color:var(--glow)">/ LABS</span><small>OPEN INTELLIGENCE</small></span></a><nav class="nav" aria-label="Primary navigation"><a href="#projects">Projects</a><a href="#ux-engineering">UX Engineering</a><a href="#additional-tools">Playgrounds</a><a href="#contribute">Contribute</a></nav></div></div>
 <header class="wrap hero">
 <div class="hero-copy"><p class="kicker">Compound Intelligence Lab · Shared openly</p><h1>Useful ideas.<br><em>Working tools.</em></h1><p class="lead">Explore open-source experiments that help you question AI, design better journeys and build more dependable software. Start with a playground, inspect the source, make something your own.</p>
 <div class="buttonrow"><a class="linkchip primary" href="#projects">Explore projects ↗</a><a class="linkchip" href="#additional-tools">Try the playgrounds</a><a class="linkchip" href="#contribute">Build with us</a></div>
@@ -290,6 +308,29 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 <div class="links"><a class="source" href="https://github.com/esheenj/visual-regression-starter-oss">Source</a><a class="contribute" href="https://github.com/esheenj/visual-regression-starter-oss/issues">Contribute</a><a class="demo" href="https://esheenj.github.io/visual-regression-starter-oss/">Try demo</a></div></div></div>
 </article>
 </div>
+</section>
+
+<section id="ux-engineering" class="ux-offer" aria-labelledby="ux-engineering-heading">
+  <div class="ux-intro">
+    <div>
+      <p class="kicker">SIGMA CODE / UX Engineering</p>
+      <h2 id="ux-engineering-heading">Better journeys. More dependable interfaces.</h2>
+      <p>Complex forms, confusing data and fragile workflows cost teams time. Explore five free, original developer examples that show how to design understandable interactions, maintain predictable state and make interface decisions inspectable.</p>
+    </div>
+    <p class="ux-note"><strong>From open source to practical implementation.</strong> Each example is a standalone fictional demonstration, not an integrated application, paid product or audited customer outcome.</p>
+  </div>
+  <div class="ux-examples" aria-label="UX engineering examples">
+    <div class="ux-example"><span class="ux-id">01 / Forms</span><h3>Form Experience Patterns</h3><p>Try validation, back navigation and local draft recovery in a three-step fictional flow.</p><a href="https://esheenj.github.io/form-experience-kit-oss/">Try the form demo</a></div>
+    <div class="ux-example"><span class="ux-id">02 / Data</span><h3>Data Table Interaction Toolkit</h3><p>Explore filtering, stable sorting, pagination and CSV export on sample rows.</p><a href="https://esheenj.github.io/data-table-interactions-oss/">Try the table demo</a></div>
+    <div class="ux-example"><span class="ux-id">03 / State</span><h3>UI Workflow State Machine</h3><p>Inspect guarded decisions and replayable fictional workflow events.</p><a href="https://esheenj.github.io/flow-state-machine-oss/">Try the workflow demo</a></div>
+    <div class="ux-example"><span class="ux-id">04 / Design tokens</span><h3>Design System Foundations</h3><p>Adjust fictional themes, inspect CSS variables and explore numeric contrast.</p><a href="https://esheenj.github.io/design-system-foundations-oss/">Try the tokens demo</a></div>
+    <div class="ux-example"><span class="ux-id">05 / Mobile</span><h3>Mobile Journey Patterns</h3><p>Test responsive guided steps, feedback, focus and recovery in an offline example.</p><a href="https://esheenj.github.io/mobile-first-flow-kit-oss/">Try the mobile demo</a></div>
+  </div>
+  <div class="ux-enquiry">
+    <div><p class="kicker">A scoped Sigma Code engagement</p><h3>Turn a useful pattern into a working product experience.</h3>
+    <p>Potential work includes a UX friction review, interaction prototype or implementation handoff. Scope and pricing are agreed separately; no pilot places or results are guaranteed. For a private business brief, use <strong>info@sigmacode.co.za</strong>. Please do not post confidential customer data in public issues.</p></div>
+    <a class="linkchip" href="https://github.com/esheenj/compound-intelligence-starter/issues">Discuss public developer tooling</a>
+  </div>
 </section>
 <section id="additional-tools" class="catalog" aria-labelledby="tools-heading">
 <div class="section-heading"><div><p class="kicker">02 / Browser playgrounds</p><h2 id="tools-heading">21 more ways to experiment.</h2><p>No install needed for the hosted demos. Try a tool, inspect how it works and bring the lessons into your own projects. The 21 browser add-ons remain in the original seven repositories. Fifteen additional standalone projects now cover integration readiness, failure test design, delivery trace diagnostics, deterministic synthetic replay fixtures, Rust/Node event parity, versioned event-message compatibility, agent policy, prompt and dataset evaluation, retrieval quality, tool contracts, invocation replay, skill manifests, webhook idempotency and citation traceability.</p></div></div>
