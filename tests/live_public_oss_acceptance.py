@@ -500,12 +500,13 @@ def inspect_wave_21(driver: Driver, repo: str) -> None:
                 && document.querySelector('#fixture').value.includes('event-010')
                 && document.querySelector('#presetBaseline')
                 && document.querySelector('#presetReordered')
-                && document.querySelector('#evaluate');
+                && !!document.querySelector('#evaluate');
         """) is True:
             break
         time.sleep(0.2)
     else:
-        raise AssertionError("LIVE_RUST_NODE_LAB_MODULE_NOT_READY")
+        detail=driver.js("return {ready:document.readyState,fixtureLength:document.querySelector('#fixture')?.value.length??null,preset:!!document.querySelector('#presetBaseline'),button:!!document.querySelector('#evaluate')};")
+        raise AssertionError("LIVE_RUST_NODE_LAB_MODULE_NOT_READY "+repr(detail))
 
     verify(driver.js("""
         document.querySelector('#evaluate').click();
