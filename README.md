@@ -6,6 +6,18 @@
 
 **Product identity:** **Compound Intelligence Lab** is the public-facing family name for original offline-first AI and developer experiments. This source repository remains `compound-intelligence-starter` to preserve published GitHub Pages URLs, existing imports and contributor instructions. The wider portfolio operates under Sigma Code; this repository's source credits and MIT licensing remain intact. Individual demonstrations are not production agents, live model benchmarks or certified integration services.
 
+## Sigma Code UX Engineering collection
+
+Explore a new [UX Engineering collection](https://esheenj.github.io/compound-intelligence-starter/#ux-engineering) that presents five independent fictional, offline developer examples as one practical capability showcase:
+
+- [Form Experience Patterns](https://esheenj.github.io/form-experience-kit-oss/) — guided forms, error feedback and local draft recovery.
+- [Data Table Interaction Toolkit](https://esheenj.github.io/data-table-interactions-oss/) — filtering, stable sorting and CSV export.
+- [UI Workflow State Machine](https://esheenj.github.io/flow-state-machine-oss/) — guarded transitions and replayable synthetic journals.
+- [Design System Foundations](https://esheenj.github.io/design-system-foundations-oss/) — CSS token compilation and numeric contrast examples.
+- [Mobile Journey Patterns](https://esheenj.github.io/mobile-first-flow-kit-oss/) — responsive guidance, focus and recovery patterns.
+
+These demos are not integrated, deployed customer systems or completed accessibility audits. They provide public evidence of reusable UX engineering approaches. Sigma Code may separately scope UX reviews, prototypes or implementation work; no commercial transaction or pilot availability is claimed. Business briefs can be sent privately to `info@sigmacode.co.za`; use GitHub issues only for nonconfidential OSS feedback. The five existing GitHub Pages destinations, repository slugs and source interfaces stay unchanged.
+
 **Challenge assumptions. Verify outcomes. Reuse what works.**
 
 Turn an engineering problem into competing, falsifiable hypotheses and a reproducible test-first brief. Explore a small, offline reference implementation of evidence-backed AI experiments, durable memory and model comparisons.
