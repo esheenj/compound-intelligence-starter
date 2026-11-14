@@ -129,10 +129,10 @@ fn evaluate(input: &Inventory) -> Result<Report, &'static str> {
             add(&mut findings, "TOOL_MISSING", Status::Hold, "Required tool was not declared.");
         }
     }
-    if let Some(target) = &j.rust_target {
-        if !r.rust_targets.iter().any(|available| available == target) {
-            add(&mut findings, "RUST_TARGET_MISSING", Status::Hold, "Required Rust target was not declared.");
-        }
+    if let Some(target) = &j.rust_target
+        && !r.rust_targets.iter().any(|available| available == target)
+    {
+        add(&mut findings, "RUST_TARGET_MISSING", Status::Hold, "Required Rust target was not declared.");
     }
     let status = if findings.iter().any(|f| f.severity == Status::Hold) {
         Status::Hold
