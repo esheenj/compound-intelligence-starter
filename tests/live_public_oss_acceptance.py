@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 35 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 37 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -27,6 +27,8 @@ ENTRY_SITES = {
     "agent-tool-schema-diff-lab": "https://esheenj.github.io/agent-tool-schema-diff-lab/",
     "agent-invocation-replay-lab": "https://esheenj.github.io/agent-invocation-replay-lab/",
     "agent-skills-manifest-validator": "https://esheenj.github.io/agent-skills-manifest-validator/",
+    "webhook-idempotency-lab": "https://esheenj.github.io/webhook-idempotency-lab/",
+    "citation-provenance-inspector": "https://esheenj.github.io/citation-provenance-inspector/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -150,6 +152,65 @@ def inspect_new_agent_tools(driver: Driver, repo: str) -> None:
         driver.viewport(width,height)
         verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
                "LIVE_NEW_AGENT_TOOL_RESPONSIVE_"+repo+"_"+str(width))
+
+
+def inspect_wave_16(driver: Driver, repo: str) -> None:
+    """Actual live browser click and negative-input checks on the two newest tools."""
+    if repo not in {"webhook-idempotency-lab", "citation-provenance-inspector"}:
+        return
+    selector = "#source" if repo == "webhook-idempotency-lab" else "#scenario"
+    for _ in range(45):
+        if driver.js("""
+          const area=document.querySelector(arguments[0]);
+          return !!area && area.value.length>150;
+        """, [selector]) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_NEW_OSS_MODULE_NOT_READY_" + repo)
+    if repo == "webhook-idempotency-lab":
+        verify(driver.js("""
+          document.querySelector('#run').click();
+          return document.querySelector('#state').textContent==='SIMULATED ONLY'
+            && document.querySelector('#events').textContent==='7'
+            && document.querySelector('#admitted').textContent==='2'
+            && document.querySelector('#completed').textContent==='1'
+            && document.querySelector('#replayed').textContent==='1'
+            && document.querySelector('#held').textContent==='3'
+            && document.querySelectorAll('#decisions li').length===7
+            && !document.querySelector('#download').disabled;
+        """) is True, "LIVE_WEBHOOK_EXAMPLE_DECISIONS")
+        verify(driver.js("""
+          document.querySelector('#source').value='{"bogus":true}';
+          document.querySelector('#run').click();
+          return document.querySelector('#state').textContent==='INPUT ERROR'
+            && document.querySelector('#download').disabled
+            && document.querySelectorAll('#decisions li').length===0;
+        """) is True, "LIVE_WEBHOOK_INVALID_INPUT_REJECTED")
+    else:
+        verify(driver.js("""
+          document.querySelector('#inspect').click();
+          return document.querySelector('#status').textContent==='REVIEW REQUIRED'
+            && document.querySelector('#claimCount').textContent==='3'
+            && document.querySelector('#sourceCount').textContent==='3'
+            && document.querySelector('#errors').textContent==='0'
+            && Number(document.querySelector('#reviews').textContent)>=1
+            && document.querySelectorAll('#claims li').length===3
+            && !document.querySelector('#export').disabled;
+        """) is True, "LIVE_PROVENANCE_REVIEW_SAMPLE")
+        verify(driver.js("""
+          const data=JSON.parse(document.querySelector('#scenario').value);
+          data.claims[0].citations[0].sourceId='unknown';
+          document.querySelector('#scenario').value=JSON.stringify(data);
+          document.querySelector('#inspect').click();
+          return document.querySelector('#status').textContent==='INVALID REFERENCES'
+            && Number(document.querySelector('#errors').textContent)>0
+            && document.querySelector('#findings').textContent.includes('BROKEN_SOURCE_LINK');
+        """) is True, "LIVE_PROVENANCE_BROKEN_LINK_REJECTED")
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+               "LIVE_WAVE_16_RESPONSIVE_"+repo+"_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -794,11 +855,15 @@ def run() -> dict:
             print(json.dumps({"phase":"opening-home","id":repo,"url":url}), flush=True)
             open_static(driver, repo, url)
             inspect_new_agent_tools(driver, repo)
+            inspect_wave_16(driver, repo)
+            interactive_repos = {
+                "agent-invocation-replay-lab", "agent-skills-manifest-validator",
+                "webhook-idempotency-lab", "citation-provenance-inspector",
+            }
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope":
-                                "HTTPS interactive and responsive checks" if repo in {
-                                    "agent-invocation-replay-lab", "agent-skills-manifest-validator"
-                                } else "HTTPS load and semantic landmarks"})
+                                "HTTPS interactive and responsive checks" if repo in interactive_repos
+                                else "HTTPS load and semantic landmarks"})
         for kind, url in EARLY_URLS.items():
             print(json.dumps({"phase":"opening-early","id":kind,"url":url}), flush=True)
             open_static(driver, kind, url)
@@ -824,14 +889,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==35, "LIVE_GALLERY_EXPECTED_35_PAGES")
+        verify(len(checked)==37, "LIVE_GALLERY_EXPECTED_37_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 14 independent public repository landing pages loaded; 21 add-ons exercised in Chrome; newest tools have separate Node and release verification; not user-device acceptance",
+            "proof_type": "remote HTTPS: 16 independent repository landing pages loaded, four newest repos exercised with positive/negative browser interactions, and 21 add-ons exercised in Chrome; not user-device acceptance",
         }
     finally:
         driver.close()
