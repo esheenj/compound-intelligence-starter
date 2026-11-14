@@ -1,4 +1,4 @@
-"""Read-only LIVE HTTPS Chrome acceptance for 40 current public pages.
+"""Read-only LIVE HTTPS Chrome acceptance for 41 current public pages.
 
 Unlike loopback source/staging checks, this opens deployed GitHub Pages.
 Fixed allowlisted URLs; no secrets, auth, data uploads, CI mutations or
@@ -32,6 +32,7 @@ ENTRY_SITES = {
     "integration-reliability-assessment": "https://esheenj.github.io/integration-reliability-assessment/",
     "workflow-failure-test-builder": "https://esheenj.github.io/workflow-failure-test-builder/",
     "integration-delivery-trace-inspector": "https://esheenj.github.io/integration-delivery-trace-inspector/",
+    "deterministic-replay-fixture-generator": "https://esheenj.github.io/deterministic-replay-fixture-generator/",
 }
 EARLY_URLS = {
     "wave": "https://esheenj.github.io/compound-intelligence-starter/mvp-wave.html",
@@ -390,6 +391,102 @@ def inspect_wave_19(driver: Driver, repo: str) -> None:
         driver.viewport(width,height)
         verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
             "LIVE_DELIVERY_TRACE_RESPONSIVE_"+str(width))
+
+
+def inspect_wave_20(driver: Driver, repo: str) -> None:
+    """Exercise the real hosted deterministic replay generator, not an actual integration."""
+    if repo != "deterministic-replay-fixture-generator":
+        return
+    for _ in range(55):
+        if driver.js("""
+            return document.querySelector('#source')?.value.length>1000
+                && document.querySelectorAll('#mutation option').length===4
+                && !!globalThis.crypto?.subtle?.digest
+                && !!document.querySelector('#generate');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_REPLAY_FIXTURE_MODULE_NOT_READY")
+
+    driver.js("document.querySelector('#generate').click(); return true;")
+    for _ in range(55):
+        if driver.js("""
+            return !document.querySelector('#results').hidden
+                && document.querySelector('#inputCount').textContent==='22'
+                && document.querySelector('#outputCount').textContent==='22'
+                && document.querySelector('#operationCount').textContent==='7'
+                && document.querySelector('#effectCount').textContent==='1'
+                && document.querySelector('#ackCount').textContent==='1'
+                && document.querySelectorAll('#operations tr').length===7
+                && /^[0-9a-f]{64}$/.test(document.querySelector('#digest').textContent);
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_REPLAY_FIXTURE_BASELINE_GENERATION")
+
+    verify(driver.js("""
+        const m=document.querySelector('#mutation');
+        m.value='duplicate-receipt';m.dispatchEvent(new Event('change',{bubbles:true}));
+        const wasHidden=document.querySelector('#results').hidden;
+        document.querySelector('#generate').click();
+        return wasHidden;
+    """) is True, "LIVE_REPLAY_FIXTURE_SELECTION_INVALIDATES")
+    for _ in range(55):
+        if driver.js("""
+            return !document.querySelector('#results').hidden
+                && document.querySelector('#outputCount').textContent==='23'
+                && document.querySelector('#mutationResult').textContent.includes('Repeated delivery IDs: 2')
+                && document.querySelector('#status').textContent==='MUTATED REPLAY';
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_REPLAY_FIXTURE_REPEAT_MUTATION")
+
+    driver.js("""
+        const m=document.querySelector('#mutation');m.value='swap-time-order';
+        m.dispatchEvent(new Event('change',{bubbles:true}));
+        document.querySelector('#generate').click();return true;
+    """)
+    for _ in range(55):
+        if driver.js("""
+            return !document.querySelector('#results').hidden
+                && document.querySelector('#outputCount').textContent==='22'
+                && document.querySelector('#mutationResult').textContent.includes('out-of-order operations: 1');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_REPLAY_FIXTURE_ORDER_MUTATION")
+
+    verify(driver.js("""
+        document.querySelector('#restore').click();
+        const area=document.querySelector('#source');
+        const obj=JSON.parse(area.value);
+        obj.events[0].payload={secret:'forbidden'};
+        area.value=JSON.stringify(obj);
+        area.dispatchEvent(new Event('input',{bubbles:true}));
+        const hidden=document.querySelector('#results').hidden;
+        document.querySelector('#generate').click();
+        return hidden;
+    """) is True, "LIVE_REPLAY_FIXTURE_PRIVATE_FIELDS_INVALIDATE")
+    for _ in range(55):
+        if driver.js("""
+            return document.querySelector('#results').hidden
+                && !document.querySelector('#error').hidden
+                && document.querySelector('#error').textContent.includes('Unsupported event field payload');
+        """) is True:
+            break
+        time.sleep(0.2)
+    else:
+        raise AssertionError("LIVE_REPLAY_FIXTURE_REJECT_PRIVATE_FIELDS")
+
+    for width,height in ((320,720),(1440,900)):
+        driver.viewport(width,height)
+        verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+            "LIVE_REPLAY_FIXTURE_RESPONSIVE_"+str(width))
 
 
 def interact_early(driver: Driver, kind: str) -> None:
@@ -1038,12 +1135,14 @@ def run() -> dict:
             inspect_wave_17(driver, repo)
             inspect_wave_18(driver, repo)
             inspect_wave_19(driver, repo)
+            inspect_wave_20(driver, repo)
             interactive_repos = {
                 "agent-invocation-replay-lab", "agent-skills-manifest-validator",
                 "webhook-idempotency-lab", "citation-provenance-inspector",
                 "integration-reliability-assessment",
                 "workflow-failure-test-builder",
                 "integration-delivery-trace-inspector",
+                "deterministic-replay-fixture-generator",
             }
             checked.append({"kind": "repository-home", "repo": repo, "url": url,
                             "result": "PASS", "interaction_scope":
@@ -1074,14 +1173,14 @@ def run() -> dict:
             checked.append({"tool": kind, "url": URLS[kind], "result": "PASS",
                             "responsive_widths": [320, 1440],
                             "independent_https_interaction": True})
-        verify(len(checked)==40, "LIVE_GALLERY_EXPECTED_40_PAGES")
+        verify(len(checked)==41, "LIVE_GALLERY_EXPECTED_41_PAGES")
         return {
             "schema": "esheen-public-live-oss-acceptance-v1",
             "state": "PASS", "tested_at": "workflow-runtime",
             "browser": "Google Chrome", "browser_version": version,
             "pages_tested": len(checked), "checks": checked,
             "wcag_certified": False, "screen_reader_tested": False,
-            "proof_type": "remote HTTPS: 19 independent repository pages loaded; latest seven labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
+            "proof_type": "remote HTTPS: 20 independent repository pages loaded; latest eight labs exercised with positive/negative Chrome interactions, plus 21 original add-ons; actual customer adoption and integration execution unverified",
         }
     finally:
         driver.close()
