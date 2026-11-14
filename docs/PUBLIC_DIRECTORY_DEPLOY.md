@@ -1,5 +1,9 @@
 # Public open-source MVP directory
 
+## Sixteen-repository gallery — 14 November 2026
+
+The original [Webhook Idempotency Lab](https://esheenj.github.io/webhook-idempotency-lab/) and [Citation Provenance Inspector](https://esheenj.github.io/citation-provenance-inspector/) are independently built and publicly hosted. Each has its own tests, CI release evidence, source code, fictional fixtures and browser playground. The gallery lists 16 standalone public repositories and the 21 previous add-ons, totaling 37 public entry pages. A source gate or the historical 35/35 live Chrome result does not substitute for a fresh 37-page acceptance.
+
 ## Fourteen-repository gallery — 14 November 2026
 
 Added the independent [Agent Invocation Replay Lab](https://esheenj.github.io/agent-invocation-replay-lab/) and [Agent Skills Manifest Inspector](https://esheenj.github.io/agent-skills-manifest-validator/), retaining 21 existing hosted add-ons. The collection now contains 14 standalone repositories and 35 demos. Both new projects have separate original source and self-contained Node tests (26 and 31), Pages workflows and explicit no-execution disclaimers. Historic 33/33 live Chrome results are not claimed as a combined 35/35 acceptance; that requires the expanded live Chrome workflow.

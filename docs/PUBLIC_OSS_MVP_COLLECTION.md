@@ -1,5 +1,13 @@
 # Esheen Labs — public open-source MVP collection
 
+## Fifteenth and sixteenth original public MVPs — 14 November 2026
+
+[Webhook Idempotency Lab](https://github.com/esheenj/webhook-idempotency-lab) simulates request-key scoped duplication, pending conflicts, completed response replay, payload mismatch, TTL expiry and missing keys. **30 original unit tests** passed and [GitHub Actions Pages CI succeeded](https://github.com/esheenj/webhook-idempotency-lab/actions/runs/43610012768). The first Pages run failed because the artifact was not visible, and the workflow was fixed before the successful deployment. No real webhook delivery, endpoint, payment or transactional guarantee exists.
+
+[Citation Provenance Inspector](https://github.com/esheenj/citation-provenance-inspector) structurally audits locally supplied claims, citations, source URLs, publication/retrieval times and excerpt matches. **36 unit tests** passed and [GitHub Actions Pages CI succeeded](https://github.com/esheenj/citation-provenance-inspector/actions/runs/43610534721). The inspector never fetches source URLs, validates factual truth, or claims to implement W3C PROV-O.
+
+The new inventory is **16 independently published repositories plus 21 original browser add-ons, totaling 37 public demo entry pages**. Earlier 35-page Chrome acceptance is recorded separately; full 37-page browser interaction acceptance is required for this wave. Added recurring infrastructure cost remains R0. Trading/Commander/Cortex control-plane code and financial authority remain private.
+
 ## Thirteenth and fourteenth original public MVPs — 14 November 2026
 
 **[Agent Invocation Replay Lab](https://github.com/esheenj/agent-invocation-replay-lab)** is an offline fictional agent event replay tool. It exposes held approvals, deduplicated requests, expiry, denial and hypothetical budget admissions. [26 deterministic unit and adversarial tests and GitHub Pages publication](https://github.com/esheenj/agent-invocation-replay-lab/actions/runs/43573045184) passed. The browser and CLI never run any real agent tools or grant authority.
