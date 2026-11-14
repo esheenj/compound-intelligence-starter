@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Try Runner Preflight READY, WARN and HOLD diagnostics on synthetic CI inventories. Offline browser reference for an original Rust CLI.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Runner Preflight Playground · Compound Intelligence Lab</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;--bg:#08110d;--surface:#101f18;--surface2:#172920;--line:#30473a;--text:#f3fff1;--muted:#adbfaf;--lime:#b3f58d;--mint:#79dfae}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 85% 0,#1d573338,transparent 45%),var(--bg);color:var(--text)}
+a{color:var(--lime);text-underline-offset:3px;overflow-wrap:anywhere}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.skip{position:absolute;top:-7rem;left:1rem;z-index:5;background:var(--lime);color:#102119;padding:.65rem 1rem;border-radius:.55rem}.skip:focus{top:.5rem}
+main{max-width:76rem;margin:auto;padding:clamp(1rem,4vw,3rem)}
+header{padding:1.2rem 0 2rem;border-bottom:1px solid var(--line)}
+.meta{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--mint)}
+h1{font-size:clamp(2.1rem,5vw,4rem);letter-spacing:-.055em;line-height:1.06;margin:.65rem 0 1rem}
+h2{font-size:1.25rem;letter-spacing:-.02em;margin:0 0 .7rem}h3{font-size:1rem}
+.lead{color:var(--muted);max-width:65ch;font-size:1.05rem}.quiet{color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:1.2rem;margin-top:1.4rem}
+.panel{min-width:0;border:1px solid var(--line);border-radius:1.1rem;background:linear-gradient(180deg,var(--surface),#0d1a14);padding:clamp(1rem,2.6vw,1.5rem)}
+button{min-height:44px;border:1px solid #b7fba1a8;border-radius:.65rem;background:var(--lime);color:#0b2015;padding:.65rem .9rem;font:inherit;font-weight:800;cursor:pointer}
+button.secondary{background:transparent;color:var(--lime)}
+button:hover{filter:brightness(1.09)}.buttons{display:flex;flex-wrap:wrap;gap:.55rem;margin:.8rem 0 1rem}
+textarea{display:block;width:100%;min-height:23rem;border-radius:.8rem;padding:1rem;background:#09130f;border:1px solid #486452;color:#d9f6db;font:12px/1.58 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
+label{display:block;font-weight:750;margin:0 0 .4rem}
+.badge{display:inline-block;padding:.33rem .72rem;border:1px solid #6b996e;border-radius:999px;background:#122a18;font-weight:900;letter-spacing:.06em}
+.badge[data-state="WARN"]{background:#3a2b13;border-color:#bca65a;color:#f6db84}
+.badge[data-state="HOLD"]{background:#3c2020;border-color:#e39a93;color:#ffb3a5}
+.badge[data-state="INVALID"]{background:#352432;border-color:#bd9aa6;color:#eed5e3}
+.response{white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2;min-height:10rem;max-height:26rem;overflow:auto;background:#08120d;color:#d9f6db;border:1px solid var(--line);border-radius:.8rem;padding:1rem;font:12px/1.58 ui-monospace,SFMono-Regular,Consolas,monospace}
+.findings{padding-left:1.2rem;min-height:3rem}.findings li{padding:.3rem 0;overflow-wrap:anywhere}
+.note{border-left:3px solid var(--mint);padding:.5rem 1rem;background:#79dfae0b;margin-top:1rem}
+.footer{margin-top:1.4rem;padding-block:1.5rem;border-top:1px solid var(--line);color:var(--muted)}
+small{color:var(--muted)}.row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+@media (max-width:740px){.layout{grid-template-columns:1fr}textarea{min-height:19rem}}
+@media (prefers-reduced-motion:no-preference){button{transition:filter .12s ease}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to playground</a>
+<main id="main">
+<header>
+<p><a href="./">← Compound Intelligence Lab</a></p>
+<p class="meta">DEVELOPER TOOLS / RUST / OFFLINE REFERENCE</p>
+<h1>Know why a CI runner <span style="color:var(--lime)">can't take a job.</span></h1>
+<p class="lead">Test a runner inventory against job requirements and get a deterministic <strong>READY</strong>, <strong>WARN</strong>, or <strong>HOLD</strong> with explicit reason codes. This browser reference demonstrates the same input contract as the Rust CLI, without inspecting your device.</p>
+<div class="buttons"><a href="https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.1.0">Get the tested Rust CLI</a><a href="https://github.com/esheenj/compound-intelligence-starter/tree/main/experiments/runner_preflight">Read source &amp; fixtures</a></div>
+</header>
+<div class="layout">
+<section class="panel" aria-labelledby="input-title">
+<h2 id="input-title">01 / Pick a scenario or edit JSON</h2>
+<p class="quiet">All examples are fictional. No server, GitHub API, live host or private inventory is queried.</p>
+<div class="buttons">
+<button id="ready" type="button" class="secondary">Ready</button>
+<button id="warn" type="button" class="secondary">Low disk</button>
+<button id="hold" type="button" class="secondary">Wrong architecture</button>
+<button id="evaluate" type="button">Evaluate inventory</button>
+</div>
+<label for="inventory">Versioned runner/job JSON, up to 64 KiB</label>
+<textarea id="inventory" spellcheck="false" aria-describedby="privacy"></textarea>
+<p id="privacy"><small>Use only synthetic or explicitly sanitized input. Do not paste credentials, production inventories, private files, personal information or proprietary data. Inputs are never transmitted by this page.</small></p>
+</section>
+<section class="panel" aria-labelledby="output-title">
+<div class="row"><h2 id="output-title">02 / Evidence before execution</h2><strong class="badge" id="status" role="status" aria-live="polite" data-state="READY">READY</strong></div>
+<p id="summary" aria-live="polite">Comparing the supplied inventory only.</p>
+<h3>Reason codes</h3>
+<ul id="findings" class="findings"></ul>
+<h3>Machine-readable output</h3>
+<pre id="response" class="response" aria-label="JSON result"></pre>
+<div class="note">
+<strong>What this proves:</strong> Only that the declared runner and job values match the rules. A READY report is <em>not</em> proof of GitHub scheduling, authenticated runner labels, installed tool versions or production health.
+</div>
+</section>
+</div>
+<section class="panel" aria-labelledby="how-title" style="margin-top:1.2rem">
+<h2 id="how-title">03 / Move from this worksheet to the Rust binary</h2>
+<p>The released <a href="https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.1.0">Runner Preflight v0.1.0 preview</a> accepts <code>inspect --input FILE --format json</code>. Exit codes are <strong>0 READY</strong>, <strong>1 WARN</strong>, <strong>2 HOLD</strong>, and <strong>3 invalid input</strong>. Linux x86-64 and ARM64 binaries were compiled and tested from the extracted standalone source on GitHub Actions.</p>
+<p class="quiet">This page is a separate JavaScript reference implementation, not Rust compiled to WebAssembly. The three example scenarios and errors are checked for parity in project CI. It does not have control-plane, Oracle, trading or AI agent permissions.</p>
+</section>
+<div class="footer"><p>Esheen Labs · Compound Intelligence Lab · Original synthetic developer tool · No network requests or persistent storage · Additional recurring infrastructure spend R0</p></div>
+</main>
+<script>
+"use strict";
+const MAX_BYTES=65536;
+const SAMPLE={
+  schema:"runner-preflight-input-v1",
+  runner:{os:"linux",arch:"x86_64",labels:["ubuntu-24.04"],disk_free_mb:12000,memory_free_mb:8000,tools:["cargo","rustc","git"],rust_targets:["x86_64-unknown-linux-gnu"]},
+  job:{os:"linux",arch:"x86_64",required_labels:["ubuntu-24.04"],min_disk_mb:4000,min_memory_mb:2000,required_tools:["cargo","rustc"],rust_target:"x86_64-unknown-linux-gnu"}
+};
+const RULES={
+  OS_MISMATCH:"Runner operating system differs from job.",
+  ARCH_MISMATCH:"Runner architecture differs from job.",
+  LABEL_MISSING:"Required label is absent.",
+  DISK_INSUFFICIENT:"Free disk below requirement.",
+  DISK_HEADROOM_LOW:"Free disk headroom below 25%.",
+  MEMORY_INSUFFICIENT:"Free memory below requirement.",
+  MEMORY_HEADROOM_LOW:"Free memory headroom below 25%.",
+  TOOL_MISSING:"Required tool was not declared.",
+  RUST_TARGET_MISSING:"Required Rust target was not declared."
+};
+function reject(message){throw Error(message)}
+function exact(value,required,optional=[]){
+  if(value===null||typeof value!=="object"||Array.isArray(value))reject("Invalid input object");
+  for(const key of Object.keys(value))if(!required.includes(key)&&!optional.includes(key))reject("Unknown input field");
+  for(const key of required)if(!Object.hasOwn(value,key))reject("Missing required input field");
+}
+function token(value){
+  return typeof value==="string"&&/^[a-zA-Z0-9_.+\/-]{1,64}$/.test(value);
+}
+function list(value){
+  return value===undefined?[]:Array.isArray(value)&&value.length<=64&&value.every(token)?value:reject("Invalid or oversized inventory value");
+}
+function resource(value){
+  return Number.isInteger(value)&&value>=0&&value<=1000000?value:reject("Resource quantity out of range");
+}
+function validate(m){
+  exact(m,["schema","runner","job"]);
+  if(m.schema!=="runner-preflight-input-v1")reject("Unsupported schema");
+  const r=m.runner,j=m.job;
+  exact(r,["os","arch","disk_free_mb","memory_free_mb"],["labels","tools","rust_targets"]);
+  exact(j,["os","arch","min_disk_mb","min_memory_mb"],["required_labels","required_tools","rust_target"]);
+  const os=["linux","macos","windows"], arch=["x86_64","aarch64"];
+  if(!os.includes(r.os)||!os.includes(j.os)||!arch.includes(r.arch)||!arch.includes(j.arch))reject("Unknown OS or architecture");
+  for(const field of ["disk_free_mb","memory_free_mb"])resource(r[field]);
+  for(const field of ["min_disk_mb","min_memory_mb"])resource(j[field]);
+  for(const key of ["labels","tools","rust_targets"])list(r[key]);
+  for(const key of ["required_labels","required_tools"])list(j[key]);
+  if(j.rust_target!==undefined&&j.rust_target!==null&&!token(j.rust_target))reject("Invalid or oversized inventory value");
+}
+function evaluate(m){
+  validate(m);
+  const r=m.runner,j=m.job,findings=[];
+  function add(code,severity){findings.push({code,severity,message:RULES[code]})}
+  if(r.os!==j.os)add("OS_MISMATCH","HOLD");
+  if(r.arch!==j.arch)add("ARCH_MISMATCH","HOLD");
+  for(const label of [...new Set(list(j.required_labels))].sort())if(!list(r.labels).includes(label))add("LABEL_MISSING","HOLD");
+  if(r.disk_free_mb<j.min_disk_mb)add("DISK_INSUFFICIENT","HOLD");
+  else if(j.min_disk_mb>0&&r.disk_free_mb<j.min_disk_mb*5/4)add("DISK_HEADROOM_LOW","WARN");
+  if(r.memory_free_mb<j.min_memory_mb)add("MEMORY_INSUFFICIENT","HOLD");
+  else if(j.min_memory_mb>0&&r.memory_free_mb<j.min_memory_mb*5/4)add("MEMORY_HEADROOM_LOW","WARN");
+  for(const tool of [...new Set(list(j.required_tools))].sort())if(!list(r.tools).includes(tool))add("TOOL_MISSING","HOLD");
+  if(j.rust_target!==undefined&&j.rust_target!==null&&!list(r.rust_targets).includes(j.rust_target))add("RUST_TARGET_MISSING","HOLD");
+  return {schema:"runner-preflight-result-v1",status:findings.some(f=>f.severity==="HOLD")?"HOLD":findings.length?"WARN":"READY",findings};
+}
+function parseInput(raw){
+  if(new TextEncoder().encode(raw).length>MAX_BYTES)reject("Input exceeds 64 KiB");
+  let value;try{value=JSON.parse(raw)}catch{reject("Invalid input JSON")}
+  return value;
+}
+function scenario(name){
+  const m=JSON.parse(JSON.stringify(SAMPLE));
+  if(name==="warn")m.runner.disk_free_mb=4800;
+  if(name==="hold")m.runner.arch="aarch64";
+  return m;
+}
+if(typeof document!=="undefined"){
+  const input=document.getElementById("inventory"),status=document.getElementById("status");
+  const summary=document.getElementById("summary"),output=document.getElementById("response"),findings=document.getElementById("findings");
+  function render(){
+    try{
+      const report=evaluate(parseInput(input.value));
+      status.textContent=report.status;status.dataset.state=report.status;
+      summary.textContent=report.status==="READY"?"All declared requirements match; live readiness is not verified.":report.status==="WARN"?"Declared requirements match, but resource headroom is low.":"One or more declared job requirements are missing.";
+      findings.replaceChildren();
+      for(const item of report.findings){
+        const li=document.createElement("li");li.textContent=item.code+" — "+item.message;findings.append(li);
+      }
+      if(!report.findings.length){const li=document.createElement("li");li.textContent="No declared mismatches.";findings.append(li)}
+      output.textContent=JSON.stringify(report,null,2);
+    }catch{
+      status.textContent="INVALID";status.dataset.state="INVALID";
+      summary.textContent="Input rejected. Check JSON structure, version, bounded values and unknown fields.";
+      findings.replaceChildren();
+      output.textContent=JSON.stringify({schema:"runner-preflight-result-v1",status:"INVALID",message:"Invalid or oversized inventory input"},null,2);
+    }
+  }
+  document.getElementById("evaluate").addEventListener("click",render);
+  for(const name of ["ready","warn","hold"])document.getElementById(name).addEventListener("click",()=>{
+    input.value=JSON.stringify(scenario(name),null,2);render();
+  });
+  input.value=JSON.stringify(scenario("ready"),null,2);
+  render();
+}
+</script>
+</body>
+</html>
