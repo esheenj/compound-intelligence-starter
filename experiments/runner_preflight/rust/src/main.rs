@@ -48,7 +48,11 @@ struct Job {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-enum Status { Ready, Warn, Hold }
+enum Status {
+    Ready,
+    Warn,
+    Hold,
+}
 
 #[derive(Debug, Serialize)]
 struct Finding {
@@ -63,37 +67,54 @@ struct Report {
     findings: Vec<Finding>,
 }
 fn token_ok(v: &str) -> bool {
-    !v.is_empty() && v.len() <= 64
-        && v.bytes().all(|b| b.is_ascii_alphanumeric()
-            || matches!(b, b'-' | b'_' | b'.' | b'+' | b'/'))
+    !v.is_empty()
+        && v.len() <= 64
+        && v.bytes()
+            .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'-' | b'_' | b'.' | b'+' | b'/'))
 }
 fn list_ok(values: &[String]) -> bool {
     values.len() <= 64 && values.iter().all(|v| token_ok(v))
 }
 fn platform_ok(os: &str, arch: &str) -> bool {
-    matches!(os, "linux" | "macos" | "windows")
-        && matches!(arch, "x86_64" | "aarch64")
+    matches!(os, "linux" | "macos" | "windows") && matches!(arch, "x86_64" | "aarch64")
 }
 fn validate(input: &Inventory) -> Result<(), &'static str> {
-    if input.schema != IN_SCHEMA { return Err("Unsupported schema"); }
+    if input.schema != IN_SCHEMA {
+        return Err("Unsupported schema");
+    }
     let r = &input.runner;
     let j = &input.job;
     if !platform_ok(&r.os, &r.arch) || !platform_ok(&j.os, &j.arch) {
         return Err("Unknown OS or architecture");
     }
-    if !list_ok(&r.labels) || !list_ok(&r.tools) || !list_ok(&r.rust_targets)
-        || !list_ok(&j.required_labels) || !list_ok(&j.required_tools)
-        || !j.rust_target.as_deref().is_none_or(token_ok) {
+    if !list_ok(&r.labels)
+        || !list_ok(&r.tools)
+        || !list_ok(&r.rust_targets)
+        || !list_ok(&j.required_labels)
+        || !list_ok(&j.required_tools)
+        || !j.rust_target.as_deref().is_none_or(token_ok)
+    {
         return Err("Invalid or oversized inventory value");
     }
-    if [r.disk_free_mb, r.memory_free_mb, j.min_disk_mb, j.min_memory_mb]
-        .iter().any(|&value| value > 1_000_000) {
+    if [
+        r.disk_free_mb,
+        r.memory_free_mb,
+        j.min_disk_mb,
+        j.min_memory_mb,
+    ]
+    .iter()
+    .any(|&value| value > 1_000_000)
+    {
         return Err("Resource quantity out of range");
     }
     Ok(())
 }
 fn add(findings: &mut Vec<Finding>, code: &'static str, severity: Status, message: &'static str) {
-    findings.push(Finding { code, severity, message });
+    findings.push(Finding {
+        code,
+        severity,
+        message,
+    });
 }
 fn evaluate(input: &Inventory) -> Result<Report, &'static str> {
     validate(input)?;
@@ -101,38 +122,88 @@ fn evaluate(input: &Inventory) -> Result<Report, &'static str> {
     let j = &input.job;
     let mut findings = Vec::new();
     if r.os != j.os {
-        add(&mut findings, "OS_MISMATCH", Status::Hold, "Runner operating system differs from job.");
+        add(
+            &mut findings,
+            "OS_MISMATCH",
+            Status::Hold,
+            "Runner operating system differs from job.",
+        );
     }
     if r.arch != j.arch {
-        add(&mut findings, "ARCH_MISMATCH", Status::Hold, "Runner architecture differs from job.");
+        add(
+            &mut findings,
+            "ARCH_MISMATCH",
+            Status::Hold,
+            "Runner architecture differs from job.",
+        );
     }
     let labels: BTreeSet<&str> = r.labels.iter().map(String::as_str).collect();
     let required: BTreeSet<&str> = j.required_labels.iter().map(String::as_str).collect();
     for label in required {
         if !labels.contains(label) {
-            add(&mut findings, "LABEL_MISSING", Status::Hold, "Required label is absent.");
+            add(
+                &mut findings,
+                "LABEL_MISSING",
+                Status::Hold,
+                "Required label is absent.",
+            );
         }
     }
     if r.disk_free_mb < j.min_disk_mb {
-        add(&mut findings, "DISK_INSUFFICIENT", Status::Hold, "Free disk below requirement.");
+        add(
+            &mut findings,
+            "DISK_INSUFFICIENT",
+            Status::Hold,
+            "Free disk below requirement.",
+        );
     } else if j.min_disk_mb > 0 && r.disk_free_mb < j.min_disk_mb * 5 / 4 {
-        add(&mut findings, "DISK_HEADROOM_LOW", Status::Warn, "Free disk headroom below 25%.");
+        add(
+            &mut findings,
+            "DISK_HEADROOM_LOW",
+            Status::Warn,
+            "Free disk headroom below 25%.",
+        );
     }
     if r.memory_free_mb < j.min_memory_mb {
-        add(&mut findings, "MEMORY_INSUFFICIENT", Status::Hold, "Free memory below requirement.");
+        add(
+            &mut findings,
+            "MEMORY_INSUFFICIENT",
+            Status::Hold,
+            "Free memory below requirement.",
+        );
     } else if j.min_memory_mb > 0 && r.memory_free_mb < j.min_memory_mb * 5 / 4 {
-        add(&mut findings, "MEMORY_HEADROOM_LOW", Status::Warn, "Free memory headroom below 25%.");
+        add(
+            &mut findings,
+            "MEMORY_HEADROOM_LOW",
+            Status::Warn,
+            "Free memory headroom below 25%.",
+        );
     }
     let tools: BTreeSet<&str> = r.tools.iter().map(String::as_str).collect();
-    for tool in j.required_tools.iter().map(String::as_str).collect::<BTreeSet<_>>() {
+    for tool in j
+        .required_tools
+        .iter()
+        .map(String::as_str)
+        .collect::<BTreeSet<_>>()
+    {
         if !tools.contains(tool) {
-            add(&mut findings, "TOOL_MISSING", Status::Hold, "Required tool was not declared.");
+            add(
+                &mut findings,
+                "TOOL_MISSING",
+                Status::Hold,
+                "Required tool was not declared.",
+            );
         }
     }
     if let Some(target) = &j.rust_target
         && !r.rust_targets.iter().any(|available| available == target)
     {
-        add(&mut findings, "RUST_TARGET_MISSING", Status::Hold, "Required Rust target was not declared.");
+        add(
+            &mut findings,
+            "RUST_TARGET_MISSING",
+            Status::Hold,
+            "Required Rust target was not declared.",
+        );
     }
     let status = if findings.iter().any(|f| f.severity == Status::Hold) {
         Status::Hold
@@ -141,7 +212,11 @@ fn evaluate(input: &Inventory) -> Result<Report, &'static str> {
     } else {
         Status::Ready
     };
-    Ok(Report { schema: OUT_SCHEMA, status, findings })
+    Ok(Report {
+        schema: OUT_SCHEMA,
+        status,
+        findings,
+    })
 }
 fn inspect(path: &Path) -> Result<u8, &'static str> {
     // Refuse symlinks; no host probing, GitHub network access or privileged mutations.
@@ -150,7 +225,9 @@ fn inspect(path: &Path) -> Result<u8, &'static str> {
         return Err("Input must be a regular file no larger than 64 KiB");
     }
     let bytes = fs::read(path).map_err(|_| "Input cannot be read")?;
-    if bytes.len() as u64 > MAX_BYTES { return Err("Input file too large"); }
+    if bytes.len() as u64 > MAX_BYTES {
+        return Err("Input file too large");
+    }
     let input: Inventory = serde_json::from_slice(&bytes).map_err(|_| "Invalid JSON schema")?;
     let report = evaluate(&input)?;
     let rc = match report.status {
@@ -158,7 +235,10 @@ fn inspect(path: &Path) -> Result<u8, &'static str> {
         Status::Warn => 1,
         Status::Hold => 2,
     };
-    println!("{}", serde_json::to_string(&report).map_err(|_| "Output serialization failed")?);
+    println!(
+        "{}",
+        serde_json::to_string(&report).map_err(|_| "Output serialization failed")?
+    );
     Ok(rc)
 }
 fn run() -> Result<u8, &'static str> {
@@ -167,8 +247,10 @@ fn run() -> Result<u8, &'static str> {
         return Err("Usage: runner-preflight inspect --input FILE --format json");
     }
     let input = a.next().ok_or("Missing input file")?;
-    if a.next().as_deref() != Some("--format") || a.next().as_deref() != Some("json")
-        || a.next().is_some() {
+    if a.next().as_deref() != Some("--format")
+        || a.next().as_deref() != Some("json")
+        || a.next().is_some()
+    {
         return Err("Usage: runner-preflight inspect --input FILE --format json");
     }
     inspect(Path::new(&input))
@@ -196,14 +278,16 @@ mod tests {
     }
     #[test]
     fn architecture_mismatch_fixture() {
-        let m: Inventory = serde_json::from_str(include_str!("../../fixtures/hold-arch.json")).unwrap();
+        let m: Inventory =
+            serde_json::from_str(include_str!("../../fixtures/hold-arch.json")).unwrap();
         let r = evaluate(&m).unwrap();
         assert_eq!(r.status, Status::Hold);
         assert!(r.findings.iter().any(|f| f.code == "ARCH_MISMATCH"));
     }
     #[test]
     fn low_disk_headroom_fixture() {
-        let m: Inventory = serde_json::from_str(include_str!("../../fixtures/warn-disk.json")).unwrap();
+        let m: Inventory =
+            serde_json::from_str(include_str!("../../fixtures/warn-disk.json")).unwrap();
         let r = evaluate(&m).unwrap();
         assert_eq!(r.status, Status::Warn);
         assert!(r.findings.iter().any(|f| f.code == "DISK_HEADROOM_LOW"));
@@ -218,7 +302,12 @@ mod tests {
         let r = evaluate(&m).unwrap();
         let codes: Vec<_> = r.findings.iter().map(|f| f.code).collect();
         assert_eq!(r.status, Status::Hold);
-        for code in ["LABEL_MISSING", "TOOL_MISSING", "RUST_TARGET_MISSING", "MEMORY_INSUFFICIENT"] {
+        for code in [
+            "LABEL_MISSING",
+            "TOOL_MISSING",
+            "RUST_TARGET_MISSING",
+            "MEMORY_INSUFFICIENT",
+        ] {
             assert!(codes.contains(&code), "{code}");
         }
     }
