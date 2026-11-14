@@ -8,12 +8,13 @@ An offline, read-only CLI that checks a **supplied** runner inventory against de
 
 ```sh
 cd experiments/runner_preflight/rust
-cargo generate-lockfile
-cargo test
+cargo fmt --all -- --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --locked
 cargo run -- inspect --input ../fixtures/ready-x64.json --format json
 ```
 
-The candidate uses Rust 1.100.0 (2024 edition). The first CI workflow generates a dependency lockfile for qualification; a future standalone release must commit and pin its audited Cargo.lock.
+The candidate uses Rust 1.100.0 (2024 edition). The tool has a committed Cargo.lock captured identically from x64 and ARM64 qualification jobs. The standalone release still requires dependency/license/advisory review and exact-head locked-source CI.
 
 ## Input
 
@@ -38,4 +39,4 @@ Files are read-only. The default command performs no network access, mutation, r
 
 ## Tests and release conditions
 
-`cargo test`, `cargo clippy` and x64/ARM64 CI are required before this prototype can be promoted. Build artifacts, committed locked dependencies, exact-head CI, an independent capability-named repository, final name availability and clean release provenance remain separate gates. Additional recurring spend is R0.
+`cargo test`, `cargo clippy` and x64/ARM64 CI are required before this prototype can be promoted. Build artifacts, dependency auditing, exact-head CI, an independent capability-named repository, final name availability and clean release provenance remain separate gates. Additional recurring spend is R0.
