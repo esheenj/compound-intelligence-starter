@@ -22,6 +22,8 @@ jobs:
         run: |
           node --version
           node --test tests/test_agent_auth.mjs
+      - name: Verify offline Runner Preflight browser reference
+        run: node --test tests/test_runner_preflight_ui.mjs
       - name: Stage standalone seven-repo public directory
         run: |
           mkdir -p dist
@@ -97,3 +99,5 @@ jobs:
         run: python tests/browser_check_issue_explorer.py
       - name: Test exact public OSS directory in real headless Chrome
         run: python tests/browser_check_showcase.py
+      - name: Test offline Runner Preflight playground in real headless Chrome
+        run: python tests/browser_check_runner_preflight.py
