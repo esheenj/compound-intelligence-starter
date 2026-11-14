@@ -497,7 +497,7 @@ def inspect_wave_21(driver: Driver, repo: str) -> None:
     for _ in range(50):
         if driver.js("""
             return !!document.querySelector('#fixture')
-                && document.querySelector('#fixture').value.includes('event_id')
+                && document.querySelector('#fixture').value.includes('event-010')
                 && document.querySelector('#presetBaseline')
                 && document.querySelector('#presetReordered')
                 && document.querySelector('#evaluate');
