@@ -184,22 +184,24 @@ See the [cross-language validator pilot](docs/CROSS_LANGUAGE_VALIDATOR_PILOT.md)
 
 ### Rust CLI: Runner Preflight
 
-[Runner Preflight](experiments/runner_preflight/README.md) is an offline, read-only Rust CLI that compares a **supplied** runner inventory to declared job requirements. It reports deterministic READY, WARN, and HOLD outcomes for OS/architecture, labels, disk/memory, tools, and Rust targets. It is not a live host inspector, installer, GitHub scheduling fix or standalone repository.
+[Runner Preflight](experiments/runner_preflight/README.md) evaluates an explicitly supplied CI runner/job inventory and reports READY, WARN or HOLD with machine-readable findings. It is a read-only diagnostic, not GitHub runner registration, scheduling repair, privileged administration or financial execution.
 
-**Try the [Runner Preflight offline playground](https://esheenj.github.io/compound-intelligence-starter/runner-preflight.html):** explore READY/WARN/HOLD examples and edit synthetic inventories in your browser before downloading the Rust CLI. This is a tested JavaScript reference, not Rust/WASM or live server monitoring. It is a companion page within this repository, not an additional standalone repository or an independently claimed public MVP.
+**[Try the offline browser playground](https://esheenj.github.io/compound-intelligence-starter/runner-preflight.html)** to edit synthetic runner inventories and inspect outcomes. This page is an independently tested JavaScript reference, not a live host inspector or Rust/WASM executable, and is not counted as an additional standalone public repository.
 
-**Download the versioned [Runner Preflight v0.1.0 Linux preview](https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.1.0):** [x86-64 executable](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/runner-preflight-linux-x86_64) · [ARM64 executable](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/runner-preflight-linux-aarch64) · [portable standalone source ZIP](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/runner-preflight-source.zip) · [SHA256SUMS](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.1.0/SHA256SUMS). Unlike short-lived Actions artifacts, these files are attached to the versioned GitHub Release.
+**[Download Runner Preflight v0.2.0 — Linux preview](https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.2.0):** [Linux x86-64 executable](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.2.0/runner-preflight-linux-x86_64) · [Linux ARM64 executable](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.2.0/runner-preflight-linux-aarch64) · [standalone source with read-only Linux observer](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.2.0/runner-preflight-source.zip) · [SHA256SUMS](https://github.com/esheenj/compound-intelligence-starter/releases/download/runner-preflight-v0.2.0/SHA256SUMS). Versioned release files do not expire with GitHub Actions run-artifact retention.
 
-Build or test from source with Rust 1.100.0:
+To observe an **authorized local** Linux x86-64 host and evaluate it through Rust (use `job-linux-arm64.json` instead on ARM64):
 
 ```sh
 unzip runner-preflight-source.zip
-cd runner-preflight/rust
+cd runner-preflight
+python3 scripts/collect_linux_runner.py --job fixtures/job-linux-x64.json --workspace . > observed.json
+cd rust
 cargo test --locked
-cargo run --locked -- inspect --input ../fixtures/ready-x64.json --format json
+cargo run --locked -- inspect --input ../observed.json --format json
 ```
 
-The release tag targets `22352ce23dea5d156395eb91b4527e3e1d1f4e89`. [Release CI](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43645628365) passed the extracted-source x86-64 and ARM64 build/tests, deterministic artifact provenance checks, RustSec/licence/source audit and publication. The source ZIP SHA-256 is `13f9f4528bb9d935c97865de7f0715feb35150aed3c98a6d4eb9e63ac66b5e7c` (check against the release's SHA256SUMS). These are **unsigned preview binaries** for Linux, not proof of verified live runner state or production suitability. No additional recurring infrastructure spend.
+The optional Python 3 standard-library observer reads point-in-time disk/memory availability, OS/architecture and presence of **requested executable names**. It does **not** access the network, read secrets, attest GitHub labels, verify installed Rust targets or establish tool versions. Unverifiable requirements stay HOLD. [Standalone extracted-source x64/ARM64 tests, dependency audit and release publication](https://github.com/esheenj/compound-intelligence-starter/actions/runs/43689829871) passed at release source `ee53cd7bd74ed193b1839e5d5654bbca4d3df2e3`; v0.2.0 source ZIP SHA-256 is `9b160c0df37bc3d96bfed2a42ecfd042a255dc537fbefd48f2ff881c5bc3f5ce`. These are **unsigned preview binaries**, not independent production security certification or deployment. The earlier v0.1.0 preview is preserved. Added recurring spend: R0.
 
 ## New: offline public MVP wave planner
 
