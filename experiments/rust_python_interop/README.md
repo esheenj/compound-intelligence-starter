@@ -22,20 +22,17 @@ From this directory:
 cargo fmt --all -- --check
 cargo clippy --all-targets -- -D warnings
 cargo test
-python -m pip install "maturin>=1.9,<2"
+python -m pip install "maturin==1.16.0"
 maturin build --release --out dist --interpreter python --compatibility off
 python -m pip install --no-index --find-links dist rust-id-interop-pilot
 python -m unittest discover -s tests -v
 ```
 
 The `--compatibility off` wheel is **host-specific test evidence**, not a portable manylinux
-release. Before release, commit the generated `Cargo.lock`, repeat exact-head `--locked`
-checks, perform dependency/license audit and test actual supported wheel targets. Do not
-publish to PyPI or claim a production speedup from this experiment.
+release. Cargo.lock was generated independently on x64 and ARM64 and matched byte-for-byte (SHA-256 `64ccd24daeb8a53f113258a79a0b1f32f7503e250358776293022db374604c43`), then committed. Exact-head CI must now prove locked builds. Before external package release, perform dependency/license review, portable wheel-target qualification and meaningful benefit measurement. Do not publish to PyPI or claim a production speedup from this experiment.
 
 ## Evidence boundaries
 
 The Python baseline was initially checked locally with six pure-Python unit tests.
-Native compilation, wheel import and parity are unverified until actual architecture-specific
-CI succeeds. This experiment is a capability prerequisite, not one of the proposed 30
+Initial native compilation, wheel imports and 10 Python/Rust parity tests passed in the 15 November CI matrix (x64 Python 3.10/3.12 and ARM64 Python 3.12); exact-head locked requalification remains separate. This experiment is a capability prerequisite, not one of the proposed 30
 developer-magnet products. Added recurring infrastructure spend R0.
