@@ -19,5 +19,7 @@ jobs:
         run: python3 tests/live_support_page_acceptance.py
       - name: Read-only integration offer HTTPS and Chrome acceptance
         run: python3 tests/live_integration_offer_acceptance.py
+      - name: Read-only Runner Preflight deployed HTML checksum and Chrome acceptance
+        run: python3 tests/live_runner_preflight_acceptance.py
       - name: Verify published sitemap exact bytes and all 15 HTTPS pages
         run: python3 tests/live_public_discovery_acceptance.py
