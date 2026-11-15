@@ -194,6 +194,21 @@ class ShowcaseStageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "INVALID_CATALOG_STRUCTURE"):
             verify_catalog(source.replace(b"<main", b"<section", 1))
 
+    def test_public_ux_enquiry_is_exactly_one_authorized_mailto(self):
+        source = SOURCE.read_bytes()
+        address = b"mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry"
+        self.assertEqual(source.count(b'href="' + address + b'"'), 1)
+        self.assertEqual(verify_catalog(source)["repoCount"], 22)
+        with self.assertRaisesRegex(ValueError, "UX_ENQUIRY_LINK_MISSING_OR_DUPLICATE"):
+            verify_catalog(source.replace(b'href="' + address + b'"',
+                                          b'href="#ux-engineering"', 1))
+        with self.assertRaisesRegex(ValueError, "UX_ENQUIRY_LINK_MISSING_OR_DUPLICATE"):
+            verify_catalog(source.replace(
+                b"</section>", b'<a href="' + address + b'">Duplicate enquiry</a></section>', 1))
+        with self.assertRaisesRegex(ValueError, "CATALOG_EXTERNAL_LINK_NOT_ALLOWED"):
+            verify_catalog(source.replace(b'href="#projects"',
+                                          b'href="mailto:outsider@example.invalid"', 1))
+
     def test_refuses_binary_and_unbounded_input(self):
         for example in (b"\x00", b"x" * 150001, b"\xff\xfe"):
             with self.subTest(length=len(example)):
