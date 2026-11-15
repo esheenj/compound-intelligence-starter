@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a151b">
+<meta name="description" content="Discover where CRM, webhook and AI integration handoffs fail. Assess, inspect, test and replay with free local-first tools from Esheen Labs; discuss a bounded Sigma Code integration reliability pilot.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'">
+<link rel="canonical" href="https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html">
+<meta property="og:type" content="website"><meta property="og:title" content="Integration Reliability | Sigma Code × Esheen Labs">
+<meta property="og:description" content="Stop guessing where a business integration breaks. Try four free diagnostics and request a scoped engineering pilot.">
+<meta property="og:url" content="https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html">
+<meta name="twitter:card" content="summary">
+<title>Integration Reliability — Diagnose, Reproduce, Improve | Sigma Code</title>
+<style>
+:root{color-scheme:dark;--bg:#0a151b;--panel:#112832;--panel2:#152f38;--line:#375560;--muted:#a7bdc0;--ink:#f0f8f4;--mint:#b5f1da;--teal:#8dcbd0;--gold:#d7b788;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-synthesis:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:320px;background:radial-gradient(ellipse at 80% 0%,#27627166,transparent 38%),var(--bg);font-size:15px;line-height:1.66}
+a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid var(--mint);outline-offset:5px;border-radius:4px}
+.skip{position:absolute;top:-120px;left:12px;background:var(--mint);color:#0a2826;padding:.7rem 1rem;z-index:9}.skip:focus{top:10px}
+.shell{max-width:1260px;margin:auto;padding:0 43px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:94px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:13px;letter-spacing:.12em;font-weight:800;font-size:12px}.mark{width:42px;height:42px;border:1px solid #7baeb5;display:grid;place-items:center;border-radius:12px;color:var(--mint);font-size:26px}.brand b{color:#b8e6d4;font-weight:400}.brand small{display:block;color:#91b1b6;font-size:9px;letter-spacing:.14em;margin-top:3px}
+.top nav{display:flex;gap:24px;flex-wrap:wrap;justify-content:end}.top nav a{color:#b9d0d0;font-size:12px;font-weight:670}.top nav a:hover,.footer a:hover{color:var(--mint)}
+.kicker,.eyebrow{color:var(--mint);font-size:11px;font-weight:830;letter-spacing:.16em;text-transform:uppercase}
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr);gap:58px;align-items:center;padding:95px 0 74px;border-bottom:1px solid var(--line)}
+.hero h1{font-size:clamp(3.25rem,6.7vw,6.45rem);font-weight:670;letter-spacing:-.075em;line-height:1.08;margin:23px 0}.hero h1 em{font-style:normal;color:var(--mint)}
+.hero .lead{max-width:650px;color:#b8cdd0;font-size:17px;line-height:1.8;margin:0 0 29px}
+.buttonline{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.primary,.secondary{border-radius:9px;padding:15px 21px;font-size:13px;font-weight:790;display:inline-block}
+.primary{color:#11342f;background:var(--mint)}.primary:hover{background:#defded}.secondary{background:#193540;border:1px solid #59818a;color:#d6eae4}.secondary:hover{background:#25505a}
+.hero-trust{font-size:11px;color:#83b1b3;letter-spacing:.08em;margin:27px 0 0;font-weight:730}
+.scenario{background:linear-gradient(140deg,#183741,#102830);border:1px solid #50767c;border-radius:18px;padding:29px;box-shadow:0 25px 90px #0003}
+.scenario .small{color:var(--mint);font-size:10px;font-weight:820;letter-spacing:.15em}.scenario h2{font-size:21px;font-weight:590;line-height:1.25;letter-spacing:-.035em;margin:17px 0 14px}.scenario p{font-size:12px;color:#b2cace;line-height:1.77}.scenario .divider{height:1px;background:#44636b;margin:19px 0}.scenario .signal{display:grid;grid-template-columns:65px 1fr;gap:13px;margin-top:14px;align-items:baseline}.scenario .signal strong{font-size:10px;color:#aee8d6;letter-spacing:.1em}.scenario .signal span{font-size:12px;color:#e1f0eb}
+.section{padding:76px 0;border-bottom:1px solid var(--line)}.section-head{max-width:850px;margin-bottom:35px}
+h2{font-size:clamp(2rem,3.8vw,3.35rem);font-weight:650;line-height:1.18;letter-spacing:-.06em;margin:13px 0 18px}
+.section-head p{font-size:15px;color:#a9c3c4;line-height:1.78}
+.tool-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.tool{display:flex;flex-direction:column;min-width:0;background:linear-gradient(142deg,#16303a,#10242b);border:1px solid #426470;border-radius:14px;padding:28px}
+.tool-number{font-size:10px;color:#9fdaca;letter-spacing:.13em;font-weight:830}
+.tool h3{font-size:23px;line-height:1.25;letter-spacing:-.045em;margin:17px 0 10px;font-weight:650}
+.tool .outcome{color:#d5e8e2;font-size:13px;line-height:1.75;margin:0 0 16px}
+.tool .evidence{color:#8cbbbf;font-size:12px;line-height:1.73;border-left:2px solid #70afaa;padding-left:12px;margin:0 0 22px}
+.tool .actions{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.tool .actions a{display:inline-block;font-size:12px;font-weight:790;padding:10px 15px;border:1px solid #6b8c92;border-radius:8px;color:#d9eae8}.tool .actions a:first-child{background:#b6e8d7;color:#12362c;border-color:#b6e8d7}
+.purpose{display:flex;gap:14px;align-items:start;background:#16323a;border:1px solid #436b74;border-radius:10px;padding:21px;margin-top:24px}
+.purpose strong{color:#b8edda;font-size:12px;white-space:nowrap}.purpose p{font-size:12px;color:#a7c8c9;margin:0;line-height:1.75}
+.technical{display:grid;grid-template-columns:1fr 1fr;gap:17px}
+.technical a{border:1px solid #42616e;border-radius:13px;background:#142a36;padding:25px;display:flex;flex-direction:column;gap:11px}
+.technical a:hover{border-color:#92d8ca}.technical strong{font-size:17px}.technical span{color:#a8c8c5;font-size:12px;line-height:1.8}.technical small{color:#afeee0;font-size:11px;font-weight:830}
+.pilot{padding:77px 0 86px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr);gap:60px}
+.pilot p{color:#b1caca;font-size:14px;line-height:1.83;max-width:650px}.pilot .buttonline{margin-top:23px}
+.pilot .fine{font-size:11px;color:#8daeb4;margin-top:23px}
+.scope{background:linear-gradient(135deg,#17353c,#10252d);border:1px solid #4b7479;border-radius:14px;padding:27px}
+.scope>div{padding:16px 0;border-bottom:1px solid #42626d;display:flex;gap:18px;align-items:baseline}
+.scope strong{font-size:11px;color:var(--mint)}.scope span{color:#d0e6df;font-size:13px;line-height:1.65}
+.footer{border-top:1px solid var(--line);padding:27px 0 38px;display:flex;gap:20px;justify-content:space-between;color:#87a9ad;font-size:11px}
+.footer nav{display:flex;gap:19px;flex-wrap:wrap}.footer nav a{color:#c0dfda}
+@media(max-width:890px){.shell{padding:0 26px}.hero{grid-template-columns:1fr;gap:30px;padding:68px 0}.scenario{max-width:650px}.pilot{gap:28px}}
+@media(max-width:690px){.top{flex-direction:column;align-items:start;padding:18px 0}.top nav{gap:13px}.hero h1{font-size:clamp(3rem,10vw,5rem)}.tool-list,.technical,.pilot{grid-template-columns:1fr}.section{padding:56px 0}.tool{padding:22px}.purpose{flex-direction:column}.footer{flex-direction:column}}
+@media(max-width:420px){.shell{padding:0 17px}.brand{font-size:11px}.hero{padding:54px 0}.hero h1{font-size:clamp(2.9rem,10.8vw,4rem)}.primary,.secondary{width:100%;text-align:center}.tool .actions a{flex:1;text-align:center}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+.technical-source{font-size:12px;color:#93babb;margin:21px 0 0}.technical-source a{text-decoration:underline;text-underline-offset:3px;color:#b9efda}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the integration tools</a>
+<div class="shell">
+<header class="top">
+<a class="brand" href="index.html"><span class="mark" aria-hidden="true">Σ</span><span>ESHEEN <b>LABS</b><small>TOOLS FOR SIGMA CODE ENGINEERING</small></span></a>
+<nav aria-label="Page navigation"><a href="#tools">The tools</a><a href="#engineering">For developers</a><a href="#pilot">Engineering pilot</a><a href="index.html">All 43 demos</a></nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="main-heading">
+<div>
+<p class="kicker">Integration reliability / Free engineering tools</p>
+<h1 id="main-heading">When systems talk,<br><em>things can break.</em></h1>
+<p class="lead">A CRM receives a lead, a webhook retries, an invoice is created twice—or a handoff quietly stalls. Start with free, inspectable tools that help your team locate weak points and reproduce failure conditions before they reach your customers.</p>
+<div class="buttonline"><a href="#tools" class="primary">Explore the four free tools ↗</a><a href="#pilot" class="secondary">Discuss an engineering pilot</a></div>
+<p class="hero-trust">FREE & OPEN SOURCE · SYNTHETIC EXAMPLES · NO LOGIN OR UPLOAD REQUIRED</p>
+</div>
+<aside class="scenario" aria-label="Example integration failure">
+<span class="small">A FAMILIAR FAILURE PATH</span>
+<h2>One customer request.<br>Two recorded effects.</h2>
+<p>A fictional CRM-to-invoice workflow receives a repeated delivery. The trace shows two distinct recorded effect IDs, but lacks enough external evidence to certify whether two real invoices were created.</p>
+<div class="divider"></div>
+<div class="signal"><strong>ASSESS</strong><span>Which safeguards were actually tested?</span></div>
+<div class="signal"><strong>INSPECT</strong><span>Which events and acknowledgements are missing?</span></div>
+<div class="signal"><strong>REPRODUCE</strong><span>Can a synthetic test catch the failure again?</span></div>
+</aside>
+</section>
+<section class="section" id="tools" aria-labelledby="tools-heading">
+<div class="section-head"><span class="eyebrow">01 / START WITH THE PROBLEM</span><h2 id="tools-heading">Four tools. One clearer path to a fix.</h2>
+<p>Each tool is a standalone, free browser playground with public source and tests. Choose the stage that matches your problem. They do not connect to, inspect or modify your real systems.</p></div>
+<div class="tool-list">
+<article class="tool"><span class="tool-number">01 / UNDERSTAND EXPOSURE</span><h3>Integration Reliability Assessment</h3><p class="outcome">Identify missing or untested safeguards across authentication, retries, idempotency, visibility, contracts and reconciliation.</p><p class="evidence">A transparent self-reported exposure index and prioritized actions; not a security certification.</p><div class="actions"><a href="https://esheenj.github.io/integration-reliability-assessment/">Try free assessment</a><a href="https://github.com/esheenj/integration-reliability-assessment">View source</a></div></article>
+<article class="tool"><span class="tool-number">02 / FOLLOW THE DELIVERY</span><h3>Delivery Trace Inspector</h3><p class="outcome">Review a synthetic chain of receipts, acknowledgements and recorded effects to pinpoint what needs investigation.</p><p class="evidence">Event-linked findings, with a clear distinction between observed records and unverified real-world effects.</p><div class="actions"><a href="https://esheenj.github.io/integration-delivery-trace-inspector/">Inspect an example</a><a href="https://github.com/esheenj/integration-delivery-trace-inspector">View source</a></div></article>
+<article class="tool"><span class="tool-number">03 / DEFINE THE FAILURE TEST</span><h3>Workflow Failure Test Builder</h3><p class="outcome">Turn a fictional integration failure into checkable acceptance conditions that your engineers can use.</p><p class="evidence">A structured test plan rather than a claimed production integration run.</p><div class="actions"><a href="https://esheenj.github.io/workflow-failure-test-builder/">Build a test plan</a><a href="https://github.com/esheenj/workflow-failure-test-builder">View source</a></div></article>
+<article class="tool"><span class="tool-number">04 / MAKE IT REPEATABLE</span><h3>Deterministic Replay Fixture Generator</h3><p class="outcome">Create synthetic relative-time fixtures and executable Node regression tests for repeated receipts, missing acknowledgements and event ordering.</p><p class="evidence">Runnable tests of the generated fixture—not of the provider, CRM or production workflow.</p><div class="actions"><a href="https://esheenj.github.io/deterministic-replay-fixture-generator/">Generate a replay</a><a href="https://github.com/esheenj/deterministic-replay-fixture-generator">View source</a></div></article>
+</div>
+<div class="purpose"><strong>WHAT THEY DO NOT DO</strong><p>These are local-first educational and engineering utilities. The results depend on what you enter, and their example data is fictional. They cannot certify security, actual business effects, live compatibility or financial returns. Real-world verification requires separately authorized access and targeted tests.</p></div>
+</section>
+<section class="section" id="engineering" aria-labelledby="engineering-heading">
+<div class="section-head"><span class="eyebrow">02 / ADVANCED ENGINEERING</span><h2 id="engineering-heading">For teams shipping and maintaining integrations.</h2><p>Two companion labs extend reproducibility into cross-language event handling and versioned message contracts. Rust is independently tested in GitHub Actions; their public browser interfaces run JavaScript.</p></div>
+<div class="technical"><a href="https://esheenj.github.io/event-replay-rust-parity-lab/"><strong>Rust / Node Event Replay Parity Lab</strong><span>Compare synthetic delivery summaries across two independently implemented runtimes, with reproducible parity tests.</span><small>Explore the parity lab ↗</small></a>
+<a href="https://esheenj.github.io/event-contract-evolution-lab/"><strong>Event Contract Evolution Lab</strong><span>Check which declared event fields may break backward or forward consumer compatibility during a version change.</span><small>Inspect contract changes ↗</small></a></div>
+<p class="technical-source">Inspect the implementation: <a href="https://github.com/esheenj/event-replay-rust-parity-lab">Rust/Node replay source</a> and <a href="https://github.com/esheenj/event-contract-evolution-lab">Event contract evolution source</a>.</p>
+</section>
+<section class="pilot" id="pilot" aria-labelledby="pilot-heading">
+<div><span class="eyebrow">03 / SIGMA CODE ENGINEERING</span><h2 id="pilot-heading">A real integration problem?<br>Start with one bounded pilot.</h2>
+<p>The free tools help clarify the question. A scoped Sigma Code engagement could then examine one authorized CRM, webhook, API or AI handoff; agree the acceptance criteria; run reproducible staging checks; and document which risks were actually resolved.</p>
+<div class="buttonline">
+<a class="primary" href="mailto:info@sigmacode.co.za?subject=Integration%20reliability%20pilot%20enquiry&amp;body=Hi%20Sigma%20Code%2C%0A%0AI%27d%20like%20to%20discuss%20one%20integration%20reliability%20pilot.%0A%0AIntegration%20type%3A%20%0AObserved%20symptom%20%28general%20terms%29%3A%20%0ADesired%20outcome%3A%20%0A%0APlease%20do%20not%20request%20production%20logs%20or%20credentials%20by%20email." aria-label="Email Sigma Code about a scoped integration reliability pilot">Email us about a pilot ↗</a>
+<a class="secondary" href="https://github.com/esheenj/integration-reliability-assessment/issues/new?template=pilot.yml">Public enquiry template ↗</a>
+</div>
+<p class="fine">An enquiry is not a booking, a signed proposal or a paid service. Keep customer identifiers, production logs, credentials and confidential system details out of public issues and initial emails. We have not verified paid pilots or commercial conversions.</p>
+</div>
+<aside class="scope" aria-label="Pilot scope example">
+<span class="eyebrow">SMALL SCOPE / TESTABLE RESULT</span>
+<div><strong>01</strong><span>Choose one business handoff and one observed symptom</span></div>
+<div><strong>02</strong><span>Agree synthetic reproduction and acceptance conditions</span></div>
+<div><strong>03</strong><span>Run targeted checks in authorized staging only</span></div>
+<div><strong>04</strong><span>Provide a concise evidence-backed engineering handoff</span></div>
+</aside>
+</section>
+</main>
+<footer class="footer"><span>© 2026 Esheen Labs · Open-source tools, commercial enquiries via Sigma Code</span><nav aria-label="Footer links"><a href="index.html">Public directory</a><a href="https://sigmacode.co.za/">Sigma Code website</a><a href="https://github.com/esheenj/compound-intelligence-starter">Gallery source</a></nav></footer>
+</div></body></html>

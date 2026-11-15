@@ -120,6 +120,17 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
 /* SIGMA CODE UX Engineering collection: static, link-only; no new scripts or services. */
+.integration-offer{margin:1.6rem 0 3.1rem;padding:clamp(1.25rem,3.2vw,2.3rem);border-radius:1.3rem;border:1px solid #74cdb04f;background:linear-gradient(125deg,#173c3d,#101d28)}
+.integration-offer .integrations-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end}
+.integration-offer .offer-id{font-size:.75rem;color:#a4dfd0;letter-spacing:.1em;font-weight:800;text-transform:uppercase}
+.integration-offer h2{font-size:clamp(1.55rem,3vw,2.6rem);letter-spacing:-.05em;line-height:1.2;margin:.55rem 0}
+.integration-offer p{color:#b1cccb;font-size:.9rem;max-width:78ch;line-height:1.7}
+.integration-offer .offer-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin-top:1.55rem}
+.integration-offer .offer-steps span{padding:.8rem;background:#ffffff0a;border:1px solid #ffffff24;border-radius:.75rem;color:#d9eee4;font-size:.8rem}
+.integration-offer .offer-steps strong{color:#a9ead6;margin-right:.3rem}
+.integration-offer .linkchip{max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:center}
+@media(max-width:780px){.integration-offer .integrations-head{grid-template-columns:1fr}.integration-offer .offer-steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.integration-offer .offer-steps{grid-template-columns:1fr}}
 .ux-offer{margin:3.25rem 0 0;padding:clamp(1.1rem,3.2vw,2.25rem);border:1px solid #7ec69743;border-radius:1.35rem;background:linear-gradient(135deg,#152920ee,#0a1712);box-shadow:0 22px 80px #00000018}
 .ux-offer .ux-intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.75fr);gap:1.8rem;align-items:end}
 .ux-offer .ux-intro p{color:var(--muted);max-width:70ch}
@@ -160,16 +171,23 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 </head>
 <body>
 <a class="skip" href="#main">Skip to public projects</a>
-<div class="topbar"><div class="wrap top-inner"><a class="brand" href="#main"><span class="brand-icon" aria-hidden="true">Σ</span><span>SIGMA <span style="color:var(--glow)">/ LABS</span><small>OPEN INTELLIGENCE</small></span></a><nav class="nav" aria-label="Primary navigation"><a href="#projects">Projects</a><a href="#ux-engineering">UX Engineering</a><a href="#additional-tools">Playgrounds</a><a href="#contribute">Contribute</a></nav></div></div>
+<div class="topbar"><div class="wrap top-inner"><a class="brand" href="#main"><span class="brand-icon" aria-hidden="true">Σ</span><span>SIGMA <span style="color:var(--glow)">/ LABS</span><small>OPEN INTELLIGENCE</small></span></a><nav class="nav" aria-label="Primary navigation"><a href="#projects">Projects</a><a href="#ux-engineering">UX Engineering</a><a href="integration-reliability.html">Integrations</a><a href="#contribute">Contribute</a></nav></div></div>
 <header class="wrap hero">
 <div class="hero-copy"><p class="kicker">Compound Intelligence Lab · Shared openly</p><h1>Useful ideas.<br><em>Working tools.</em></h1><p class="lead">Explore open-source experiments that help you question AI, design better journeys and build more dependable software. Start with a playground, inspect the source, make something your own.</p>
-<div class="buttonrow"><a class="linkchip primary" href="#projects">Explore projects ↗</a><a class="linkchip" href="#additional-tools">Try the playgrounds</a><a class="linkchip" href="#contribute">Build with us</a></div>
+<div class="buttonrow"><a class="linkchip primary" href="integration-reliability.html">Integration toolkit ↗</a><a class="linkchip" href="#projects">Explore projects</a><a class="linkchip" href="#additional-tools">Try the playgrounds</a><a class="linkchip" href="#contribute">Build with us</a></div>
 <p class="lead" style="font-size:.94rem;margin:.1rem 0 1.5rem">Want to help keep the tools free? <a href="support.html">Support Esheen Labs with BTC or USDT</a>. Voluntary contributions only; verify the latest deposit address and network before sending.</p>
 <div class="stats"><div class="stat"><strong>22</strong><span>public project repos</span></div><div class="stat"><strong>21</strong><span>more browser tools</span></div><div class="stat"><strong>43</strong><span>public demo pages</span></div></div></div>
 <div class="hero-art" aria-hidden="true"><span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="particle a"></span><span class="particle b"></span><span class="particle c"></span><span class="core">Σ</span></div>
 </header>
 <main class="wrap" id="main">
 <aside class="notice" aria-label="Verification and hosting limitations"><strong>43 public demo entries across 22 independent repositories and 21 hosted add-ons.</strong> The previous <a href="https://github.com/esheenj/compound-intelligence-starter/actions/runs/43643183138">42/42 merged-main live Chrome acceptance</a> passed on 14 November 2026. The new <a href="https://github.com/esheenj/event-contract-evolution-lab/actions/runs/43645901036">Event Contract Evolution Lab</a> passed actual hosted Rust compilation (8 native tests), 78 JavaScript/source tests, 138 differential Rust/Node comparisons and standalone Pages release. It checks a deliberately shallow synthetic message contract, not complete JSON Schema, actual message payloads, deployed consumers, customer adoption or revenue. The browser uses JavaScript, not Rust/WASM. A separate 43/43 live Chrome acceptance is required before this gallery release.</aside>
+<section class="integration-offer" aria-labelledby="integration-offer-heading">
+<div class="integrations-head"><div><p class="offer-id">SIGMA CODE ENGINEERING / OPEN-SOURCE INTEGRATION TOOLKIT</p>
+<h2 id="integration-offer-heading">A fragile business handoff? Start here.</h2>
+<p>Use four free, inspectable tools to assess safeguards, trace fictional delivery evidence, design failure tests and generate reproducible synthetic fixtures. Then discuss one bounded CRM, API, webhook or AI integration pilot with Sigma Code.</p></div>
+<a class="linkchip primary" href="integration-reliability.html">Explore the integration toolkit ↗</a></div>
+<div class="offer-steps"><span><strong>01</strong> Assess</span><span><strong>02</strong> Inspect</span><span><strong>03</strong> Test</span><span><strong>04</strong> Reproduce</span></div>
+</section>
 <section id="projects" aria-labelledby="projects-heading">
 <div class="section-heading"><div><p class="kicker">01 / Open source foundations</p><h2 id="projects-heading">Pick a project. <span style="color:var(--glow)">Make it yours.</span></h2><p>Twenty-two original, independent developer foundations you can explore, run and improve. Customer-ready integration tooling first, then AI, agent intelligence, design, experience and testing foundations.</p></div></div>
 <div class="cards">

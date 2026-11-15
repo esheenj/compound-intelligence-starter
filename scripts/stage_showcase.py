@@ -30,6 +30,7 @@ DECISION_REVIEW_SOURCE = ROOT / "site" / "decision-review.html"
 AGENT_TRUST_SOURCE = ROOT / "site" / "agent-trust.html"
 SIGNED_AGENT_SOURCE = ROOT / "site" / "signed-agent.html"
 RUNNER_PREFLIGHT_SOURCE = ROOT / "site" / "runner-preflight.html"
+INTEGRATION_OFFER_SOURCE = ROOT / "site" / "integration-reliability.html"
 SUPPORT_CONFIG_SOURCE = ROOT / "support" / "channels.json"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
@@ -126,10 +127,10 @@ def verify_catalog(data: bytes) -> dict:
     observed = set(parser.links)
     if not expected_links.issubset(observed):
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
-    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1 or parser.links.count("decision-review.html") != 1 or parser.links.count("agent-trust.html") != 1 or parser.links.count("signed-agent.html") != 1 or parser.links.count("support.html") != 2:
+    if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1 or parser.links.count("decision-review.html") != 1 or parser.links.count("agent-trust.html") != 1 or parser.links.count("signed-agent.html") != 1 or parser.links.count("support.html") != 2 or parser.links.count("integration-reliability.html") < 2:
         raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html"}):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html", "integration-reliability.html"}):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -145,6 +146,61 @@ def verify_catalog(data: bytes) -> dict:
         raise ValueError("UNSUPPORTED_CATALOG_CLAIM")
     return {"repoCount": 22, "githubDeployedUrlCount": 22,
             "independentBrowserVerified": False,
+            "htmlSha256": hashlib.sha256(data).hexdigest()}
+
+
+INTEGRATION_TOOL_SLUGS = (
+    "integration-reliability-assessment",
+    "integration-delivery-trace-inspector",
+    "workflow-failure-test-builder",
+    "deterministic-replay-fixture-generator",
+    "event-replay-rust-parity-lab",
+    "event-contract-evolution-lab",
+)
+
+
+APPROVED_PILOT_MAILTO = 'mailto:info@sigmacode.co.za?subject=Integration%20reliability%20pilot%20enquiry&body=Hi%20Sigma%20Code%2C%0A%0AI%27d%20like%20to%20discuss%20one%20integration%20reliability%20pilot.%0A%0AIntegration%20type%3A%20%0AObserved%20symptom%20%28general%20terms%29%3A%20%0ADesired%20outcome%3A%20%0A%0APlease%20do%20not%20request%20production%20logs%20or%20credentials%20by%20email.'
+
+def verify_integration_offer(data: bytes) -> dict:
+    """Fail closed on content, external destinations and active browser behavior."""
+    if not data or len(data) > 46000 or b"\x00" in data:
+        raise ValueError("INTEGRATION_OFFER_BYTES_INVALID")
+    page = data.decode("utf-8")
+    html = SourceCatalog()
+    html.feed(page)
+    html.close()
+    if html.heading != 1 or html.main != 1 or html.script or html.remote_assets != ["link"] or html.articles:
+        raise ValueError("INTEGRATION_OFFER_STRUCTURE")
+    if ('<link rel="canonical" href="https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html">' not in page or
+            page.count('<link rel="canonical"') != 1 or
+            "connect-src 'none'" not in page or "script-src 'none'" not in page or
+            "<form" in page.lower() or "<script" in page.lower() or
+            "localStorage" in page or "XMLHttpRequest" in page or
+            "fetch(" in page or "innerHTML" in page):
+        raise ValueError("INTEGRATION_OFFER_SAFETY")
+    expected = set()
+    for slug in INTEGRATION_TOOL_SLUGS:
+        expected.add("https://esheenj.github.io/" + slug + "/")
+        expected.add("https://github.com/esheenj/" + slug)
+    if not expected.issubset(set(html.links)):
+        raise ValueError("INTEGRATION_OFFER_MISSING_TOOL")
+    if html.links.count(APPROVED_PILOT_MAILTO) != 1:
+        raise ValueError("INTEGRATION_OFFER_EMAIL_ROUTE")
+    approved = expected | {APPROVED_PILOT_MAILTO,
+        "index.html", "#main", "#tools", "#engineering", "#pilot",
+        "https://sigmacode.co.za/",
+        "https://github.com/esheenj/compound-intelligence-starter",
+        "https://github.com/esheenj/integration-reliability-assessment/issues/new?template=pilot.yml",
+    }
+    if any(x not in approved for x in html.links):
+        raise ValueError("INTEGRATION_OFFER_EXTERNAL_DESTINATION")
+    if ("not a booking" not in page or "fictional" not in page or
+            "not a security certification" not in page or
+            "23 public" in page or "44 demos" in page):
+        raise ValueError("INTEGRATION_OFFER_UNSUPPORTED_CLAIM")
+    return {"schema": "esheen-integration-offer-v1",
+            "state": "SOURCE_VALIDATED",
+            "linkedFreeTools": 4, "linkedDeveloperLabs": 2,
             "htmlSha256": hashlib.sha256(data).hexdigest()}
 
 
@@ -214,6 +270,11 @@ def stage_catalog(output: Path) -> dict:
     agent_trust = AGENT_TRUST_SOURCE.read_bytes()
     signed_agent = SIGNED_AGENT_SOURCE.read_bytes()
     runner_preflight = RUNNER_PREFLIGHT_SOURCE.read_bytes()
+    if (INTEGRATION_OFFER_SOURCE.is_symlink() or INTEGRATION_OFFER_SOURCE.parent.is_symlink()
+            or not INTEGRATION_OFFER_SOURCE.is_file()):
+        raise ValueError("INTEGRATION_OFFER_SOURCE_INVALID")
+    offer = INTEGRATION_OFFER_SOURCE.read_bytes()
+    offer_receipt = verify_integration_offer(offer)
     support = render_support(load_channels(SUPPORT_CONFIG_SOURCE))
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
@@ -235,8 +296,9 @@ def stage_catalog(output: Path) -> dict:
         (output / "signed-agent.html").write_bytes(signed_agent)
         (output / "runner-preflight.html").write_bytes(runner_preflight)
         (output / "support.html").write_bytes(support)
+        (output / "integration-reliability.html").write_bytes(offer)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -244,9 +306,11 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"],
+        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"],
         "additionalHostedToolCount": 11,
         "supportPageSha256": hashlib.sha256(support).hexdigest(),
+        "integrationOfferSha256": offer_receipt["htmlSha256"],
+        "integrationOfferSourceValidated": True,
         "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
         "mvpWaveSha256": hashlib.sha256(wave).hexdigest(),
         "agentOpsSha256": hashlib.sha256(agentops).hexdigest(),
