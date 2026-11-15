@@ -1,50 +1,102 @@
 //! Original synthetic Rust/Python interoperability experiment.
 //! This module performs no file I/O, network access, or external execution.
 
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::types::{PyList, PyString, PyTuple};
 use std::collections::HashSet;
 
 const MAX_ITEMS: usize = 200_000;
 const MAX_TOTAL_BYTES: usize = 8_000_000;
 
-fn classify_core(values: &[String]) -> Result<(usize, usize, usize), &'static str> {
-    if values.len() > MAX_ITEMS {
-        return Err("batch too large");
-    }
-    let (mut accepted, mut duplicate, mut rejected) = (0, 0, 0);
-    let mut bytes = 0usize;
-    let mut seen = HashSet::<&str>::new();
-    for item in values {
-        bytes = bytes
-            .checked_add(item.len())
+#[derive(Default)]
+struct Classifier {
+    seen: HashSet<String>,
+    accepted: usize,
+    duplicate: usize,
+    rejected: usize,
+    total_bytes: usize,
+}
+
+impl Classifier {
+    fn push(&mut self, value: &str) -> Result<(), &'static str> {
+        self.total_bytes = self
+            .total_bytes
+            .checked_add(value.len())
             .ok_or("batch bytes too large")?;
-        if bytes > MAX_TOTAL_BYTES {
+        if self.total_bytes > MAX_TOTAL_BYTES {
             return Err("batch bytes too large");
         }
-        let valid = (1..=64).contains(&item.len())
-            && item
+        let valid = (1..=64).contains(&value.len())
+            && value
                 .as_bytes()
                 .iter()
                 .all(|&b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'-');
         if !valid {
-            rejected += 1;
-        } else if seen.insert(item.as_str()) {
-            accepted += 1;
+            self.rejected += 1;
+        } else if self.seen.insert(value.to_owned()) {
+            self.accepted += 1;
         } else {
-            duplicate += 1;
+            self.duplicate += 1;
         }
+        Ok(())
     }
-    Ok((accepted, duplicate, rejected))
+
+    fn counts(self) -> (usize, usize, usize) {
+        (self.accepted, self.duplicate, self.rejected)
+    }
 }
 
-/// Return (accepted unique, duplicate valid, rejected invalid) counts.
+#[cfg(test)]
+fn classify_core(values: &[String]) -> Result<(usize, usize, usize), &'static str> {
+    if values.len() > MAX_ITEMS {
+        return Err("batch too large");
+    }
+    let mut classifier = Classifier::default();
+    for value in values {
+        classifier.push(value)?;
+    }
+    Ok(classifier.counts())
+}
+
+fn classify_sequence<'py>(
+    items: impl Iterator<Item = Bound<'py, PyAny>>,
+    item_count: usize,
+) -> PyResult<(usize, usize, usize)> {
+    // Check the Python container before allocating/copying any element in Rust.
+    if item_count > MAX_ITEMS {
+        return Err(PyValueError::new_err("batch too large"));
+    }
+    let mut classifier = Classifier::default();
+    for item in items {
+        let text = item
+            .cast::<PyString>()
+            .map_err(|_| PyTypeError::new_err("all values must be strings"))?;
+        // Unicode character count is a lower bound on UTF-8 byte count.
+        // Reject a very large Python string before converting it to Rust UTF-8.
+        if text.len() > MAX_TOTAL_BYTES - classifier.total_bytes {
+            return Err(PyValueError::new_err("batch bytes too large"));
+        }
+        classifier
+            .push(text.to_str()?)
+            .map_err(PyValueError::new_err)?;
+    }
+    Ok(classifier.counts())
+}
+
+/// Count accepted unique, duplicate valid, and rejected invalid identifiers.
 ///
-/// The Python boundary accepts a sequence of strings. Invalid identifiers are
-/// counted, while invalid input types and excessive batches raise exceptions.
+/// Accept Python lists or tuples of strings. Iterate without cloning an
+/// untrusted entire input sequence into an unbounded native vector.
 #[pyfunction]
-fn classify_ids(values: Vec<String>) -> PyResult<(usize, usize, usize)> {
-    classify_core(&values).map_err(PyValueError::new_err)
+fn classify_ids(values: &Bound<'_, PyAny>) -> PyResult<(usize, usize, usize)> {
+    if let Ok(list) = values.cast::<PyList>() {
+        classify_sequence(list.iter(), list.len())
+    } else if let Ok(tuple) = values.cast::<PyTuple>() {
+        classify_sequence(tuple.iter(), tuple.len())
+    } else {
+        Err(PyTypeError::new_err("values must be a list or tuple of strings"))
+    }
 }
 
 #[pymodule]
