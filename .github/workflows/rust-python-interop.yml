@@ -42,8 +42,9 @@ jobs:
           cargo --version
           python --version
           uname -m
-      - name: Rust formatting and negative tests
+      - name: Resolve experimental dependencies and validate Rust
         run: |
+          cargo generate-lockfile
           cargo fmt --all -- --check
           cargo clippy --all-targets -- -D warnings
           cargo test
