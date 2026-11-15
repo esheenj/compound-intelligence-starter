@@ -74,7 +74,7 @@ fn classify_sequence<'py>(
             .map_err(|_| PyTypeError::new_err("all values must be strings"))?;
         // Unicode character count is a lower bound on UTF-8 byte count.
         // Reject a very large Python string before converting it to Rust UTF-8.
-        if text.len() > MAX_TOTAL_BYTES - classifier.total_bytes {
+        if text.len()? > MAX_TOTAL_BYTES - classifier.total_bytes {
             return Err(PyValueError::new_err("batch bytes too large"));
         }
         classifier
