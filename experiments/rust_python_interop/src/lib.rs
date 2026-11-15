@@ -16,14 +16,17 @@ fn classify_core(values: &[String]) -> Result<(usize, usize, usize), &'static st
     let mut bytes = 0usize;
     let mut seen = HashSet::<&str>::new();
     for item in values {
-        bytes = bytes.checked_add(item.len()).ok_or("batch bytes too large")?;
+        bytes = bytes
+            .checked_add(item.len())
+            .ok_or("batch bytes too large")?;
         if bytes > MAX_TOTAL_BYTES {
             return Err("batch bytes too large");
         }
         let valid = (1..=64).contains(&item.len())
-            && item.as_bytes().iter().all(|&b| {
-                b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'-'
-            });
+            && item
+                .as_bytes()
+                .iter()
+                .all(|&b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'-');
         if !valid {
             rejected += 1;
         } else if seen.insert(item.as_str()) {
