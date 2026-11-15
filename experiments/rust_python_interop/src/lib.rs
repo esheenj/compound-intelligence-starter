@@ -95,7 +95,9 @@ fn classify_ids(values: &Bound<'_, PyAny>) -> PyResult<(usize, usize, usize)> {
     } else if let Ok(tuple) = values.cast::<PyTuple>() {
         classify_sequence(tuple.iter(), tuple.len())
     } else {
-        Err(PyTypeError::new_err("values must be a list or tuple of strings"))
+        Err(PyTypeError::new_err(
+            "values must be a list or tuple of strings",
+        ))
     }
 }
 
