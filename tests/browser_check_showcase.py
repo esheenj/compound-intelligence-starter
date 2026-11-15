@@ -140,6 +140,47 @@ def run():
                 """)
                 verify(layout["page"] <= layout["viewport"] and layout["cards"] == 22,
                        "NO_PAGE_OVERFLOW_" + str(width))
+            # The integration offer is a commercial discovery page, NOT an extra MVP.
+            driver.command("POST", "url", {"url": (path / "integration-reliability.html").resolve().as_uri()})
+            offer = driver.js("""
+                return {
+                    title:document.title,
+                    headings:document.querySelectorAll('h1').length,
+                    main:document.querySelectorAll('main').length,
+                    tools:document.querySelectorAll('article.tool').length,
+                    advanced:document.querySelectorAll('.technical a').length,
+                    primaryMailto:[...document.querySelectorAll('a[href^="mailto:"]')].map(x=>x.getAttribute('href')),
+                    githubPublicIssue:[...document.querySelectorAll('a')].some(x=>x.href.includes('/issues/new?template=pilot.yml')),
+                    csp:document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content||'',
+                    scripts:document.querySelectorAll('script').length,
+                    forms:document.querySelectorAll('form').length,
+                    remoteResources:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length,
+                    demos:[...document.querySelectorAll('article.tool .actions a:first-child')].map(x=>x.href),
+                    noRevenuePromise:document.body.textContent.includes('not a booking')
+                };
+            """)
+            verify(offer["headings"]==1 and offer["main"]==1
+                   and offer["tools"]==4 and offer["advanced"]==2
+                   and len(offer["primaryMailto"])==1
+                   and offer["primaryMailto"][0].startswith("mailto:info@sigmacode.co.za?")
+                   and offer["githubPublicIssue"] and offer["noRevenuePromise"]
+                   and offer["scripts"]==0 and offer["forms"]==0 and offer["remoteResources"]==0
+                   and "connect-src 'none'" in offer["csp"]
+                   and "script-src 'none'" in offer["csp"],
+                   "OFFLINE_INTEGRATION_OFFER_PURPOSE_AND_SAFETY")
+            verify(len(offer["demos"])==4
+                   and all(x.startswith("https://esheenj.github.io/") for x in offer["demos"]),
+                   "FOUR_LINKED_DEMOS")
+            for width,height in ((320,720),(375,812),(1440,900)):
+                driver.viewport(width,height)
+                verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
+                       "INTEGRATION_OFFER_NO_OVERFLOW_"+str(width))
+            driver.key("\ue004")
+            verify(driver.js("return document.activeElement.classList.contains('skip');") is True,
+                   "INTEGRATION_OFFER_KEYBOARD_SKIP")
+            driver.key("\ue007")
+            verify(driver.js("return location.hash;")=="#main",
+                   "INTEGRATION_OFFER_SKIP_TO_CONTENT")
             driver.command("POST", "url", {"url": (path / "mvp-wave.html").resolve().as_uri()})
             wave = driver.js("""
                 document.getElementById("plan").click();

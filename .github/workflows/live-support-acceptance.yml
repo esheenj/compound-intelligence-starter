@@ -17,3 +17,5 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
       - name: Read-only Chrome check against public Pages and reviewed manifest
         run: python3 tests/live_support_page_acceptance.py
+      - name: Read-only integration offer HTTPS and Chrome acceptance
+        run: python3 tests/live_integration_offer_acceptance.py

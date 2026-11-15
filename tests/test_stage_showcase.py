@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.render_support import load_channels, render_support
-from scripts.stage_showcase import SUPPORT_CONFIG_SOURCE, SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, CONTEXT_SOURCE, DISAGREEMENT_SOURCE, DECISION_REVIEW_SOURCE, AGENT_TRUST_SOURCE, SIGNED_AGENT_SOURCE, RUNNER_PREFLIGHT_SOURCE, stage_catalog, verify_catalog
+from scripts.stage_showcase import SUPPORT_CONFIG_SOURCE, SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, CONTEXT_SOURCE, DISAGREEMENT_SOURCE, DECISION_REVIEW_SOURCE, AGENT_TRUST_SOURCE, SIGNED_AGENT_SOURCE, RUNNER_PREFLIGHT_SOURCE, INTEGRATION_OFFER_SOURCE, stage_catalog, verify_catalog
 
 
 class ShowcaseStageTests(unittest.TestCase):
@@ -24,7 +24,12 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["githubDeployedUrlCount"], 22)
         self.assertFalse(report["independentBrowserVerified"])
         self.assertFalse(report["publicHostingVerified"])
-        self.assertEqual(report["files"], [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"])
+        self.assertEqual(report["files"], [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"])
+        offer = self.output.joinpath("integration-reliability.html").read_bytes()
+        self.assertEqual(offer, INTEGRATION_OFFER_SOURCE.read_bytes())
+        self.assertEqual(report["integrationOfferSha256"], hashlib.sha256(offer).hexdigest())
+        self.assertTrue(report["integrationOfferSourceValidated"])
+        self.assertEqual(offer.count(b'href="https://esheenj.github.io/integration-reliability-assessment/"'), 1)
         support = self.output.joinpath("support.html").read_bytes()
         self.assertEqual(support, render_support(load_channels(SUPPORT_CONFIG_SOURCE)))
         self.assertIn(b"connect-src 'none'", support)
@@ -33,6 +38,8 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["supportPageSha256"], hashlib.sha256(support).hexdigest())
         content = self.output.joinpath("index.html").read_bytes()
         self.assertEqual(content, SOURCE.read_bytes())
+        self.assertGreaterEqual(content.count(b'href="integration-reliability.html"'), 2)
+        self.assertIn(b'Four tools. One clearer path to a fix.', offer)
         self.assertIn(b"43 public demo entries across 22 independent repositories", content)
         self.assertIn(b"actions/runs/43643183138", content)
         self.assertIn(b"docs/MARKETING_AND_EMBED_KIT.md", content)
@@ -103,7 +110,7 @@ class ShowcaseStageTests(unittest.TestCase):
         self.assertEqual(report["mvpWaveSha256"], hashlib.sha256(wave).hexdigest())
         self.assertIn(b"connect-src 'none'", wave)
         self.assertIn(b"MVP Wave Planner", content)
-        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"])
+        self.assertEqual(sorted(x.name for x in self.output.iterdir()), [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"])
         self.assertNotIn(b"<script", content)
         self.assertNotIn(b"<img", content)
         self.assertEqual(content.count(b">Try demo</a>"), 22)
