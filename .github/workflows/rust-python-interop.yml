@@ -54,5 +54,7 @@ jobs:
           python -m pip install --no-index --find-links dist rust-id-interop-pilot
       - name: Python-Rust exact parity
         run: python -m unittest discover -s tests -v
+      - name: Informational same-runner performance comparison (no speedup gate)
+        run: python benchmark.py --size 50000 --trials 7
       - name: Verify Cargo.lock remained unchanged
         run: git diff --exit-code -- Cargo.lock
