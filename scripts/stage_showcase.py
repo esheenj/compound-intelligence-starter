@@ -62,7 +62,7 @@ REPOS = {
     "visual-regression-starter-oss",
 }
 DEPLOYED_PAGES = {"https://esheenj.github.io/" + repo + "/" for repo in REPOS}
-UX_ENQUIRY_URL = "mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry"
+UX_ENQUIRY_URL = "mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry&body=Hello%20Sigma%20Code%2C%0A%0AI%20would%20like%20to%20discuss%20a%20UX%20engineering%20review.%0AChallenge%3A%20%5Bbriefly%20describe%20the%20workflow%20or%20user%20problem%5D%0ADesired%20outcome%3A%20%5Bwhat%20should%20improve%5D%0ACurrent%20platform%20(optional)%3A%20%5B%20%5D%0APreferred%20timing%20(optional)%3A%20%5B%20%5D%0A%0ASource%3A%20Compound%20Intelligence%20Lab%20UX%20Engineering.%0APlease%20recommend%20a%20suitable%20first%20step.%20No%20credentials%20or%20customer%20personal%20data%20are%20included."
 EXTRA_TOOL_URLS = {
     "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html",
     "https://esheenj.github.io/design-system-foundations-oss/audit.html",
