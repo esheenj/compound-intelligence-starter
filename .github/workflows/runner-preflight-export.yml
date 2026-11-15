@@ -49,6 +49,9 @@ jobs:
           rustc --version
           cargo --version
           uname -m
+          # Version is read from rust/ where rust-toolchain.toml is in scope.
+          test "$(rustc --version | awk '{print $2}')" = '1.100.0'
+          test "$(cargo --version | awk '{print $2}')" = '1.100.0'
           cargo fmt --all -- --check
           cargo clippy --all-targets --locked -- -D warnings
           cargo test --locked
@@ -88,8 +91,8 @@ jobs:
           {
             echo "Build source: $GITHUB_SHA"
             echo "GitHub runner: $RUNNER_OS/$RUNNER_ARCH"
-            rustc --version
-            cargo --version
+            echo 'Compiler toolchain from extracted rust/ (not GitHub checkout root):'
+            ( cd dist/extracted/runner-preflight/rust && rustc --version && cargo --version )
           } > dist/publish/BUILD_INFO.txt
       - name: Upload architecture-specific tested distribution
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -145,6 +148,8 @@ jobs:
             ( cd "dist/download/$arch" && sha256sum --check runner-preflight-source.zip.sha256 && sha256sum --check runner-preflight.sha256 )
             test -s "dist/download/$arch/BUILD_INFO.txt"
             grep -F -- "$GITHUB_SHA" "dist/download/$arch/BUILD_INFO.txt" >/dev/null
+            grep -Eq '^rustc 1[.]100[.]0 ' "dist/download/$arch/BUILD_INFO.txt"
+            grep -Eq '^cargo 1[.]100[.]0 ' "dist/download/$arch/BUILD_INFO.txt"
           done
           cmp dist/download/x86_64/runner-preflight-source.zip dist/download/aarch64/runner-preflight-source.zip
           python3 - <<'PY'
@@ -222,7 +227,19 @@ jobs:
                 exit 1
               fi
             done
-            echo 'Existing complete Runner Preflight preview retained; no mutation performed.'
+            # A released tag is immutable. A later main source run must NOT
+            # relabel its new candidate as the historical v0.2.0 release.
+            published_source="$(git ls-remote --tags origin "refs/tags/$tag" | awk '{print $1}')"
+            if ! [[ "$published_source" =~ ^[0-9a-f]{40}$ ]]; then
+              echo '::error::Existing release tag cannot be resolved to one exact Git object. HOLD.'
+              exit 1
+            fi
+            if [[ "$published_source" != "$GITHUB_SHA" ]]; then
+              echo "Existing immutable $tag points to $published_source; this newer $GITHUB_SHA is only a CI qualification, NOT a new published release."
+            else
+              echo 'Existing immutable Runner Preflight release already targets this exact source.'
+            fi
+            echo 'Existing complete preview retained; no release mutation performed.'
             exit 0
           fi
           if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
