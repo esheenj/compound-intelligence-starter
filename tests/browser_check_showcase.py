@@ -135,11 +135,14 @@ def run():
                     return {
                       page:document.documentElement.scrollWidth,
                       viewport:innerWidth,
-                      cards:document.querySelectorAll('article.card').length
+                      cards:document.querySelectorAll('article.card').length,
+                      overflowSelectors:[...document.querySelectorAll('main *')]
+                        .filter(x=>x.getBoundingClientRect().right>innerWidth+1)
+                        .slice(0,5).map(x=>x.tagName.toLowerCase()+'.'+x.className)
                     };
                 """)
                 verify(layout["page"] <= layout["viewport"] and layout["cards"] == 22,
-                       "NO_PAGE_OVERFLOW_" + str(width))
+                       "NO_PAGE_OVERFLOW_" + str(width) + " "+repr(layout))
             # The integration offer is a commercial discovery page, NOT an extra MVP.
             driver.command("POST", "url", {"url": (path / "integration-reliability.html").resolve().as_uri()})
             offer = driver.js("""
