@@ -1,5 +1,9 @@
 # Compound Intelligence Lab
 
+## Public discovery and sitemap (no analytics)
+
+The [public directory XML sitemap](https://esheenj.github.io/compound-intelligence-starter/sitemap.xml) lists exactly **15 pre-existing hosted HTML pages**, including the [Integration Reliability landing page](https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html). The homepage includes a canonical destination and an accessible sitemap link. Publishing a project-scoped robots file does **not** grant control of the GitHub Pages hostname-root robots policy, nor is Search Console indexing or real traffic verified. See [reviewed discovery and SEO release boundaries](docs/PUBLIC_DISCOVERY_SEO.md).
+
 ## Integration Reliability — customer-facing free toolkit
 
 **[Start with the four free integration tools](https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html)**. The new focused landing page helps CRM, webhook, API and AI workflow owners move from understanding safeguards to examining fictional delivery traces, outlining a failure test and generating a repeatable synthetic fixture. Two Rust/Node engineering labs are included for developers who need event parity or message-contract migration checks. All six demos and their actual source repositories are linked directly.
