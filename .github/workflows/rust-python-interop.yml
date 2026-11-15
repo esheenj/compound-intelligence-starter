@@ -54,7 +54,28 @@ jobs:
           python -m pip install --no-index --find-links dist rust-id-interop-pilot
       - name: Python-Rust exact parity
         run: python -m unittest discover -s tests -v
+      - name: Existing issue-challenger consumer, Python fallback versus native
+        run: |
+          python consumer_probe.py --engine python --issues 12 --iterations 200
+          python consumer_probe.py --engine rust --issues 12 --iterations 200
       - name: Informational same-runner performance comparison (no speedup gate)
         run: python benchmark.py --size 50000 --trials 7
       - name: Verify Cargo.lock remained unchanged
         run: git diff --exit-code -- Cargo.lock
+
+  dependency-audit:
+    name: RustSec, dependency licenses and sources
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Audit locked Rust dependency graph
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          manifest-path: experiments/rust_python_interop/Cargo.toml
+          arguments: --all-features
+          command: check
