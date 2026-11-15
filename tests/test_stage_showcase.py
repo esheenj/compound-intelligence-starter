@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.render_support import load_channels, render_support
-from scripts.stage_showcase import SUPPORT_CONFIG_SOURCE, SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, CONTEXT_SOURCE, DISAGREEMENT_SOURCE, DECISION_REVIEW_SOURCE, AGENT_TRUST_SOURCE, SIGNED_AGENT_SOURCE, RUNNER_PREFLIGHT_SOURCE, INTEGRATION_OFFER_SOURCE, stage_catalog, verify_catalog
+from scripts.stage_showcase import SUPPORT_CONFIG_SOURCE, SOURCE, MVP_WAVE_SOURCE, AGENTOPS_SOURCE, AGENTPROOF_SOURCE, AGENTCREDITS_SOURCE, MODEL_COST_SOURCE, MODEL_FIT_SOURCE, CONTEXT_SOURCE, DISAGREEMENT_SOURCE, DECISION_REVIEW_SOURCE, AGENT_TRUST_SOURCE, SIGNED_AGENT_SOURCE, RUNNER_PREFLIGHT_SOURCE, INTEGRATION_OFFER_SOURCE, UX_ENQUIRY_URL, stage_catalog, verify_catalog
 
 
 class ShowcaseStageTests(unittest.TestCase):
@@ -196,7 +196,11 @@ class ShowcaseStageTests(unittest.TestCase):
 
     def test_public_ux_enquiry_is_exactly_one_authorized_mailto(self):
         source = SOURCE.read_bytes()
-        address = b"mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry"
+        address = UX_ENQUIRY_URL.replace("&", "&amp;").encode("utf-8")
+        self.assertIn(b"Source%3A%20Compound%20Intelligence%20Lab", address)
+        self.assertIn(b"Challenge%3A", address)
+        self.assertIn(b"Desired%20outcome%3A", address)
+        self.assertNotIn(b"http%3A", address)
         self.assertEqual(source.count(b'href="' + address + b'"'), 1)
         self.assertEqual(verify_catalog(source)["repoCount"], 22)
         with self.assertRaisesRegex(ValueError, "UX_ENQUIRY_LINK_MISSING_OR_DUPLICATE"):

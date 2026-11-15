@@ -113,6 +113,7 @@ def run():
                 return {
                     count: links.length,
                     href: lead?.getAttribute('href') ?? '',
+                    body: new URLSearchParams((lead?.getAttribute('href') ?? '').split('?')[1] ?? '').get('body') ?? '',
                     label: lead?.textContent.trim() ?? '',
                     className: lead?.className ?? '',
                     keyboard: lead?.tabIndex === 0,
@@ -120,7 +121,11 @@ def run():
                 };
             """)
             verify(ux_enquiry["count"] == 1 and
-                   ux_enquiry["href"] == "mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry" and
+                   ux_enquiry["href"].startswith("mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry&body=") and
+                   "Challenge: " in ux_enquiry["body"] and
+                   "Desired outcome: " in ux_enquiry["body"] and
+                   "Source: Compound Intelligence Lab UX Engineering." in ux_enquiry["body"] and
+                   "No credentials or customer personal data" in ux_enquiry["body"] and
                    ux_enquiry["label"] == "Enquire about UX Engineering" and
                    "primary" in ux_enquiry["className"] and
                    ux_enquiry["keyboard"] and ux_enquiry["visible"],
