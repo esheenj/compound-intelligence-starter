@@ -20,8 +20,11 @@ from scripts.collect_linux_runner import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-X64 = ROOT / "experiments/runner_preflight/fixtures/job-linux-x64.json"
-ARM64 = ROOT / "experiments/runner_preflight/fixtures/job-linux-arm64.json"
+FIXTURES = ROOT / "experiments/runner_preflight/fixtures"
+if not FIXTURES.is_dir():
+    FIXTURES = ROOT / "fixtures"  # The allowlisted standalone source ZIP layout.
+X64 = FIXTURES / "job-linux-x64.json"
+ARM64 = FIXTURES / "job-linux-arm64.json"
 
 
 def document(arch: str = "x86_64") -> dict:
