@@ -1,0 +1,13 @@
+[build-system]
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
+
+[project]
+name = "rust-id-interop-pilot"
+version = "0.1.0"
+requires-python = ">=3.10"
+description = "Unpublished, synthetic Rust/Python behavioral parity experiment"
+
+[tool.maturin]
+bindings = "pyo3"
+module-name = "rust_ids"
