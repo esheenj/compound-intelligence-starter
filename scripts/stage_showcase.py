@@ -62,6 +62,7 @@ REPOS = {
     "visual-regression-starter-oss",
 }
 DEPLOYED_PAGES = {"https://esheenj.github.io/" + repo + "/" for repo in REPOS}
+UX_ENQUIRY_URL = "mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry"
 EXTRA_TOOL_URLS = {
     "https://esheenj.github.io/mobile-first-flow-kit-oss/recovery.html",
     "https://esheenj.github.io/design-system-foundations-oss/audit.html",
@@ -136,8 +137,10 @@ def verify_catalog(data: bytes) -> dict:
         raise ValueError("PUBLIC_REPOSITORY_LINK_MISSING")
     if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1 or parser.links.count("decision-review.html") != 1 or parser.links.count("agent-trust.html") != 1 or parser.links.count("signed-agent.html") != 1 or parser.links.count("support.html") != 2 or parser.links.count("integration-reliability.html") < 2:
         raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
+    if parser.links.count(UX_ENQUIRY_URL) != 1:
+        raise ValueError("UX_ENQUIRY_LINK_MISSING_OR_DUPLICATE")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html", "integration-reliability.html", "sitemap.xml"}):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link == UX_ENQUIRY_URL or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html", "integration-reliability.html", "sitemap.xml"}):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
