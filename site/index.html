@@ -136,6 +136,26 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
 .ux-enquiry strong{color:var(--ink)}
 @media(max-width:720px){.ux-offer .ux-intro{grid-template-columns:1fr}.ux-examples{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}}
 
+
+/* UX Engineering: authored fictional worked case study; native details, no JavaScript. */
+.ux-case-study{margin:1.1rem 0 1.65rem;padding:clamp(1rem,2.5vw,1.7rem);background:linear-gradient(155deg,#0c1b15,#13271d);border:1px solid #7ec69744;border-radius:1.1rem}
+.ux-case-study .case-heading{max-width:78ch}
+.ux-case-study .case-heading h3{font-size:clamp(1.35rem,2.5vw,2.2rem);letter-spacing:-.04em;margin:.3rem 0 .55rem;line-height:1.15}
+.ux-case-study .case-heading p{color:var(--muted);margin:.35rem 0}
+.ux-case-study .case-marker{color:var(--glow2);font-size:.78rem;font-weight:750;letter-spacing:.08em}
+.ux-case-steps{list-style:none;padding:0;margin:1.3rem 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;counter-reset:uxstep}
+.ux-case-steps li{background:#ffffff07;border:1px solid #ffffff20;border-radius:.85rem;padding:1.1rem;min-width:0}
+.ux-case-steps .case-stage{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--glow2);font-weight:780}
+.ux-case-steps h4{margin:.4rem 0 .5rem;font-size:1.06rem;letter-spacing:-.015em}
+.ux-case-steps p{color:var(--muted);font-size:.88rem;line-height:1.5;margin:.3rem 0 .65rem}
+.ux-case-steps details{border-top:1px solid #ffffff22;padding-top:.65rem;color:var(--muted);font-size:.84rem}
+.ux-case-steps summary{cursor:pointer;color:var(--ink);font-weight:720;min-height:32px}
+.ux-case-steps summary:focus-visible{outline:3px solid var(--glow);outline-offset:3px;border-radius:.2rem}
+.ux-case-note{border-top:1px solid #ffffff22;padding-top:1rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ux-case-note p{color:var(--muted);font-size:.86rem;max-width:77ch;margin:0}
+.ux-case-note a{color:var(--glow2);font-size:.87rem;font-weight:760;text-underline-offset:.22em}
+@media(max-width:700px){.ux-case-steps{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -326,6 +346,44 @@ code.command{display:block;max-width:100%;font:.75rem/1.5 ui-monospace,SFMono-Re
     <div class="ux-example"><span class="ux-id">04 / Design tokens</span><h3>Design System Foundations</h3><p>Adjust fictional themes, inspect CSS variables and explore numeric contrast.</p><a href="https://esheenj.github.io/design-system-foundations-oss/">Try the tokens demo</a></div>
     <div class="ux-example"><span class="ux-id">05 / Mobile</span><h3>Mobile Journey Patterns</h3><p>Test responsive guided steps, feedback, focus and recovery in an offline example.</p><a href="https://esheenj.github.io/mobile-first-flow-kit-oss/">Try the mobile demo</a></div>
   </div>
+
+  <section id="ux-case-study" class="ux-case-study" aria-labelledby="ux-case-heading">
+    <div class="case-heading">
+      <p class="case-marker">WORKED EXAMPLE / FICTIONAL SMALL BUSINESS</p>
+      <h3 id="ux-case-heading">One repair request. Four critical UX decisions.</h3>
+      <p>Imagine a fictional repair service receiving request <strong>SERVICE-104</strong>. How could a team reduce incomplete intake, confusing status changes and staff handoff friction? This walkthrough connects design patterns conceptually; it is <strong>not</strong> an integrated application, client project or measured business result.</p>
+    </div>
+    <ol class="ux-case-steps">
+      <li>
+        <span class="case-stage">01 / Guided intake</span>
+        <h4>Help people submit a complete request</h4>
+        <p>Make missing issue details actionable; preserve valid fields and offer a recoverable draft. Reference: Form Experience Patterns.</p>
+        <details><summary>Proposed acceptance check</summary><p>Next with an empty required issue stays on the current step, identifies the error and preserves other valid input. Check focus and keyboard use separately.</p></details>
+      </li>
+      <li>
+        <span class="case-stage">02 / Workflow decisions</span>
+        <h4>Make every transition explainable</h4>
+        <p>Illustrative journey: DRAFT, REVIEW_REQUIRED and CONFIRMED. Use explicit guards and a replayable decision trail. Reference: UI Workflow State Machine.</p>
+        <details><summary>Proposed acceptance check</summary><p>A direct DRAFT-to-CONFIRMED request is rejected without mutating the current state; an allowed step is recorded in a synthetic journal.</p></details>
+      </li>
+      <li>
+        <span class="case-stage">03 / Staff triage</span>
+        <h4>Make the right work easy to find</h4>
+        <p>Conceptually filter a fictional SERVICE-104 row by review status, preserve sort order and export matching results. Reference: Data Table Interaction Toolkit.</p>
+        <details><summary>Proposed acceptance check</summary><p>Filter and stable sort must give predictable results. Export should respect the selected filter across pages; the existing table demo uses different fictional row fields.</p></details>
+      </li>
+      <li>
+        <span class="case-stage">04 / Consistent interaction</span>
+        <h4>Keep signals understandable across screens</h4>
+        <p>Apply reusable spacing and colour tokens, with text status labels and mobile recovery patterns. References: Design System Foundations and Mobile Journey Patterns.</p>
+        <details><summary>Proposed acceptance check</summary><p>Resolve illustrative tokens and measure contrast, then review the real experience with keyboard, assistive technology and users. A contrast number alone is not accessibility certification.</p></details>
+      </li>
+    </ol>
+    <div class="ux-case-note">
+      <p><strong>Evidence boundary:</strong> Each linked demo is independent and uses its own fictional fixtures. The shared SERVICE-104 record and these cross-product acceptance checks are a proposed implementation plan, not a completed data integration or measured customer improvement.</p>
+      <a href="https://github.com/esheenj/compound-intelligence-starter/blob/main/docs/UX_ENGINEERING_WORKED_CASE_STUDY.md">Read the complete worked example and test plan</a>
+    </div>
+  </section>
   <div class="ux-enquiry">
     <div><p class="kicker">A scoped Sigma Code engagement</p><h3>Turn a useful pattern into a working product experience.</h3>
     <p>Potential work includes a UX friction review, interaction prototype or implementation handoff. Scope and pricing are agreed separately; no pilot places or results are guaranteed. For a private business brief, use <strong>info@sigmacode.co.za</strong>. Please do not post confidential customer data in public issues.</p></div>
