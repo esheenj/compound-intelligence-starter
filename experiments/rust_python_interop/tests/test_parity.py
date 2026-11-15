@@ -48,6 +48,18 @@ class CrossLanguageParity(unittest.TestCase):
     def test_tuple_input(self):
         self.assert_parity(("a", "a", "abc", "é"))
 
+    def test_non_sequence_rejected_before_iteration(self):
+        for value in ("abc", {"a": "a"}, 42):
+            for fn in (python_classify, rust_classify):
+                with self.assertRaises(TypeError):
+                    fn(value)
+
+    def test_oversized_single_string_rejected(self):
+        values = ["x" * 8_000_001]
+        for fn in (python_classify, rust_classify):
+            with self.assertRaises(ValueError):
+                fn(values)
+
     def test_deterministic_seeded_batches(self):
         import random
 
