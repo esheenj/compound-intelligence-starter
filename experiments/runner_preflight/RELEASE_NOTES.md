@@ -1,34 +1,42 @@
-# Runner Preflight v0.1.0 — Linux preview
+# Runner Preflight v0.2.0 — Linux preview with opt-in observation
 
-A small, offline, read-only Rust CLI for comparing a **supplied** CI runner inventory with declared job requirements.
+**Runner Preflight** is a small, offline, read-only Rust CLI for comparing declared CI-job requirements with a runner inventory. This release adds a complementary **Python 3 standard-library observer for an authorized local Linux machine**, making it practical to produce an inventory rather than invent every field.
+
+## What's new from v0.1.0
+
+- New `scripts/collect_linux_runner.py` accepts a strict `runner-preflight-job-v1` requirements document (64 KiB maximum) and observes Linux OS/architecture, free disk on the selected workspace filesystem, `/proc/meminfo` available memory and presence of only the requested executable names.
+- x86-64 and ARM64 example job requirements under `fixtures/`.
+- Duplicate-key, nonfinite JSON, invalid-token, oversized input and symlink rejection with deterministic tests; no shell, subprocess, network request or host mutation.
+- Output is a `runner-preflight-input-v1` manifest accepted by the same Rust evaluator. **Labels and installed Rust targets remain unverified and empty**, and tools are checked for name presence, not versions or competence. A READY result is not actual GitHub runner registration or scheduling readiness.
+- Updated Rust source package version `0.2.0`, committed lockfile, Linux x64/ARM64 extracted-source CI and dependency licence/advisory checks.
 
 ## Assets
 
-- `runner-preflight-linux-x86_64` — compiled for GitHub-hosted Linux x86-64
-- `runner-preflight-linux-aarch64` — compiled for GitHub-hosted Linux ARM64
-- `runner-preflight-source.zip` — deterministic, independently testable standalone source and CI package
-- `SHA256SUMS` — digests for all three downloadable files
-- `BUILD_INFO.txt` — exact source revision and separate build runner details
+- `runner-preflight-linux-x86_64` — Rust executable for GitHub-hosted Linux x86-64
+- `runner-preflight-linux-aarch64` — Rust executable for GitHub-hosted Linux ARM64
+- `runner-preflight-source.zip` — complete original, standalone Rust and Python source, tests, synthetic fixtures and independent CI
+- `SHA256SUMS` — digests of both executables and source ZIP
+- `BUILD_INFO.txt` — source commit and build runner receipts
 
-The source package includes MIT licensing, pinned Cargo.lock and Rust 1.100 toolchain, synthetic fixtures, stand-alone README/CI, a dependency policy, and per-file source provenance. Use only on a platform you authorize.
+## Run locally
 
-## Example
+From the downloaded source ZIP on your own Linux x86-64 host (use `job-linux-arm64.json` on ARM64):
 
 ```sh
 unzip runner-preflight-source.zip
-cd runner-preflight/rust
+cd runner-preflight
+python3 scripts/collect_linux_runner.py --job fixtures/job-linux-x64.json --workspace . > observed.json
+cd rust
 cargo test --locked
-cargo run --locked -- inspect --input ../fixtures/ready-x64.json --format json
+cargo run --locked -- inspect --input ../observed.json --format json
 ```
 
-Expected result: a JSON report with `status: READY`. The provided alternate fixtures demonstrate `WARN` and `HOLD`.
+You may instead evaluate a manually prepared synthetic inventory with `inspect --input FILE --format json`. Exit codes are 0 READY, 1 WARN, 2 HOLD, 3 invalid input/usage.
 
-## Security and scope
+## Scope and assurance
 
-This preview **does not** inspect live machines or GitHub's scheduling state, check tool versions, register or restart runners, install anything, use tokens, send data over a network or grant execution/trading authority. It only checks declared JSON inputs; declarations are not proof of live system state.
+This is a **component-prefixed GitHub prerelease** inside Compound Intelligence Starter, **not** a separate `runner-preflight` repository, crates.io publication, Rust/WASM web app, signed binary, live Oracle runner deployment or commercial service. The collector never reads credentials, hostnames, user names, IP addresses, private runner labels, environmental secrets or process inventories; no output leaves the local machine unless you deliberately redirect/share it.
 
-The release workflow is gated by successful x86-64 and ARM64 ZIP-extracted tests and RustSec/licence/source checks. SHA-256 verifies published file integrity against the manifest; artifacts are not code-signed, independently audited, or a promise of suitability for production.
+GitHub-hosted CI tests the **extracted ZIP on both x86-64 and ARM64** and validates the Rust CLI, observed manifest, synthetic negative cases, cargo-deny RustSec advisories, dependency licence/source constraints and release integrity. The hashes prove contents match the release assets; these binaries are not code-signed or independently audited. The existing v0.1.0 release remains available and unchanged.
 
-This is a **component-prefixed release inside the existing Compound Intelligence Starter repository**. It is not an independent `runner-preflight` GitHub repository, crates.io package or hosted web app.
-
-Additional recurring infrastructure expenditure: R0.
+R0 added recurring infrastructure expenditure; no trading, Oracle or control-plane authority.

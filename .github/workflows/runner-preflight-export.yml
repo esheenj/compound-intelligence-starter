@@ -185,7 +185,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     concurrency:
-      group: runner-preflight-v0.1.0-release
+      group: runner-preflight-v0.2.0-release
       cancel-in-progress: false
     permissions:
       contents: write
@@ -213,7 +213,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag=runner-preflight-v0.1.0
+          tag=runner-preflight-v0.2.0
           if gh release view "$tag" >/dev/null 2>&1; then
             actual="$(gh release view "$tag" --json assets --jq '.assets[].name' | sort)"
             for needed in BUILD_INFO.txt SHA256SUMS runner-preflight-source.zip runner-preflight-linux-x86_64 runner-preflight-linux-aarch64; do
@@ -236,7 +236,7 @@ jobs:
             dist/release/SHA256SUMS \
             dist/release/BUILD_INFO.txt \
             --target "$GITHUB_SHA" \
-            --title 'Runner Preflight v0.1.0 — Linux preview' \
+            --title 'Runner Preflight v0.2.0 — Linux preview' \
             --notes-file experiments/runner_preflight/RELEASE_NOTES.md \
             --latest=false --prerelease
           gh release view "$tag" --json url,isDraft,isPrerelease,tagName,assets
