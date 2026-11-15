@@ -5,6 +5,8 @@ on:
       - 'experiments/runner_preflight/**'
       - 'experiments/runner_preflight/RELEASE_NOTES.md'
       - 'scripts/export_runner_preflight.py'
+      - 'scripts/collect_linux_runner.py'
+      - 'tests/test_runner_preflight_collector.py'
       - 'tests/test_runner_preflight_export.py'
       - '.github/workflows/runner-preflight-export.yml'
   push:
@@ -13,6 +15,8 @@ on:
       - 'experiments/runner_preflight/**'
       - 'experiments/runner_preflight/RELEASE_NOTES.md'
       - 'scripts/export_runner_preflight.py'
+      - 'scripts/collect_linux_runner.py'
+      - 'tests/test_runner_preflight_collector.py'
       - 'tests/test_runner_preflight_export.py'
       - '.github/workflows/runner-preflight-export.yml'
 permissions:
@@ -49,6 +53,17 @@ jobs:
           cargo clippy --all-targets --locked -- -D warnings
           cargo test --locked
           cargo build --release --locked
+      - name: Test extracted Linux observer against extracted Rust binary
+        working-directory: dist/extracted/runner-preflight
+        run: |
+          python3 -m unittest discover -s tests -p test_runner_preflight_collector.py -v
+          case "$(uname -m)" in
+            aarch64|arm64) job=fixtures/job-linux-arm64.json ;;
+            x86_64|amd64) job=fixtures/job-linux-x64.json ;;
+            *) echo 'Unsupported CI architecture' >&2; exit 1 ;;
+          esac
+          python3 scripts/collect_linux_runner.py --job "$job" --workspace "$GITHUB_WORKSPACE" > /tmp/runner-observed.json
+          ./rust/target/release/runner-preflight inspect --input /tmp/runner-observed.json --format json | grep -q '"status":"READY"'
       - name: Smoke test extracted CLI and exit codes
         working-directory: dist/extracted/runner-preflight/rust
         run: |
