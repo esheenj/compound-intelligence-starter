@@ -190,7 +190,7 @@ See the [cross-language validator pilot](docs/CROSS_LANGUAGE_VALIDATOR_PILOT.md)
 
 ### Rust CLI: Runner Preflight
 
-[Runner Preflight](experiments/runner_preflight/README.md) evaluates an explicitly supplied CI runner/job inventory and reports READY, WARN or HOLD with machine-readable findings. It is a read-only diagnostic, not GitHub runner registration, scheduling repair, privileged administration or financial execution.
+**[Runner Preflight — independent public Rust repository](https://github.com/esheenj/runner-preflight)** evaluates an explicitly supplied CI runner/job inventory and reports READY, WARN or HOLD with machine-readable findings. Its clean v0.2.0 source was imported at [`ea0c21d`](https://github.com/esheenj/runner-preflight/commit/ea0c21d1a5da31fb59cafb31324f413256309739); the **[new repository's independent Linux x86-64/ARM64 CI](https://github.com/esheenj/runner-preflight/actions/runs/43741752446) passed**, including Rust 1.100.0 unit tests, local Linux observer integration, and dependency advisories/licences/sources. [Historical standalone export documentation](experiments/runner_preflight/README.md) remains available. It is a read-only diagnostic, not GitHub runner registration, scheduling repair, privileged administration or financial execution.
 
 **[Try the offline browser playground](https://esheenj.github.io/compound-intelligence-starter/runner-preflight.html)** to edit synthetic runner inventories and inspect outcomes. This page is an independently tested JavaScript reference, not a live host inspector or Rust/WASM executable, and is not counted as an additional standalone public repository.
 
