@@ -105,6 +105,26 @@ def run():
                    and case_study["firstOpen"] and case_study["noNewArticles"]
                    and case_study["docLink"] and case_study["evidenceBoundary"]
                    and case_study["fictionalId"], "UX_CASE_STUDY_NATIVE_INTERACTION_AND_HONEST_SCOPE")
+            ux_enquiry = driver.js("""
+                const root = document.querySelector('#ux-engineering .ux-enquiry');
+                const links = [...(root?.querySelectorAll('a') ?? [])];
+                const lead = links[0];
+                const css = lead ? getComputedStyle(lead) : null;
+                return {
+                    count: links.length,
+                    href: lead?.getAttribute('href') ?? '',
+                    label: lead?.textContent.trim() ?? '',
+                    className: lead?.className ?? '',
+                    keyboard: lead?.tabIndex === 0,
+                    visible: css?.display !== 'none' && css?.visibility !== 'hidden'
+                };
+            """)
+            verify(ux_enquiry["count"] == 1 and
+                   ux_enquiry["href"] == "mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry" and
+                   ux_enquiry["label"] == "Enquire about UX Engineering" and
+                   "primary" in ux_enquiry["className"] and
+                   ux_enquiry["keyboard"] and ux_enquiry["visible"],
+                   "DIRECT_PRIVATE_UX_ENQUIRY_AVAILABLE_WITHOUT_TRACKING")
             driver.key("\ue004")  # Tab to skip link.
             skip = driver.js("""
                 return {className:document.activeElement.className,
