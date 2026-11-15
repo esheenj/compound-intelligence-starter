@@ -1,0 +1,161 @@
+<style>
+#sigma-code-ux-engineering {
+  --sc-ux-bg: #101c15;
+  --sc-ux-ink: #f5faf6;
+  --sc-ux-muted: #bacac0;
+  --sc-ux-green: #96f7ad;
+  --sc-ux-border: rgba(150,247,173,.20);
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  max-width: 1260px;
+  margin: clamp(24px,6vw,90px) auto;
+  padding: clamp(24px,5.5vw,72px);
+  color: var(--sc-ux-ink);
+  background: radial-gradient(circle at 92% 5%,rgba(62,158,87,.16),transparent 44%),linear-gradient(145deg,#101c15,#09120d 80%);
+  border: 1px solid var(--sc-ux-border);
+  border-radius: 26px;
+  box-shadow: 0 28px 95px rgba(0,0,0,.23);
+  font-family: inherit;
+  line-height: 1.5;
+}
+#sigma-code-ux-engineering * { box-sizing: border-box; }
+#sigma-code-ux-engineering .scux-kicker {
+  margin: 0 0 24px;
+  color: var(--sc-ux-green);
+  font-size: .76rem;
+  font-weight: 720;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+#sigma-code-ux-engineering .scux-intro { max-width: 845px; }
+#sigma-code-ux-engineering h2 {
+  margin: 0 0 20px;
+  font-size: clamp(2.35rem,5.5vw,5.5rem);
+  font-weight: 690;
+  letter-spacing: -.064em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+#sigma-code-ux-engineering h2 span { color: var(--sc-ux-green); }
+#sigma-code-ux-engineering .scux-lede {
+  margin: 0;
+  max-width: 690px;
+  font-size: clamp(1.06rem,1.45vw,1.3rem);
+  color: var(--sc-ux-muted);
+}
+#sigma-code-ux-engineering .scux-case {
+  position: relative;
+  margin: clamp(26px,5vw,55px) 0 28px;
+  padding: clamp(21px,3vw,38px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  background: rgba(255,255,255,.035);
+}
+#sigma-code-ux-engineering .scux-eyebrow {
+  color: var(--sc-ux-green);
+  margin: 0 0 10px;
+  font-weight: 690;
+  font-size: .73rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+#sigma-code-ux-engineering h3 {
+  margin: 0 0 10px;
+  font-size: clamp(1.4rem,2.25vw,2.2rem);
+  letter-spacing: -.035em;
+  line-height: 1.17;
+}
+#sigma-code-ux-engineering .scux-case-summary { color: var(--sc-ux-muted); max-width: 800px; margin: 0 0 24px; }
+#sigma-code-ux-engineering .scux-stages {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 10px;
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+}
+#sigma-code-ux-engineering .scux-stages li {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 155px;
+  padding: 17px;
+  border: 1px solid rgba(255,255,255,.11);
+  background: rgba(5,20,12,.55);
+  border-radius: 12px;
+}
+#sigma-code-ux-engineering .scux-count { color: var(--sc-ux-green); font-size: .8rem; font-weight: 750; }
+#sigma-code-ux-engineering .scux-stages strong { display: block; margin: 12px 0 6px; font-size: 1.02rem; line-height: 1.25; }
+#sigma-code-ux-engineering .scux-stages small { display: block; color: var(--sc-ux-muted); font-size: .83rem; }
+#sigma-code-ux-engineering .scux-evidence { margin: 0; font-size: .87rem; color: var(--sc-ux-muted); }
+#sigma-code-ux-engineering a { text-decoration: none; text-underline-offset: 4px; }
+#sigma-code-ux-engineering a:focus-visible { outline: 3px solid var(--sc-ux-green); outline-offset: 4px; border-radius: 4px; }
+#sigma-code-ux-engineering .scux-textlink { display: inline-block; margin-top: 17px; color: var(--sc-ux-green); text-decoration: underline; font-size: .94rem; font-weight: 650; }
+#sigma-code-ux-engineering .scux-footer {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+#sigma-code-ux-engineering .scux-footer-copy { max-width: 620px; }
+#sigma-code-ux-engineering .scux-footer-copy h3 { font-size: clamp(1.2rem,2vw,1.85rem); margin: 0 0 8px; }
+#sigma-code-ux-engineering .scux-footer-copy p { margin: 0; color: var(--sc-ux-muted); font-size: .95rem; }
+#sigma-code-ux-engineering .scux-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 13px 24px;
+  border-radius: 100px;
+  color: #07100b;
+  background: var(--sc-ux-green);
+  font-weight: 740;
+  text-align: center;
+  transition: background-color .15s ease;
+}
+#sigma-code-ux-engineering .scux-cta:hover { background: #bcffd0; }
+@media (max-width: 900px) {
+  #sigma-code-ux-engineering .scux-stages { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  #sigma-code-ux-engineering .scux-stages li { min-height: 125px; }
+}
+@media (max-width: 520px) {
+  #sigma-code-ux-engineering { margin: 12px; padding: 25px 19px; border-radius: 18px; }
+  #sigma-code-ux-engineering .scux-stages { grid-template-columns: 1fr; }
+  #sigma-code-ux-engineering .scux-stages li { min-height: auto; }
+  #sigma-code-ux-engineering .scux-footer { gap: 21px; }
+  #sigma-code-ux-engineering .scux-cta { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sigma-code-ux-engineering .scux-cta { transition: none; }
+}
+</style>
+<section id="sigma-code-ux-engineering" aria-labelledby="scux-heading">
+  <div class="scux-intro">
+    <p class="scux-kicker">Sigma Code / UX Engineering</p>
+    <h2 id="scux-heading">Better journeys.<span> More dependable interfaces.</span></h2>
+    <p class="scux-lede">A good interface does more than look polished. It helps people finish the task, recover from mistakes and know what happens next. Explore the engineering patterns behind those experiences.</p>
+  </div>
+  <article class="scux-case" aria-labelledby="scux-case-title">
+    <p class="scux-eyebrow">Featured example · Fictional business scenario</p>
+    <h3 id="scux-case-title">One service request. Four decisions that matter.</h3>
+    <p class="scux-case-summary">Follow a sample repair request from the first form to the staff handoff. Each step reveals a different usability or engineering risk worth testing.</p>
+    <ol class="scux-stages">
+      <li><span class="scux-count">01 / Intake</span><strong>Clear information</strong><small>Validation and a recoverable draft</small></li>
+      <li><span class="scux-count">02 / Decisions</span><strong>Predictable state</strong><small>Guarded changes and a readable trail</small></li>
+      <li><span class="scux-count">03 / Staff review</span><strong>Find the right work</strong><small>Filtering, sorting and export patterns</small></li>
+      <li><span class="scux-count">04 / Consistency</span><strong>One design language</strong><small>Reusable tokens and mobile recovery</small></li>
+    </ol>
+    <p class="scux-evidence">The case study uses invented data and five independent public examples. It is not a live CRM integration or a measured customer project.</p>
+    <a class="scux-textlink" href="https://esheenj.github.io/compound-intelligence-starter/#ux-case-study">Explore the public UX case study</a>
+  </article>
+  <div class="scux-footer">
+    <div class="scux-footer-copy">
+      <h3>Where does your customer journey get stuck?</h3>
+      <p>We can scope an experience review, focused prototype or implementation handoff around an actual business problem. Project scope and pricing are agreed separately.</p>
+    </div>
+    <a class="scux-cta" href="mailto:info@sigmacode.co.za?subject=UX%20Engineering%20Enquiry">Discuss a UX engineering review</a>
+  </div>
+</section>
