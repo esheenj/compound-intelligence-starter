@@ -16,6 +16,8 @@ Explore a new [UX Engineering collection](https://esheenj.github.io/compound-int
 - [Design System Foundations](https://esheenj.github.io/design-system-foundations-oss/) — CSS token compilation and numeric contrast examples.
 - [Mobile Journey Patterns](https://esheenj.github.io/mobile-first-flow-kit-oss/) — responsive guidance, focus and recovery patterns.
 
+[**Read the worked case study: a fictional repair-request intake and staff handoff**](docs/UX_ENGINEERING_WORKED_CASE_STUDY.md). It maps the patterns into a proposed acceptance-test plan without pretending that the five existing demos exchange data or run as one workflow.
+
 These demos are not integrated, deployed customer systems or completed accessibility audits. They provide public evidence of reusable UX engineering approaches. Sigma Code may separately scope UX reviews, prototypes or implementation work; no commercial transaction or pilot availability is claimed. Business briefs can be sent privately to `info@sigmacode.co.za`; use GitHub issues only for nonconfidential OSS feedback. The five existing GitHub Pages destinations, repository slugs and source interfaces stay unchanged.
 
 **Challenge assumptions. Verify outcomes. Reuse what works.**
