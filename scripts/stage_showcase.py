@@ -13,8 +13,10 @@ import shutil
 
 if __package__:
     from .render_support import load_channels, render_support
+    from .public_discovery import verify_public_discovery
 else:
     from render_support import load_channels, render_support
+    from public_discovery import verify_public_discovery
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "site" / "index.html"
@@ -31,6 +33,8 @@ AGENT_TRUST_SOURCE = ROOT / "site" / "agent-trust.html"
 SIGNED_AGENT_SOURCE = ROOT / "site" / "signed-agent.html"
 RUNNER_PREFLIGHT_SOURCE = ROOT / "site" / "runner-preflight.html"
 INTEGRATION_OFFER_SOURCE = ROOT / "site" / "integration-reliability.html"
+ROBOTS_SOURCE = ROOT / "site" / "robots.txt"
+SITEMAP_SOURCE = ROOT / "site" / "sitemap.xml"
 SUPPORT_CONFIG_SOURCE = ROOT / "support" / "channels.json"
 DESTINATION = ROOT / "dist" / "pages"
 REPOS = {
@@ -116,8 +120,11 @@ def verify_catalog(data: bytes) -> dict:
     parser = SourceCatalog()
     parser.feed(html)
     parser.close()
-    if parser.script or parser.remote_assets or parser.articles != 22 or parser.main != 1 or parser.heading != 1:
+    if parser.script or parser.remote_assets != ["link"] or parser.articles != 22 or parser.main != 1 or parser.heading != 1:
         raise ValueError("INVALID_CATALOG_STRUCTURE")
+    if (html.count('<link rel="canonical" href="https://esheenj.github.io/compound-intelligence-starter/">') != 1
+            or parser.links.count("sitemap.xml") != 1):
+        raise ValueError("CATALOG_DISCOVERY_LINKS_INVALID")
     if "connect-src 'none'" not in html or "script-src 'none'" not in html:
         raise ValueError("CATALOG_CSP_REQUIRED")
     expected_links = set()
@@ -130,7 +137,7 @@ def verify_catalog(data: bytes) -> dict:
     if not EXTRA_TOOL_URLS.issubset(observed) or parser.links.count("mvp-wave.html") != 1 or parser.links.count("agentops.html") != 1 or parser.links.count("agentproof.html") != 1 or parser.links.count("agentcredits.html") != 1 or parser.links.count("model-cost.html") != 1 or parser.links.count("model-fit.html") != 1 or parser.links.count("context-preservation.html") != 1 or parser.links.count("model-disagreement.html") != 1 or parser.links.count("decision-review.html") != 1 or parser.links.count("agent-trust.html") != 1 or parser.links.count("signed-agent.html") != 1 or parser.links.count("support.html") != 2 or parser.links.count("integration-reliability.html") < 2:
         raise ValueError("ADDITIONAL_TOOL_LINK_MISSING")
     for link in parser.links:
-        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html", "integration-reliability.html"}):
+        if not (link.startswith("#") or link.startswith("https://github.com/esheenj/") or link in DEPLOYED_PAGES or link in EXTRA_TOOL_URLS or link in {"mvp-wave.html", "agentops.html", "agentproof.html", "agentcredits.html", "model-cost.html", "model-fit.html", "context-preservation.html", "model-disagreement.html", "decision-review.html", "agent-trust.html", "signed-agent.html", "support.html", "integration-reliability.html", "sitemap.xml"}):
             raise ValueError("CATALOG_EXTERNAL_LINK_NOT_ALLOWED")
     # Verify exact source, issues and GitHub-deployed URL on each card.
     # A swapped destination or unrelated host must not be published.
@@ -275,6 +282,12 @@ def stage_catalog(output: Path) -> dict:
         raise ValueError("INTEGRATION_OFFER_SOURCE_INVALID")
     offer = INTEGRATION_OFFER_SOURCE.read_bytes()
     offer_receipt = verify_integration_offer(offer)
+    for source in (ROBOTS_SOURCE, SITEMAP_SOURCE):
+        if source.is_symlink() or source.parent.is_symlink() or not source.is_file():
+            raise ValueError("PUBLIC_DISCOVERY_SOURCE_INVALID")
+    robots = ROBOTS_SOURCE.read_bytes()
+    sitemap = SITEMAP_SOURCE.read_bytes()
+    discovery_receipt = verify_public_discovery(robots, sitemap)
     support = render_support(load_channels(SUPPORT_CONFIG_SOURCE))
     if output.exists() or output.is_symlink():
         raise ValueError("OUTPUT_EXISTS")
@@ -297,8 +310,10 @@ def stage_catalog(output: Path) -> dict:
         (output / "runner-preflight.html").write_bytes(runner_preflight)
         (output / "support.html").write_bytes(support)
         (output / "integration-reliability.html").write_bytes(offer)
+        (output / "robots.txt").write_bytes(robots)
+        (output / "sitemap.xml").write_bytes(sitemap)
         (output / ".nojekyll").write_bytes(b"")
-        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"]:
+        if sorted(p.name for p in output.iterdir()) != [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "robots.txt", "runner-preflight.html", "signed-agent.html", "sitemap.xml", "support.html"]:
             raise ValueError("STAGED_UNEXPECTED_FILE")
     except BaseException:
         shutil.rmtree(output)
@@ -306,11 +321,15 @@ def stage_catalog(output: Path) -> dict:
     return {
         "schema": "esheen-oss-directory-stage-v1",
         "state": "STAGED_ONLY", "publicHostingVerified": False,
-        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "runner-preflight.html", "signed-agent.html", "support.html"],
+        "files": [".nojekyll", "agent-trust.html", "agentcredits.html", "agentops.html", "agentproof.html", "context-preservation.html", "decision-review.html", "index.html", "integration-reliability.html", "model-cost.html", "model-disagreement.html", "model-fit.html", "mvp-wave.html", "robots.txt", "runner-preflight.html", "signed-agent.html", "sitemap.xml", "support.html"],
         "additionalHostedToolCount": 11,
         "supportPageSha256": hashlib.sha256(support).hexdigest(),
         "integrationOfferSha256": offer_receipt["htmlSha256"],
         "integrationOfferSourceValidated": True,
+        "publicDiscoverySitemapSha256": discovery_receipt["sitemapSha256"],
+        "publicDiscoveryRobotsSha256": discovery_receipt["robotsSha256"],
+        "publicDiscoveryListedPages": discovery_receipt["listedPages"],
+        "originRootRobotsAuthority": False,
         "additionalLinkedPublicToolCount": len(EXTRA_TOOL_URLS),
         "mvpWaveSha256": hashlib.sha256(wave).hexdigest(),
         "agentOpsSha256": hashlib.sha256(agentops).hexdigest(),

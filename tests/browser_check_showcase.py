@@ -33,6 +33,8 @@ def run():
             page = driver.js("""
                 return {
                     title:document.title,
+                    canonical:document.querySelector('link[rel="canonical"]')?.href,
+                    sitemap:[...document.querySelectorAll('a')].filter(x=>x.getAttribute('href')==='sitemap.xml').length,
                     language:document.documentElement.lang,
                     h1:document.querySelectorAll('h1').length,
                     main:document.querySelectorAll('main').length,
@@ -75,6 +77,8 @@ def run():
                    and "https://esheenj.github.io/flow-state-machine-oss/blueprint.html" in page["extraLinks"]
                    and "https://esheenj.github.io/flow-state-machine-oss/approval.html" in page["extraLinks"],
                    "EXACT_PUBLIC_TOOL_DISCOVERY")
+            verify(page["canonical"]=="https://esheenj.github.io/compound-intelligence-starter/" and page["sitemap"]==1,
+                   "PUBLIC_SITEMAP_AND_CANONICAL_DISCOVERY")
             verify(page["script"] == 0 and page["externalAssets"] == 0
                    and "connect-src 'none'" in page["csp"]
                    and "script-src 'none'" in page["csp"],
