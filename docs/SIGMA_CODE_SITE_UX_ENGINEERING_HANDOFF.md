@@ -87,3 +87,14 @@ If the native website editor supports components, prefer its **existing card, bu
 - Commercial brand: Sigma Code, not Sigma Quant Finance.
 - No private client work, private trading source, confidential governance instructions, production credentials, or payment flows are used by this feature.
 - **Additional recurring infrastructure spend:** R0.
+
+
+## Reviewed HTML/CSS component
+
+- [Copy-ready, scoped website feature markup](SIGMA_CODE_UX_FEATURE_EMBED.html) — original responsive HTML/CSS source. This fragment has **no preview-only meta tags**, scripts, external assets, image hotlinks, forms, advertising controls or third-party integrations. It contains one H2-led corporate feature, four fictional UX steps and exactly two explicit links: the previously published case study and the public Sigma Code enquiry mailbox.
+- Automated regression guard: `tests/test_sigma_code_ux_feature.py`. It checks markup structure, allowed links, responsive/focus/reduced-motion support, and language separating fictional evidence from customer outcomes.
+- Separate local Chromium snapshots were visually inspected at 360px and 1440px; layout checks passed at 320px, 360px, 768px and 1440px. These previews are **not evidence of how the production ChatGPT Sites editor will render the fragment**.
+
+**Integration action remains authorized-site-editor only:** copy the fragment into the **existing** Sigma Code Sites project if that editor supports a trusted custom HTML block, or reconstruct with its native components. Preserve the site's master logo and existing SEO/analytics/cookie settings. Do not paste the standalone preview's `noindex` metadata into the live corporate website. Inspect and approve the actual website diff before publishing. The current GitHub repository is a source and evidence holder, not a publisher for the corporate domain.
+
+**Current site status:** `READY_FOR_SITE_EDITOR_NOT_DEPLOYED`; no authenticated site editor, current live markup or production publishing receipt has been verified in this conversation.
