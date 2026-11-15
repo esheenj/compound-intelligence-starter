@@ -79,6 +79,28 @@ def run():
                    and "connect-src 'none'" in page["csp"]
                    and "script-src 'none'" in page["csp"],
                    "NO_RUNTIME_OR_NETWORK_ASSETS")
+            case_study = driver.js("""
+                const section = document.getElementById('ux-case-study');
+                const steps = [...(section?.querySelectorAll('.ux-case-steps > li') ?? [])];
+                const checks = [...(section?.querySelectorAll('details') ?? [])];
+                const doc = section?.querySelector('a[href*="UX_ENGINEERING_WORKED_CASE_STUDY.md"]');
+                if (checks.length) checks[0].open = true; // Native details works without JS on the site.
+                return {
+                    exists: !!section,
+                    steps: steps.length,
+                    acceptanceChecks: checks.length,
+                    firstOpen: !!checks[0]?.open,
+                    noNewArticles: document.querySelectorAll('article.card').length === 22,
+                    docLink: doc?.href.endsWith('/docs/UX_ENGINEERING_WORKED_CASE_STUDY.md') ?? false,
+                    evidenceBoundary: section?.textContent.includes('not a completed data integration') ?? false,
+                    fictionalId: section?.textContent.includes('SERVICE-104') ?? false
+                };
+            """)
+            verify(case_study["exists"] and case_study["steps"] == 4
+                   and case_study["acceptanceChecks"] == 4
+                   and case_study["firstOpen"] and case_study["noNewArticles"]
+                   and case_study["docLink"] and case_study["evidenceBoundary"]
+                   and case_study["fictionalId"], "UX_CASE_STUDY_NATIVE_INTERACTION_AND_HONEST_SCOPE")
             driver.key("\ue004")  # Tab to skip link.
             skip = driver.js("""
                 return {className:document.activeElement.className,
