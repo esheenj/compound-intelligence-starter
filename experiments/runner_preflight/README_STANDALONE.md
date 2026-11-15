@@ -18,6 +18,24 @@ cargo run --locked -- inspect --input ../fixtures/ready-x64.json --format json
 
 Expected report status: `READY`. Other supplied synthetic fixtures produce `WARN` or `HOLD`. An incompatible inventory is a diagnostic finding, not permission to change the machine.
 
+## Optional: observe your own Linux runner
+
+The accompanying **Python 3 standard-library** observer reads a deliberately small set of current host facts locally, then generates input for the Rust evaluator. This is a complementary Python/Rust workflow, not a replacement for the Rust engine and **not present in the original v0.1.0 release**.
+
+Run these commands from the extracted standalone source root on your **own authorized Linux x86-64 machine** (choose `job-linux-arm64.json` on ARM64):
+
+```sh
+python3 scripts/collect_linux_runner.py --job fixtures/job-linux-x64.json --workspace . > observed.json
+cd rust
+cargo run --locked -- inspect --input ../observed.json --format json
+```
+
+The observer takes a job-only `runner-preflight-job-v1` JSON file and records Linux OS/architecture, free disk for the **specified workspace filesystem**, `/proc/meminfo` `MemAvailable` and presence of only the **requested executable names** on PATH. It reads files and metadata only: **no network, credentials, SSH, privileged commands, installs, subprocesses or filesystem mutations**. It writes its manifest to stdout, so redirect it to a local file only if you want to keep it.
+
+The result is **not attested**. A tool name being present does not prove its version or functional readiness; OS resource values are point-in-time estimates in MiB and capped at the CLI's 1,000,000-unit input bound. Labels and installed Rust targets are intentionally left empty because they cannot be independently verified through this small observer. Jobs requiring those claims receive HOLD unless separately verified and supplied using another provenance-aware workflow. No output includes IP addresses, usernames, hostnames, environment variables, executable paths or secrets.
+
+An invalid or symlinked job input (64 KiB maximum), unsupported host or unavailable Linux observation exits 3. The collector is intentionally Linux-only and never repairs CI runner registrations, scheduling, billing, disk capacity or software.
+
 ## Contract
 
 The input JSON (maximum 64 KiB, regular file only, no symlinks) has `schema: "runner-preflight-input-v1"`, plus:

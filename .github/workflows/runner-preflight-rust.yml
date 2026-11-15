@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'experiments/runner_preflight/**'
+      - 'scripts/collect_linux_runner.py'
+      - 'tests/test_runner_preflight_collector.py'
       - 'site/runner-preflight.html'
       - 'tests/test_runner_preflight_ui.mjs'
       - '.github/workflows/runner-preflight-rust.yml'
@@ -10,6 +12,8 @@ on:
     branches: [main]
     paths:
       - 'experiments/runner_preflight/**'
+      - 'scripts/collect_linux_runner.py'
+      - 'tests/test_runner_preflight_collector.py'
       - 'site/runner-preflight.html'
       - 'tests/test_runner_preflight_ui.mjs'
       - '.github/workflows/runner-preflight-rust.yml'
@@ -59,6 +63,18 @@ jobs:
         run: |
           cd ../../..
           RUNNER_PREFLIGHT_BINARY=experiments/runner_preflight/rust/target/release/runner-preflight node --test tests/test_runner_preflight_ui.mjs
+
+      - name: Verify Linux observation and exact Rust CLI compatibility
+        run: |
+          cd ../../..
+          python3 -m unittest tests.test_runner_preflight_collector -v
+          case "$(uname -m)" in
+            aarch64|arm64) job=experiments/runner_preflight/fixtures/job-linux-arm64.json ;;
+            x86_64|amd64) job=experiments/runner_preflight/fixtures/job-linux-x64.json ;;
+            *) echo 'Unsupported CI architecture' >&2; exit 1 ;;
+          esac
+          python3 scripts/collect_linux_runner.py --job "$job" --workspace "$GITHUB_WORKSPACE" > /tmp/runner-inventory.json
+          experiments/runner_preflight/rust/target/release/runner-preflight inspect --input /tmp/runner-inventory.json --format json | grep -q '"status":"READY"'
 
   dependency-audit:
     runs-on: ubuntu-24.04

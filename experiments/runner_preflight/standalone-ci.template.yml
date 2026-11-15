@@ -43,6 +43,18 @@ jobs:
           test "$holding" -eq 2
           grep -q '"status":"WARN"' /tmp/runner-warn.json
           grep -q '"status":"HOLD"' /tmp/runner-hold.json
+      - name: Validate read-only Linux observation with the extracted Rust binary
+        working-directory: .
+        run: |
+          python3 -m unittest discover -s tests -p test_runner_preflight_collector.py -v
+          case "$(uname -m)" in
+            aarch64|arm64) job=fixtures/job-linux-arm64.json ;;
+            x86_64|amd64) job=fixtures/job-linux-x64.json ;;
+            *) echo 'Unsupported CI architecture' >&2; exit 1 ;;
+          esac
+          python3 scripts/collect_linux_runner.py --job "$job" --workspace "$GITHUB_WORKSPACE" > /tmp/runner-inventory.json
+          ./rust/target/release/runner-preflight inspect --input /tmp/runner-inventory.json --format json | grep -q '"status":"READY"'
+
   dependency-audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 15

@@ -1,0 +1,15 @@
+{
+  "schema": "runner-preflight-job-v1",
+  "job": {
+    "os": "linux",
+    "arch": "aarch64",
+    "required_labels": [],
+    "min_disk_mb": 1,
+    "min_memory_mb": 1,
+    "required_tools": [
+      "git",
+      "python3"
+    ],
+    "rust_target": null
+  }
+}
