@@ -48,7 +48,7 @@ small{color:var(--muted)}.row{display:flex;align-items:center;justify-content:sp
 <p class="meta">DEVELOPER TOOLS / RUST / OFFLINE REFERENCE</p>
 <h1>Know why a CI runner <span style="color:var(--lime)">can't take a job.</span></h1>
 <p class="lead">Test a runner inventory against job requirements and get a deterministic <strong>READY</strong>, <strong>WARN</strong>, or <strong>HOLD</strong> with explicit reason codes. This browser reference demonstrates the same input contract as the Rust CLI, without inspecting your device.</p>
-<div class="buttons"><a href="https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.2.0">Get the tested Rust CLI</a><a href="https://github.com/esheenj/compound-intelligence-starter/tree/main/experiments/runner_preflight">Read source &amp; fixtures</a></div>
+<div class="buttons"><a href="https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.2.0">Get the tested Rust CLI</a><a href="https://github.com/esheenj/runner-preflight">Read standalone source &amp; fixtures</a></div>
 </header>
 <div class="layout">
 <section class="panel" aria-labelledby="input-title">
@@ -79,6 +79,7 @@ small{color:var(--muted)}.row{display:flex;align-items:center;justify-content:sp
 <section class="panel" aria-labelledby="how-title" style="margin-top:1.2rem">
 <h2 id="how-title">03 / Move from this worksheet to the Rust binary</h2>
 <p>The released <a href="https://github.com/esheenj/compound-intelligence-starter/releases/tag/runner-preflight-v0.2.0">Runner Preflight v0.2.0 preview</a> accepts <code>inspect --input FILE --format json</code>. Exit codes are <strong>0 READY</strong>, <strong>1 WARN</strong>, <strong>2 HOLD</strong>, and <strong>3 invalid input</strong>. Linux x86-64 and ARM64 binaries were compiled and tested from the extracted standalone source on GitHub Actions.</p>
+<p><strong>Standalone on GitHub:</strong> <a href="https://github.com/esheenj/runner-preflight">Runner Preflight public Rust repository</a> has its own <a href="https://github.com/esheenj/runner-preflight/actions/runs/43741752446">successful x86-64/ARM64 CI</a>. The historical v0.2.0 downloadable binaries remain on Compound Intelligence Starter; this playground is still an offline JavaScript reference, not the Rust executable or a live-host inspection.</p>
 <p><strong>New in v0.2.0:</strong> the downloadable standalone source includes an opt-in, Python 3 standard-library Linux observer. On a machine you authorize, it can collect disk and memory availability, OS/architecture and the presence of requested executable names, then pass that local JSON to Rust. It cannot verify registered runner labels, installed Rust targets, tool versions or GitHub scheduling. This browser page still uses only synthetic supplied inventories and does not inspect your device.</p>
 <p class="quiet">This page is a separate JavaScript reference implementation, not Rust compiled to WebAssembly. The three example scenarios and errors are checked for parity in project CI. It does not have control-plane, Oracle, trading or AI agent permissions.</p>
 </section>
