@@ -41,3 +41,24 @@ The HTML is static CSS-only, with no scripts, forms, external assets, third-part
 The pipeline requires Python regression and responsive/keyboard Chrome checks, followed by exact merged-main CI, GitHub Pages deployment and read-only post-publish HTTPS+Chrome verification of source bytes and destinations. Source, tests, deployment and actual live operation must be reported separately.
 
 The first meaningful conversion evidence is a qualified inbound enquiry in the real business inbox or reviewed public GitHub issue, not page views inferred from advertising. No revenue or actual leads are presumed. Added recurring infrastructure spend remains R0; financial trading and private Commander/Cortex authority remain outside scope.
+
+## Privacy-safe WhatsApp forwarding — 16 November 2026
+
+The offer includes a plainly labeled **Share on WhatsApp** link using WhatsApp's
+published `https://wa.me/?text=` share format without a telephone number.
+The prefilled, editable message mentions four free synthetic integration tools
+and links only to the existing public Integration Reliability landing page.
+
+**On click only:** WhatsApp is opened and the visitor chooses a recipient and
+decides whether to send. No message, contact address or customer data is sent
+automatically by this page. The public site has no analytics, tracking parameters,
+JavaScript event handlers, cookies, storage, third-party embeds or new billing.
+
+The CI guard pins the exact encoded message, prevents replacement with any
+recipient-specific phone number or alternate website and tests disclosure
+and mobile responsiveness in Chrome. Post-publish acceptance checks the actual
+live DOM destination but does not click the link or send a message.
+
+The Sigma Code business website has not been changed. Real distribution,
+inbound enquiries, message deliveries and paid conversions remain unverified.
+Existing inventory remains 22 standalone public repositories / 43 demos.

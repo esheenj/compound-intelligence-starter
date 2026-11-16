@@ -15,7 +15,7 @@ from browser_check_issue_report import Driver, driver_executable
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from scripts.stage_showcase import INTEGRATION_OFFER_SOURCE,verify_integration_offer
+from scripts.stage_showcase import INTEGRATION_OFFER_SOURCE,verify_integration_offer,APPROVED_WHATSAPP_SHARE_URL
 
 URL="https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html"
 
@@ -69,7 +69,11 @@ def run():
                 scripts:document.querySelectorAll('script').length,
                 forms:document.querySelectorAll('form').length,
                 assets:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length,
-                caution:document.body.textContent.includes('An enquiry is not a booking')
+                caution:document.body.textContent.includes('An enquiry is not a booking'),
+                whatsapp:[...document.querySelectorAll('a[href^="https://wa.me/?text="]')]
+                  .map(a=>({href:a.href,target:a.target,rel:a.rel,
+                            label:a.getAttribute('aria-label')}))
+
             };
         """)
         verify(result["href"]==URL and result["origin"]=="https://esheenj.github.io",
@@ -85,6 +89,12 @@ def run():
         verify(len(result["exampleLinks"])==4 and
                all(x.startswith("https://esheenj.github.io/") for x in result["exampleLinks"]),
                "INTEGRATION_OFFER_FOUR_REAL_DEMOS")
+        verify(len(result["whatsapp"])==1
+               and result["whatsapp"][0]["href"]==APPROVED_WHATSAPP_SHARE_URL
+               and result["whatsapp"][0]["target"]=="_blank"
+               and "noopener" in result["whatsapp"][0]["rel"]
+               and "WhatsApp" in result["whatsapp"][0]["label"],
+               "INTEGRATION_OFFER_WHATSAPP_SHARE_USER_ACTION_ONLY")
         for width,height in ((320,720),(375,812),(1440,900)):
             driver.viewport(width,height)
             verify(driver.js("return document.documentElement.scrollWidth<=innerWidth+1;") is True,
@@ -94,6 +104,8 @@ def run():
             "sourceSha256":sha,"httpsUrl":URL,"liveBytesMatchReviewedSource":True,
             "linkedFreeTools":4,"developerLabs":2,"browser":"Google Chrome","browserVersion":version,
             "responsiveWidths":[320,375,1440],
+            "whatsappShareDestinationVerified":True,
+            "whatsappMessageSent":False,
             "leadDeliveryVerified":False,
             "paidPilotVerified":False,
             "scope":"Exact published source and link targets; email not sent, customer adoption not measured."

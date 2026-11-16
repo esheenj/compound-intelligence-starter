@@ -188,7 +188,10 @@ def run():
                     forms:document.querySelectorAll('form').length,
                     remoteResources:performance.getEntriesByType('resource').filter(x=>x.name.startsWith('http')).length,
                     demos:[...document.querySelectorAll('article.tool .actions a:first-child')].map(x=>x.href),
-                    noRevenuePromise:document.body.textContent.includes('not a booking')
+                    noRevenuePromise:document.body.textContent.includes('not a booking'),
+                    whatsapp:[...document.querySelectorAll('a[href^="https://wa.me/?text="]')].map(
+                      a=>({href:a.href,label:a.getAttribute('aria-label'),target:a.target,rel:a.rel}))
+
                 };
             """)
             verify(offer["headings"]==1 and offer["main"]==1
@@ -200,6 +203,13 @@ def run():
                    and "connect-src 'none'" in offer["csp"]
                    and "script-src 'none'" in offer["csp"],
                    "OFFLINE_INTEGRATION_OFFER_PURPOSE_AND_SAFETY")
+            from scripts.stage_showcase import APPROVED_WHATSAPP_SHARE_URL
+            verify(len(offer["whatsapp"])==1
+                   and offer["whatsapp"][0]["href"]==APPROVED_WHATSAPP_SHARE_URL
+                   and offer["whatsapp"][0]["target"]=="_blank"
+                   and "noopener" in offer["whatsapp"][0]["rel"]
+                   and "Share the free Integration Reliability toolkit" in offer["whatsapp"][0]["label"],
+                   "INTEGRATION_OFFER_USER_INITIATED_WHATSAPP")
             verify(len(offer["demos"])==4
                    and all(x.startswith("https://esheenj.github.io/") for x in offer["demos"]),
                    "FOUR_LINKED_DEMOS")

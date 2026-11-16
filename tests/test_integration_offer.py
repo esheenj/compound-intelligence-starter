@@ -2,10 +2,11 @@
 import hashlib
 import tempfile
 import unittest
+from urllib.parse import urlparse, parse_qs
 from pathlib import Path
 from scripts.stage_showcase import (
     INTEGRATION_OFFER_SOURCE, SOURCE, stage_catalog,
-    verify_catalog, verify_integration_offer,
+    verify_catalog, verify_integration_offer, APPROVED_WHATSAPP_SHARE_URL, APPROVED_WHATSAPP_SHARE_MESSAGE,
 )
 
 class IntegrationOfferTests(unittest.TestCase):
@@ -19,6 +20,7 @@ class IntegrationOfferTests(unittest.TestCase):
         self.assertEqual(result["state"],"SOURCE_VALIDATED")
         self.assertEqual(result["linkedFreeTools"],4)
         self.assertEqual(result["linkedDeveloperLabs"],2)
+        self.assertTrue(result["whatsappShareRequiresUserAction"])
         self.assertEqual(result["htmlSha256"],hashlib.sha256(self.raw).hexdigest())
 
     def test_gallery_does_not_inflate_repository_or_demo_counts(self):
@@ -38,6 +40,38 @@ class IntegrationOfferTests(unittest.TestCase):
             with self.subTest(slug=slug):
                 self.assertIn('href="https://esheenj.github.io/'+slug+'/"',self.page)
                 self.assertIn('href="https://github.com/esheenj/'+slug+'"',self.page)
+
+    def test_whatsapp_share_matches_exact_reviewed_message(self):
+        url=APPROVED_WHATSAPP_SHARE_URL
+        self.assertIn('href="'+url+'"',self.page)
+        self.assertEqual(self.page.count('href="https://wa.me/?text='),1)
+        parsed=urlparse(url)
+        self.assertEqual(parsed.scheme,'https')
+        self.assertEqual(parsed.netloc,'wa.me')
+        self.assertEqual(parsed.path,'/')
+        self.assertEqual(parse_qs(parsed.query),{'text':[APPROVED_WHATSAPP_SHARE_MESSAGE]})
+        self.assertIn('https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html',
+                      APPROVED_WHATSAPP_SHARE_MESSAGE)
+        self.assertNotIn('utm_',url)
+        self.assertNotIn('phone=',url)
+
+    def test_whatsapp_share_requires_an_explicit_user_action(self):
+        self.assertIn('aria-label="Share the free Integration Reliability toolkit on WhatsApp"',self.page)
+        self.assertIn('target="_blank" rel="noopener noreferrer"',self.page)
+        self.assertIn('Nothing is sent automatically.',self.page)
+        self.assertNotIn("onload=",self.page)
+        self.assertNotIn("onclick=",self.page)
+
+    def test_reject_changed_whatsapp_recipient_or_message(self):
+        original=('href="'+APPROVED_WHATSAPP_SHARE_URL+'"').encode()
+        for destination in ('href="https://wa.me/27820000000?text=private"',
+                            'href="https://wa.me/?text=Unreviewed%20claim"',
+                            'href="https://api.whatsapp.com/send?text=Unreviewed"'):
+            with self.subTest(destination=destination):
+                self.assertIn(original,self.raw)
+                altered=self.raw.replace(original,destination.encode())
+                with self.assertRaisesRegex(ValueError,"WHATSAPP_SHARE_ROUTE"):
+                    verify_integration_offer(altered)
 
     def test_customer_enquiry_is_user_initiated_only(self):
         self.assertIn('mailto:info@sigmacode.co.za?subject=Integration%20reliability%20pilot%20enquiry',self.page)

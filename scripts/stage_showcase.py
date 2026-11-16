@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from urllib.parse import quote
 import json
 from html.parser import HTMLParser
 from pathlib import Path
@@ -171,6 +172,10 @@ INTEGRATION_TOOL_SLUGS = (
 
 APPROVED_PILOT_MAILTO = 'mailto:info@sigmacode.co.za?subject=Integration%20reliability%20pilot%20enquiry&body=Hi%20Sigma%20Code%2C%0A%0AI%27d%20like%20to%20discuss%20one%20integration%20reliability%20pilot.%0A%0AIntegration%20type%3A%20%0AObserved%20symptom%20%28general%20terms%29%3A%20%0ADesired%20outcome%3A%20%0A%0APlease%20do%20not%20request%20production%20logs%20or%20credentials%20by%20email.'
 
+APPROVED_WHATSAPP_SHARE_MESSAGE = 'Know someone dealing with CRM, webhook or AI integration issues? These four free tools help assess, inspect, test and reproduce failures with synthetic examples: https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html'
+APPROVED_WHATSAPP_SHARE_URL = "https://wa.me/?text=" + quote(APPROVED_WHATSAPP_SHARE_MESSAGE, safe="")
+
+
 def verify_integration_offer(data: bytes) -> dict:
     """Fail closed on content, external destinations and active browser behavior."""
     if not data or len(data) > 46000 or b"\x00" in data:
@@ -196,7 +201,9 @@ def verify_integration_offer(data: bytes) -> dict:
         raise ValueError("INTEGRATION_OFFER_MISSING_TOOL")
     if html.links.count(APPROVED_PILOT_MAILTO) != 1:
         raise ValueError("INTEGRATION_OFFER_EMAIL_ROUTE")
-    approved = expected | {APPROVED_PILOT_MAILTO,
+    if html.links.count(APPROVED_WHATSAPP_SHARE_URL) != 1:
+        raise ValueError("INTEGRATION_OFFER_WHATSAPP_SHARE_ROUTE")
+    approved = expected | {APPROVED_PILOT_MAILTO, APPROVED_WHATSAPP_SHARE_URL,
         "index.html", "#main", "#tools", "#engineering", "#pilot",
         "https://sigmacode.co.za/",
         "https://github.com/esheenj/compound-intelligence-starter",
@@ -211,6 +218,7 @@ def verify_integration_offer(data: bytes) -> dict:
     return {"schema": "esheen-integration-offer-v1",
             "state": "SOURCE_VALIDATED",
             "linkedFreeTools": 4, "linkedDeveloperLabs": 2,
+            "whatsappShareRequiresUserAction": True,
             "htmlSha256": hashlib.sha256(data).hexdigest()}
 
 
