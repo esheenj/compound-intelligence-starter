@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from src.compound_intelligence.community_intake import (
-    PUBLIC_REPOS, fetch_public_issues, main, report, summarize,
+    EXPANDED_PUBLIC_REPOS, PUBLIC_REPOS, fetch_public_issues, main, report, summarize,
 )
 
 
@@ -64,6 +64,38 @@ class FeedbackTests(unittest.TestCase):
         bad["updated_at"] = "tomorrow"
         with self.assertRaises(ValueError):
             summarize(PUBLIC_REPOS[0], [bad])
+
+    def test_expanded_fixture_is_complete_redacted_and_offline(self):
+        extra = {
+            "esheenj/agent-capability-policy-lab",
+            "esheenj/prompt-evaluation-harness-oss",
+            "esheenj/eval-dataset-leakage-lab",
+            "esheenj/rag-retrieval-eval-lab",
+        }
+        expected = set(PUBLIC_REPOS) | extra
+        self.assertEqual(set(EXPANDED_PUBLIC_REPOS), expected)
+        payload = {repo: [issue()] for repo in expected}
+        expanded = report(payload, expanded_fixture=True)
+        self.assertEqual(len(expanded["records"]), 11)
+        self.assertEqual({row["repository"] for row in expanded["records"]}, expected)
+        self.assertNotIn("A synthetic report", json.dumps(expanded))
+        missing = dict(payload)
+        missing.pop(next(iter(extra)))
+        for bad, mode in ((payload, False), (missing, True),
+                          ({**missing, "esheenj/unknown-example": [issue()]}, True)):
+            with self.assertRaises(ValueError):
+                report(bad, expanded_fixture=mode)
+        with tempfile.TemporaryDirectory() as tmp:
+            src, target = Path(tmp) / "fixture.json", Path(tmp) / "report.json"
+            src.write_text(json.dumps(payload), encoding="utf-8")
+            with patch("src.compound_intelligence.community_intake.fetch_public_issues",
+                       side_effect=AssertionError("network used")):
+                self.assertEqual(main(["--fixture", str(src), "--expanded-fixture",
+                                       "--output", str(target)]), 0)
+                self.assertEqual(json.loads(target.read_bytes()), expanded)
+                self.assertEqual(main(["--live", "--expanded-fixture",
+                                       "--output", str(target)]), 2)
+                self.assertEqual(json.loads(target.read_bytes()), expanded)
 
     def test_fixture_cli_reproducible_and_offline(self):
         with tempfile.TemporaryDirectory() as tmp:
