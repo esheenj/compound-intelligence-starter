@@ -23,6 +23,12 @@ PUBLIC_REPOS = (
     "esheenj/form-experience-kit-oss",
     "esheenj/visual-regression-starter-oss",
 )
+EXPANDED_PUBLIC_REPOS = PUBLIC_REPOS + (
+    "esheenj/agent-capability-policy-lab",
+    "esheenj/prompt-evaluation-harness-oss",
+    "esheenj/eval-dataset-leakage-lab",
+    "esheenj/rag-retrieval-eval-lab",
+)
 DATE = re.compile(r"^20[0-9]{2}-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]Z$")
 MAX_BODY = 100_000
 MAX_RESPONSE = 2_000_000
@@ -30,7 +36,7 @@ MAX_RESPONSE = 2_000_000
 
 def summarize(repo: str, payload: list) -> dict:
     """Do not reproduce public issue text into reports; no inference is performed."""
-    if repo not in PUBLIC_REPOS or not isinstance(payload, list) or len(payload) > 40:
+    if repo not in EXPANDED_PUBLIC_REPOS or not isinstance(payload, list) or len(payload) > 40:
         raise ValueError("repository or issue payload outside allowed bounds")
     refs = []
     seen = set()
@@ -74,13 +80,15 @@ def fetch_public_issues(repo: str) -> list:
     return json.loads(raw)
 
 
-def report(payloads: dict) -> dict:
-    if not isinstance(payloads, dict) or not payloads or set(payloads) - set(PUBLIC_REPOS):
+def report(payloads: dict, *, expanded_fixture: bool = False) -> dict:
+    repos = EXPANDED_PUBLIC_REPOS if expanded_fixture else PUBLIC_REPOS
+    if (not isinstance(payloads, dict) or not payloads or set(payloads) - set(repos)
+            or (expanded_fixture and set(payloads) != set(repos))):
         raise ValueError("unknown or empty cohort")
     return {
         "schema": "public-feedback-inventory-v1",
         "source_access": "PUBLIC_READ_ONLY",
-        "records": [summarize(repo, payloads[repo]) for repo in PUBLIC_REPOS if repo in payloads],
+        "records": [summarize(repo, payloads[repo]) for repo in repos if repo in payloads],
         "contents_redacted": True,
         "intelligence_validated": False,
         "automated_code_changes": False,
@@ -93,9 +101,13 @@ def main(argv=None) -> int:
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument("--live", action="store_true", help="Read only seven listed public GitHub repos")
     mode.add_argument("--fixture", help="Local synthetic JSON {repo: [issue, ...]}")
+    p.add_argument("--expanded-fixture", action="store_true",
+                   help="Require all eleven approved repositories in a local fixture")
     p.add_argument("--output", required=True, help="Local report JSON path")
     args = p.parse_args(argv)
     try:
+        if args.live and args.expanded_fixture:
+            raise ValueError("expanded scope is fixture-only")
         if args.live:
             payloads = {repo: fetch_public_issues(repo) for repo in PUBLIC_REPOS}
         else:
@@ -103,7 +115,7 @@ def main(argv=None) -> int:
             if not source.is_file() or source.stat().st_size > MAX_RESPONSE:
                 raise ValueError("invalid or oversized fixture")
             payloads = json.loads(source.read_text(encoding="utf-8"))
-        result = report(payloads)
+        result = report(payloads, expanded_fixture=args.expanded_fixture)
         destination = Path(args.output)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
