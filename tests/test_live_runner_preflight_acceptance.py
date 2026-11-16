@@ -10,7 +10,7 @@ from live_runner_preflight_acceptance import MAX_HTML_BYTES, verify_deployed_byt
 class LiveRunnerPreflightAcceptanceContracts(unittest.TestCase):
     def setUp(self):
         self.valid = (
-            b"<!doctype html><html><body>runner-preflight-v0.2.0"
+            b"<!doctype html><html><body>runner-preflight/releases/tag/v0.3.0"
             b"<main>READY WARN HOLD</main></body></html>"
         )
 

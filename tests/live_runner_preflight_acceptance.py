@@ -20,7 +20,7 @@ from browser_check_issue_report import Driver, driver_executable
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "site" / "runner-preflight.html"
 URL = "https://esheenj.github.io/compound-intelligence-starter/runner-preflight.html"
-EXPECTED_RELEASE = "runner-preflight-v0.2.0"
+EXPECTED_RELEASE = "runner-preflight/releases/tag/v0.3.0"
 MAX_HTML_BYTES = 100_000
 
 
@@ -104,7 +104,7 @@ def run() -> dict:
               .filter(x=>x.name.startsWith('http')).length,
             releaseLinks: [...document.querySelectorAll('a[href]')]
               .map(a=>a.href)
-              .filter(h=>h.includes('runner-preflight-v0.2.0')),
+              .filter(h=>h.includes('runner-preflight/releases/tag/v0.3.0')),
             status: document.querySelector('#status').textContent
           };
         """)
