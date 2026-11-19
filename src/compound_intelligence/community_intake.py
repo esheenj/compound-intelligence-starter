@@ -123,6 +123,16 @@ def main(argv=None) -> int:
                           "count": sum(row["count"] for row in result["records"]),
                           "intelligence_validated": False, "code_changes": False}))
         return 0
+    except urllib.error.HTTPError as exc:
+        # Do not log request URLs, response bodies or arbitrary response headers.
+        status = exc.code if type(exc.code) is int and 100 <= exc.code <= 599 else None
+        exhausted = exc.headers is not None and exc.headers.get("X-RateLimit-Remaining") == "0"
+        reason = ("RATE_LIMITED" if status == 429 or (status == 403 and exhausted)
+                  else "HTTP_REQUEST_REJECTED")
+        print(json.dumps({"state": "FAILED", "error_type": "HTTPError",
+                          "http_status": status, "reason": reason,
+                          "partial_inventory_written": False}))
+        return 2
     except (ValueError, OSError, UnicodeError, urllib.error.URLError,
             json.JSONDecodeError) as exc:
         print(json.dumps({"state": "FAILED", "error_type": type(exc).__name__}))
