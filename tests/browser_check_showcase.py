@@ -158,18 +158,20 @@ def run():
             verify(filters["total"] == 21 and filters["ai"] == 10 and filters["ux"] == 6
                    and filters["aiCorrect"] and filters["uxCorrect"]
                    and filters["restored"] == 21, "CATEGORY_FILTERS_RESTORE_ALL")
-            for width, height in ((320, 720), (375, 812), (812, 375), (1440, 900)):
+            for width, height in ((320, 720), (337, 720), (375, 812), (812, 375), (1440, 900)):
                 driver.viewport(width, height)
                 layout = driver.js("""
                     return {
                       page:document.documentElement.scrollWidth,
-                      viewport:innerWidth,
+                      viewport:document.documentElement.clientWidth,
+                      heroPosition:getComputedStyle(document.querySelector(".hero")).position,
                       cards:document.querySelectorAll('article.card').length,
                       overflowSelectors:[...document.querySelectorAll('main *')]
-                        .filter(x=>x.getBoundingClientRect().right>innerWidth+1)
+                        .filter(x=>x.getBoundingClientRect().right>document.documentElement.clientWidth+1)
                         .slice(0,5).map(x=>x.tagName.toLowerCase()+'.'+x.className)
                     };
                 """)
+                verify(layout["heroPosition"] == "relative", "HERO_CONTAINS_DECORATION")
                 verify(layout["page"] <= layout["viewport"] and layout["cards"] == 22,
                        "NO_PAGE_OVERFLOW_" + str(width) + " "+repr(layout))
             # The integration offer is a commercial discovery page, NOT an extra MVP.
