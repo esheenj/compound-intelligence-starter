@@ -1,3 +1,6 @@
+import contextlib
+import io
+import urllib.error
 import json
 import tempfile
 import unittest
@@ -96,6 +99,27 @@ class FeedbackTests(unittest.TestCase):
                 self.assertEqual(main(["--live", "--expanded-fixture",
                                        "--output", str(target)]), 2)
                 self.assertEqual(json.loads(target.read_bytes()), expanded)
+
+    def test_http_failure_diagnostics_are_redacted_and_do_not_write_partial_inventory(self):
+        cases = [(429, {}, "RATE_LIMITED"),
+                 (403, {"X-RateLimit-Remaining": "0"}, "RATE_LIMITED"),
+                 (403, {}, "HTTP_REQUEST_REJECTED"),
+                 (404, {}, "HTTP_REQUEST_REJECTED")]
+        for status, headers, reason in cases:
+            with self.subTest(status=status, headers=headers), tempfile.TemporaryDirectory() as tmp:
+                target = Path(tmp) / "report.json"
+                target.write_text("previous evidence", encoding="utf-8")
+                failure = urllib.error.HTTPError(
+                    "https://example.invalid/private-token", status, "sensitive message",
+                    headers, io.BytesIO(b"private response body"))
+                captured = io.StringIO()
+                with patch("src.compound_intelligence.community_intake.fetch_public_issues",
+                           side_effect=[[], failure]), contextlib.redirect_stdout(captured):
+                    self.assertEqual(main(["--live", "--output", str(target)]), 2)
+                self.assertEqual(json.loads(captured.getvalue()),
+                    {"state": "FAILED", "error_type": "HTTPError", "http_status": status,
+                     "reason": reason, "partial_inventory_written": False})
+                self.assertEqual(target.read_text(), "previous evidence")
 
     def test_fixture_cli_reproducible_and_offline(self):
         with tempfile.TemporaryDirectory() as tmp:
