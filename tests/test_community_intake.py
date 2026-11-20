@@ -121,6 +121,27 @@ class FeedbackTests(unittest.TestCase):
                      "reason": reason, "partial_inventory_written": False})
                 self.assertEqual(target.read_text(), "previous evidence")
 
+    def test_duplicate_json_fields_rejected_without_replacing_evidence(self):
+        repo = json.dumps(PUBLIC_REPOS[0])
+        row = json.dumps(issue())
+        duplicate_number = row.replace('"number": 7', '"number": 6, "number": 7')
+        for payload in ('{' + repo + ': [], ' + repo + ': [' + row + ']}',
+                        '{' + repo + ': [' + duplicate_number + ']}'):
+            with self.subTest(payload=payload), tempfile.TemporaryDirectory() as tmp:
+                src, target = Path(tmp) / "input.json", Path(tmp) / "report.json"
+                src.write_text(payload, encoding="utf-8")
+                target.write_text("previous evidence", encoding="utf-8")
+                self.assertEqual(main(["--fixture", str(src), "--output", str(target)]), 2)
+                self.assertEqual(target.read_text(), "previous evidence")
+        with patch("src.compound_intelligence.community_intake.urllib.request.urlopen") as opened:
+            opened.return_value.__enter__.return_value.read.return_value = (
+                "[" + duplicate_number + "]").encode()
+            with self.assertRaisesRegex(ValueError, "duplicate JSON field"):
+                fetch_public_issues(PUBLIC_REPOS[0])
+            opened.return_value.__enter__.return_value.read.return_value = (
+                "[" + row + "]").encode()
+            self.assertEqual(fetch_public_issues(PUBLIC_REPOS[0]), [issue()])
+
     def test_fixture_cli_reproducible_and_offline(self):
         with tempfile.TemporaryDirectory() as tmp:
             src = Path(tmp) / "source.json"

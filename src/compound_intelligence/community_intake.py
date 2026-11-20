@@ -34,6 +34,15 @@ MAX_BODY = 100_000
 MAX_RESPONSE = 2_000_000
 
 
+def _unique_object(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError("duplicate JSON field")
+        value[key] = item
+    return value
+
+
 def summarize(repo: str, payload: list) -> dict:
     """Do not reproduce public issue text into reports; no inference is performed."""
     if repo not in EXPANDED_PUBLIC_REPOS or not isinstance(payload, list) or len(payload) > 40:
@@ -77,7 +86,7 @@ def fetch_public_issues(repo: str) -> list:
         raw = response.read(MAX_RESPONSE + 1)
     if len(raw) > MAX_RESPONSE:
         raise ValueError("remote response exceeds size bound")
-    return json.loads(raw)
+    return json.loads(raw, object_pairs_hook=_unique_object)
 
 
 def report(payloads: dict, *, expanded_fixture: bool = False) -> dict:
@@ -114,7 +123,7 @@ def main(argv=None) -> int:
             source = Path(args.fixture)
             if not source.is_file() or source.stat().st_size > MAX_RESPONSE:
                 raise ValueError("invalid or oversized fixture")
-            payloads = json.loads(source.read_text(encoding="utf-8"))
+            payloads = json.loads(source.read_text(encoding="utf-8"), object_pairs_hook=_unique_object)
         result = report(payloads, expanded_fixture=args.expanded_fixture)
         destination = Path(args.output)
         destination.parent.mkdir(parents=True, exist_ok=True)
