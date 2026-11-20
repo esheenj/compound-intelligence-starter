@@ -1,0 +1,84 @@
+name: Rust-Python parity qualification (experimental)
+on:
+  pull_request:
+    paths:
+      - 'experiments/rust_python_interop/**'
+      - '.github/workflows/rust-python-interop.yml'
+  push:
+    paths:
+      - 'experiments/rust_python_interop/**'
+      - '.github/workflows/rust-python-interop.yml'
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    name: Python ${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            python: '3.10'
+          - os: ubuntu-24.04
+            python: '3.12'
+          - os: ubuntu-24.04-arm
+            python: '3.12'
+    defaults:
+      run:
+        working-directory: experiments/rust_python_interop
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Report pinned environment
+        run: |
+          rustc --version
+          cargo --version
+          python --version
+          uname -m
+      - name: Validate committed pinned Rust dependency graph and tests
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --locked -- -D warnings
+          cargo test --locked
+      - name: Build native Python extension for this runner only
+        run: |
+          python -m pip install "maturin==1.16.0"
+          maturin build --release --out dist --interpreter python --compatibility off
+          python -m pip install --no-index --find-links dist rust-id-interop-pilot
+      - name: Python-Rust exact parity
+        run: python -m unittest discover -s tests -v
+      - name: Existing issue-challenger consumer, Python fallback versus native
+        run: |
+          python consumer_probe.py --engine python --issues 12 --iterations 200
+          python consumer_probe.py --engine rust --issues 12 --iterations 200
+      - name: Informational same-runner performance comparison (no speedup gate)
+        run: python benchmark.py --size 50000 --trials 7
+      - name: Verify committed lockfile was not modified
+        run: git diff --exit-code -- Cargo.lock
+
+  dependency-audit:
+    name: RustSec, dependency licenses and sources
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify locked dependency resolution before audit
+        working-directory: experiments/rust_python_interop
+        run: cargo metadata --locked --format-version 1 > /dev/null
+      - name: Audit resolved RustSec advisories, licenses and sources
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          manifest-path: experiments/rust_python_interop/Cargo.toml
+          arguments: --all-features --config experiments/rust_python_interop/deny.toml
+          command: check
