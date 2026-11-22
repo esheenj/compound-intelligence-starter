@@ -240,6 +240,44 @@ def run() -> dict:
             assert_true(themes["dark"]["background"] != themes["light"]["background"],
                         "THEME_BACKGROUND_RESPONSIVE")
             findings["light_dark_theme"] = "PASS"
+
+            # Browser-emulated forced colors: observe rendering, not compliance.
+            driver.command("POST", "goog/cdp/execute", {
+                "cmd": "Emulation.setEmulatedMedia",
+                "params": {"features": [{"name": "forced-colors", "value": "active"}]},
+            })
+            driver.command("POST", "url", {"url": output.resolve().as_uri()})
+            driver.viewport(375, 812)
+            driver.key("\ue004")
+            high_contrast = driver.js("""
+                const skip=document.activeElement, warning=document.querySelector('#warning');
+                const body=getComputedStyle(document.body), focus=getComputedStyle(skip);
+                const banner=getComputedStyle(warning);
+                return {
+                    media:matchMedia('(forced-colors: active)').matches,
+                    foreground:body.color, background:body.backgroundColor,
+                    warning:warning.innerText.includes('nothing has been executed'),
+                    border:parseFloat(banner.borderLeftWidth)>0 && banner.borderLeftStyle!=='none',
+                    focused:skip.matches('a.skip') && skip.getBoundingClientRect().top>=0,
+                    outline:focus.outlineStyle!=='none' && parseFloat(focus.outlineWidth)>0,
+                    noOverflow:document.documentElement.scrollWidth<=innerWidth+1
+                };
+            """)
+            assert_true(high_contrast["media"] is True
+                        and high_contrast["foreground"] != high_contrast["background"]
+                        and all(high_contrast[key] is True for key in
+                                ("warning", "border", "focused", "outline", "noOverflow")),
+                        "FORCED_COLORS_VISIBLE_STATUS_AND_FOCUS")
+            driver.key("\ue007")
+            assert_true(driver.js("return location.hash") == "#main",
+                        "FORCED_COLORS_SKIP_TARGET")
+            driver.command("POST", "goog/cdp/execute", {
+                "cmd": "Emulation.setEmulatedMedia", "params": {"features": []},
+            })
+            assert_true(driver.js("return matchMedia('(forced-colors: active)').matches") is False,
+                        "FORCED_COLORS_EMULATION_RESET")
+            findings["forced_colors_emulated"] = "PASS"
+
             print(json.dumps({"qa_phase": "BROWSER_SMOKE_COMPLETE"}), flush=True)
             return {
                 "schema": "compound-browser-qa-v1",
