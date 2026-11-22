@@ -17,6 +17,7 @@ The check creates the real offline HTML using the existing Python CLI and loads 
 | Keyboard | Tab reaches the skip link, the link becomes visible, Enter navigates to `#main` |
 | Responsive | At 375 × 812 and 1440 × 900, no unexpected horizontal document overflow; warning remains visible |
 | Light/dark | Emulate both preferences and observe a real computed background change |
+| Forced colors (emulated) | Active media preference, distinct computed foreground/background, visible warning border and keyboard focus, working skip target at 375px; reset returns inactive |
 | Safe offline report | No active script, image, iframe, form or remote-reference elements; CSP disallows network and scripts |
 
 ## Reproduce
@@ -33,3 +34,5 @@ The browser script prints `compound-browser-qa-v1` JSON with observed checks, th
 ## Limitations and follow-up
 
 Browser automation exercises a real browser but **cannot prove screen-reader usability, visual appearance on all devices, or full accessibility standard conformance**. The issue should only be closed when real Chrome CI evidence is checked; a future independent assistive-technology or mobile-device check remains useful. Do not upload real customer/client information as test fixtures or publish credentials. Private Cortex, trading strategy and Commander code remain excluded.
+
+Forced-colors coverage uses Chrome DevTools emulation. It is not Windows High Contrast, physical-device, screen-reader or WCAG certification. The status remains readable as text rather than relying only on color.
