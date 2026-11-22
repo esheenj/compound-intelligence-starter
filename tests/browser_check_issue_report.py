@@ -252,7 +252,7 @@ def run() -> dict:
             high_contrast = driver.js("""
                 const skip=document.activeElement, warning=document.querySelector('#warning');
                 const body=getComputedStyle(document.body), focus=getComputedStyle(skip);
-                const banner=getComputedStyle(warning);
+                const banner=getComputedStyle(warning.closest('.banner'));
                 return {
                     media:matchMedia('(forced-colors: active)').matches,
                     foreground:body.color, background:body.backgroundColor,
