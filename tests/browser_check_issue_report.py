@@ -267,7 +267,7 @@ def run() -> dict:
                         and high_contrast["foreground"] != high_contrast["background"]
                         and all(high_contrast[key] is True for key in
                                 ("warning", "border", "focused", "outline", "noOverflow")),
-                        "FORCED_COLORS_VISIBLE_STATUS_AND_FOCUS")
+                        "FORCED_COLORS_VISIBLE_STATUS_AND_FOCUS_" + json.dumps(high_contrast, sort_keys=True))
             driver.key("\ue007")
             assert_true(driver.js("return location.hash") == "#main",
                         "FORCED_COLORS_SKIP_TARGET")
