@@ -8,6 +8,8 @@ The [public directory XML sitemap](https://esheenj.github.io/compound-intelligen
 
 **[Start with the four free integration tools](https://esheenj.github.io/compound-intelligence-starter/integration-reliability.html)**. The new focused landing page helps CRM, webhook, API and AI workflow owners move from understanding safeguards to examining fictional delivery traces, outlining a failure test and generating a repeatable synthetic fixture. Two Rust/Node engineering labs are included for developers who need event parity or message-contract migration checks. All six demos and their actual source repositories are linked directly.
 
+Teams preparing their CI environment can also use [Runner Preflight](https://github.com/esheenj/runner-preflight) to compare a supplied runner inventory with declared job requirements offline.
+
 A user-initiated [Sigma Code pilot enquiry](mailto:info@sigmacode.co.za?subject=Integration%20reliability%20pilot%20enquiry) uses the existing business email. The landing page sends no telemetry, collects no form data, and does not imply a confirmed pilot, paid client or real integration test. It is **published within this verified GitHub Pages repository**, not an unverified change to sigmacode.co.za's separate ChatGPT Sites deployment. Public standalone repository count stays **22** with **43 existing demo entries**; the landing page is a commercial discovery page, not MVP #23.
 
 
